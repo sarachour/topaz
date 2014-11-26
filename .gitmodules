@@ -1,1 +1,4 @@
 
+[submodule "emul/siact"]
+	path = emul/siact
+	url = git@github.mit.edu:sachour/siact.git
