@@ -1,4 +1,4 @@
-PIN_DIR=siACT/tool/pin-2.12-58423-gcc.4.4.7-linux/source/tools/SiAct
+PIN_DIR=siact/tool/pin-2.12-58423-gcc.4.4.7-linux/source/tools/SiAct
 
 all: pin
 
