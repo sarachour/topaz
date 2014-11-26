@@ -1,0 +1,69 @@
+TODO: Adjust data structures to keep track of used data size for sending input_info.
+TODO: input info is dynamically allocated so TASK_SIZE can be set at beginning of fxn.
+/*
+* don't need to keep track of task size - matches with message leq size.
+*/
+ 
+#Structures
+topaz_info_t: contains all the topaz runtime information and options.
+	-> num_tasks_running[NUM_MACHINES]: number of farmed out tasks to each machine.
+	-> taskset_index: index of current taskset in the main thread.
+	-> task_map: map tasks to task run function, input/output packing/unpacking routines.
+	-> option: an integer mask that contains options available.
+		-> option::DISOWN_LAGGING_TASKS : this will be a global that determines if we should disown lagging tasks.
+	/*machine info*/
+	-> machine_hostname: machine hostname
+	-> machine_rank: machine rank
+	-> total_number_machines: total number of machines
+	-> machine_rel: is the machine reliable or unreliable.
+	-> machine_main: is this machine the main thread machine.
+	-> INTERNAL_machine_index: last machine task was allocated to.
+task_input_info_t:  contains all relevent information for an input message.
+	-> taskset id(?): index of taskset.
+	-> task id: block of code to execute.
+	-> task rank: index of task.
+	-> data: arguments needed for computation.
+
+task_output_info_t: contains all relevent information for an output message
+	-> taskset id(?): index of taskset.
+	-> task id: block of code to execute.
+	-> task rank: index of task.
+	-> data: outputs produced by computation.
+
+task_status_t: contains the status of the collect call. The collect may have aborted early, in which case we
+do not run the collected info-dependent tasks;
+*/
+#Globals
+INPUT_TASK_DATA_SIZE: max size of input data buffer. Determined at compile time.
+OUTPUT_TASK_DATA_SIZE: max size of output data buffer.
+
+#API_CALLS
+init_topaz_info(int max_num_tasks, int options) : initialize number of tasks, options. Called in runtime.
+init_input_info(input_info_t * t, int task_id, int task_rank) : initialize input task struct.
+init_output_info(output_info_t * t, int task_id, int task_rank) : initialize output task struct.
+
+int topaz_add_task(**) : add a task, return its index.
+
+int pack_int(int * t,  int offset, int val) : pack int. returns new offset
+int pack_int_array(int * t, int offset, int ** val, int len) : pack int array. returns new offset.
+/*
+same functions for char, float, double. 
+Note: offset may not be int aligned.
+*/
+
+int unpack_int(int * t, int offset, int * sval);
+int unpack_int_array(int * t, int offset, int ** sval, int * len);
+/*
+same functions for char, float, double. 
+Note: offset may not be int aligned.
+*/
+
+start_taskset(topaz_info_t * topaz);
+dispatch_task(topaz_info_t * topaz, input_info_t * task);
+collect_task(topaz_info_t * topaz, output_info_t * task, task_status_t * status);
+tasks_left()
+
+#SPECIAL_FUNCTIONS
+topaz_main(topaz_info topaz){
+...
+}

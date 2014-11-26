@@ -1,0 +1,28 @@
+################OPTION###################
+CCOMPILE = icc
+CPPCOMPILE = icc
+COMPILEOPTION = -c -g -O3 -ipo -openmp -g 
+INCLUDEDIR =
+LIBHOME = 
+LINK = icc
+LINKOPTION = -g -ipo -openmp -o ./parasw.mt
+LIBS = 
+LIBDIRS =  
+OBJS = wtime.o ParseFile.o ParallelSWAlgorithm.o ParaSWProcessorSet.o ParaSWProblem.o ParaSWPath.o ParaSWParam.o ParaSWGlobalMemory.o ParallelSW.o Debug.o 
+OUTPUT = ./parasw.mt
+################OPTION END################
+$(OUTPUT):$(OBJS)
+	$(LINK) $(OBJS) $(LINKOPTION) $(LIBS) $(LIBDIRS) 
+
+clean: 
+	rm -f $(OBJS)
+	rm -f $(OUTPUT)
+all: clear $(OUTPUT)
+.SUFFIXES:
+.SUFFIXES:  .c .o .cpp
+
+.cpp.o:
+	 $(CPPCOMPILE) -o $*.o $(COMPILEOPTION) $(INCLUDEDIR)  $*.cpp
+
+.c.o:
+	$(CCOMPILE) -o $*.o $(COMPILEOPTION) $(INCLUDEDIR) $*.c

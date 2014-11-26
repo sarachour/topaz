@@ -1,0 +1,334 @@
+/******************************************************************************/
+/*                                                                            */
+/*  Copyright (c) 1996 University of California at Santa Barbara              */
+/*                                                                            */
+/*  All rights reserved.                                                      */
+/*                                                                            */
+/*  Permission is given to use, copy, and modify this software for any        */
+/*  non-commercial purpose as long as this copyright notice is not removed    */
+/*  All other uses, including redistribution in whole or in part, are         */ 
+/*  forbidden without prior written permission.                               */
+/*                                                                            */
+/*  This software is provided with absolutely no warranty and no support.     */
+/*                                                                            */
+/*  For further information contact: pedro@cs.ucsb.edu or martin@cs.ucsb.edu  */
+/*                                                                            */
+/******************************************************************************/
+
+// -------- WATER_H -----------------------------------------------------
+
+//#define AUTOICHUNKSIZE 10
+//#define AUTOJCHUNKSIZE 1000
+#define AUTOICHUNKSIZE 1
+#define AUTOJCHUNKSIZE 1
+
+//using namespace std;
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include "topaz.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/times.h>
+#include <sys/param.h>
+#include "water.h"
+#include "relax_lib.h"
+//taskify INTERF first : INTERF/interFLoop1->interFLoop2->interF2
+
+float fastabs(float f){
+	return (f)*(f);
+	//int i=((*(int*)&f)&0x7fffffff); return (*(float*)&i);
+}
+
+
+//improve by calculating by block.simparm
+void ensemble_interfLoop1(ensemble * e){
+	int i, j;
+	int m, n = e->numMol;
+	int ntasks = ((n-1)*n)/2;
+	int isiz;
+	int jsiz;
+	i=0;
+	j=0;
+	//const char instead of char for parms
+	taskset interfLoop1(k=0; k < ntasks; k+=1){
+		before {
+			isiz = 1;
+			jsiz = 1;
+			
+			if( k > 0){
+				if(j + jsiz < n) 
+				{
+					j+= jsiz;
+					
+				}
+				else 
+				{
+					i+=isiz;
+					j=i+1;
+					if(i >= n-1) 
+						break;
+				}
+			}
+			else{
+				j=i+1;
+			}
+			
+			//printf("before %d, %d, t=%d\n", i ,j, k);
+			//printf("%d,%d\n",i,j);
+		}
+		compute 
+			in (
+			   char p1[sizeof(skratch_pad)]= (char *) &e->pad[i],
+			   char p2[sizeof(skratch_pad)]= (char *) &e->pad[j],
+			   const char tparms[sizeof(simparm_t)]= (char *) parms
+			   )
+			   
+			out(double Res1[9],
+				double Res2[9],
+				double incr)
+		{
+			parms = (simparm_t *) tparms;
+			skratch_pad * P1 = (skratch_pad *) p1;
+			skratch_pad * P2 = (skratch_pad *) p2;
+			double Res1Tmp[3][3];
+			double Res2Tmp[3][3];
+			incr = 0;
+			
+			incr += ensemble_interf2_aux(P1,P2,Res1Tmp,Res2Tmp);
+			int pi;
+			for(pi=0; pi < 9; pi++){
+				Res1[pi] = Res1Tmp[pi/3][pi%3];
+				Res2[pi] = Res2Tmp[pi/3][pi%3];
+			}
+			//printf("task %d,%d\n", ci+ti ,cj+tj);
+			
+			
+			
+			
+		}
+		transform in(int rank_out_i, int rank_out_j) 
+			out(float o1x, float o1y, float o1z, float o2x, float o2y, float o2z, float lincr){
+			//compute distance, and
+			lincr = incr;
+			o1x = o2x = 0;
+			o1y = o2y = 0;
+			o1z = o2z = 0;
+			for(int q=0; q < NDIM; q++){
+				o1x += fastabs(Res1[3*q]);
+				o2x += fastabs(Res2[3*q]);
+				
+				o1y += fastabs(Res1[3*q+1]);
+				o2y += fastabs(Res2[3*q+1]);
+				
+				o1z += fastabs(Res1[3*q+2]);
+				o2z += fastabs(Res2[3*q+2]);
+			}
+			//given the distance between two molecules, compute the magnitudes
+			//of velocity, accelerate.
+		}
+		combine {
+			
+			if(j > i){
+				double * u1 = Res1;
+				double * u2 = Res2;
+				skratch_pad * r1;
+				skratch_pad * r2;
+				r1 = ensemble_getPad(e,i);
+				r2 = ensemble_getPad(e,j);
+				r1->update_forces_1D(u1);
+				r2->update_forces_1D(u2);
+			}
+			e->VIR.addval(incr);
+		}
+	}
+
+}
+
+void ensemble_interfLoop2_orig(ensemble * e, int idx){
+  int i;
+  skratch_pad *p1, *p2;
+
+  for(i = idx+1; i < e->numMol; i++){
+    p1 = ensemble_getPad(e,idx);
+    p2 = ensemble_getPad(e, i);
+    ensemble_interf2(e, p1,p2);
+  }
+}
+
+void ensemble_interfLoop1_orig(ensemble * e){
+  int i;
+  for(i = 0; i < e->numMol-1; i++) {
+    ensemble_interfLoop2_orig(e, i);
+  }
+}
+
+
+
+void ensemble_INTERF(ensemble * e, int DEST){
+  ensemble_loadData(e);
+  ensemble_interfLoop1(e);
+  //ensemble_interfLoop1_orig(e);
+  ensemble_storeData(e,DEST);
+}
+
+// ----------------------------------------------------------------------
+// POTENG
+// ----------------------------------------------------------------------
+void ensemble_potengLoop1(ensemble * e){
+  int i;
+  for(i=0; i < e->numMol-1; i++) {
+    ensemble_potengLoop2(e,i);
+  }
+}
+
+void ensemble_potengLoop2(ensemble * e, int idx){
+  int i;
+  double tmp[3];
+
+  for(i=idx+1; i < e->numMol; i++) {
+//    inter_poteng2(&pad[idx],&pad[i]);
+    ensemble_interPoteng2Aux(&e->pad[idx],&e->pad[i],tmp);
+    e->POT.vecAdd(tmp);
+  }
+}
+
+#define ltelems(a) ((a*(a-1))*(a*(a-1))/2)
+void ensemble_poteng_topaz(ensemble * e){
+	int i, j;
+	int isiz, jsiz;
+	int m, n = e->numMol;
+	int ntasks = ((n-1)*n)/2;
+	i=0;
+	j=0;
+    taskset poteng(k=0; k < ntasks; k+=1){
+		before {
+			isiz = n - i - 1 < AUTOICHUNKSIZE ? n-i-1 : AUTOICHUNKSIZE;
+			jsiz = n - j < AUTOJCHUNKSIZE ? n-j : AUTOJCHUNKSIZE;
+			
+			if( k > 0){
+				if(j + jsiz < n) 
+				{
+					j+= jsiz;
+					
+				}
+				else 
+				{
+					i+=isiz;
+					j=i+1;
+					if(i >= n-1) break;
+				}
+			}
+			else{
+				j=i+1;
+			}
+			//printf("forking %d,%d\n", i, j);
+			//printf("before %d, %d, t=%d\n", i ,j, k);
+			//printf("%d,%d\n",i,j);
+		}
+		compute 
+			in(
+			   char p1[sizeof(skratch_pad)]= (char *) &e->pad[i],
+			   char p2[sizeof(skratch_pad)]= (char *) &e->pad[j],
+			   const char tparms[sizeof(simparm_t)]= (char *) parms)
+			out(double res[3])
+		{
+			skratch_pad * P1 = (skratch_pad*) p1;
+			skratch_pad * P2 = (skratch_pad*) p2;
+			parms = ((simparm_t *) tparms);
+			res[0] = res[1] = res[2]=0;
+			ensemble_interPoteng2Aux(P1,P2,res);
+		}
+		transform in(int rank_i) out(float pot0, float pot1, float pot2){
+			/*getM -> you can get potential energy from vel, acc, pos
+			 */
+			#define procr(r) (r)
+			pot0 = procr(res[0]);
+			pot1 = procr(res[1]);
+			pot2 = procr(res[2]);
+			//printf("poteng:%d,%d] %f %f %f\n", rank_i, rank_j,pot1, pot2, pot3);
+		}
+		combine{
+			//printf("poteng:%d,%d] %f %f %f\n---\n", i, j,res[0], res[1], res[2]);
+			if(j > i){
+				e->POT.vecAdd(res);
+			}
+		}
+		
+	 }
+}
+void ensemble_INTER_POTENG(ensemble * e) {
+  ensemble_loadData(e);
+  //ensemble_potengLoop1(e);
+  ensemble_poteng_topaz(e);
+  
+}
+
+
+// ----------------------------------------------------------------------------
+// MAIN
+// ----------------------------------------------------------------------------
+
+int topaz_main(int argc, char **argv) {
+
+  ensemble liquid;
+  int n, start_time, stop_time;
+  int ticks;
+  double dticks;
+  const char * filename, * randomfilename, *posfile, *enfile;
+  simparm_t PARM_DATA;
+  
+  if (argc != 5) {
+    printf("Usage: %s input_param_file random_file posfile enfile\n", argv[0]);
+    return(1);
+  }
+  filename = argv[1];
+  randomfilename = argv[2];
+  posfile = argv[3];
+  enfile = argv[4];
+  pos_outfile = fopen(posfile, "w");
+  en_outfile = fopen(enfile, "w");
+  ensemble_DUMP_HEADER();
+
+  std::cout << " >>> Program Started\n";
+  std::cout.flush();
+  get_ticks_time(&ticks);
+  dticks = ticks;
+
+  get_time(&start_time);
+  parms = &PARM_DATA;
+  spar_loadParms(parms, filename);
+  n = parms->NMOL;
+  ensemble_init_ensemble(&liquid,n);
+
+  ensemble_INITIA(&liquid,randomfilename);
+  ensemble_INTRAF(&liquid);
+  ensemble_computeVIR(&liquid);
+  //slowest
+  ensemble_INTERF(&liquid, ACC);
+  ensemble_SCALEFORCES(&liquid,ACC);
+
+  parms->NFMC = (-1);
+  spar_resetStat(parms);
+  //copy parms to each worker
+  ensemble_MDMAIN(&liquid);
+  get_time(&stop_time);
+
+  get_ticks_time(&ticks);
+  dticks = ticks;
+  
+	fclose(en_outfile);
+	fclose(pos_outfile);
+  std::cout << "TOTAL CPU USED = " << ((stop_time-start_time)/dticks) << " SECONDS\n";
+  std::cout << "\nELAPSED CPU TIME IN SECONDS: " << ((stop_time-start_time)/dticks) << "\n";
+  std::cout << "\nMFLOP RATE: "<< 3432.550/((stop_time-start_time)/dticks) << "\n";
+  std::cout << "\nTotal Time = " << ((stop_time-start_time)/dticks) << "\n";
+  std::cout.flush();
+  ensemble_destruct_ensemble(&liquid);
+
+} 

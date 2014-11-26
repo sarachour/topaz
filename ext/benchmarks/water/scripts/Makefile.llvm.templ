@@ -1,0 +1,26 @@
+
+OBJS = water.bc extfcts.bc stat.bc
+CFLAGS += -g -emit-llvm $(EXTRAFLAGS)
+
+water:	$(OBJS)
+	mkdir -p $(OUT)
+	llvm-link -f -o water-o.bc $(OBJS)
+	rm -f $(OUT)/water-o3.bc
+	opt $(COPTIM) water-o.bc -o $(OUT)/water-o3.bc
+	llvm-ld -o $(OUT)/water -strip-debug -native  $(DEFAULTLIBS) $(OUT)/water-o3.bc
+	mv -f *.bc $(OUT)
+
+water.bc: water.C
+	llvm-g++ -o water.bc $(CFLAGS) -c water.C
+
+extfcts.bc: extfcts.c
+	llvm-gcc -o extfcts.bc $(CFLAGS) -c extfcts.c
+
+stat.bc: stat.c
+	llvm-gcc -o stat.bc $(CFLAGS) -c stat.c
+
+clean :
+	echo
+	echo
+	rm -f $(OUT)/*.bc
+	rm -f $(OUT)/water

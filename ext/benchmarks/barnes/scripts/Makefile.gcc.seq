@@ -1,0 +1,12 @@
+#
+
+LEVEL=.
+
+include $(LEVEL)/Makefile.common
+
+OUT=$(LEVEL)/bin/gcc
+
+CFLAGS += $(CINCLUDE_SOLO) $(COPTIM) $(CEXTRA_FLAGS)
+OBJS = barnes.o extfcts.o stat.o
+
+include $(LOCALSCRIPT)/Makefile.gcc.templ

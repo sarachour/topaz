@@ -1,0 +1,8 @@
+#!/bin/bash
+
+TOPAZCC=$TOPAZ_ROOT/util/tpzcc.native
+MPICC=mpic++
+INPUTFILE=$1
+CFILE=$(basename "$1" ".tpz").topaz.c
+
+$TOPAZCC -i $INPUTFILE -o $CFILE

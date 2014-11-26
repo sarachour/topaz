@@ -1,0 +1,3 @@
+dummy2.lo: dummy2.cc /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:

@@ -1,0 +1,21 @@
+
+OBJS = water.o extfcts.o stat.o
+
+CFLAGS += -Wno-unused-result $(EXTRAFLAGS)
+
+water:	$(OBJS)
+	mkdir -p $(OUT)
+	clang++ -o $(OUT)/water $(OBJS) $(DEFAULTLIBS)
+	mv -f *.o $(OUT)
+
+water.o:	 water.C
+	clang++ -o water.o $(CFLAGS) $(CDEFS) -c water.C
+
+extfcts.o:	extfcts.c
+	clang -o extfcts.o $(CFLAGS) $(CDEFS) -c extfcts.c
+
+stat.o:	stat.c
+	clang -o stat.o $(CFLAGS) $(CDEFS) -c stat.c
+
+clean :
+	rm -f $(OUT)/*.o $(OUT)/water

@@ -1,0 +1,11 @@
+prefix=/mnt/hgfs/sachour/Documents/git/research/topaz/benchmarks/vips/src/bin
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: vips-7.22
+Description: Image processing library
+Version: 7.22.1
+Requires:  glib-2.0 gmodule-2.0 libxml-2.0 gobject-2.0 gthread-2.0 pangoft2 libpng
+Libs: -L${libdir} -lvips  -lpng12    -lz -ljpeg -pthread -lgthread-2.0 -lglib-2.0   -Wl,--export-dynamic -pthread -lgmodule-2.0 -lxml2 -lgobject-2.0 -lglib-2.0   -lpangoft2-1.0 -lpango-1.0 -lfontconfig -lgobject-2.0 -lglib-2.0 -lfreetype          -lm
+Cflags: -I${includedir} 

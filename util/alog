@@ -1,0 +1,32 @@
+#!/bin/bash
+LOGNAME=$1
+PASTEOP=""
+IDX=0
+
+echo $LOGNAME
+
+if [ "$#" -eq "1" ] 
+then
+	rdlog $LOGNAME;
+	exit 0
+fi
+
+
+for field in ${*:2}
+do
+    echo $field > .tmp.$IDX
+    rdlog $LOGNAME $field >> .tmp.$IDX
+    PASTEOP="$PASTEOP .tmp.$IDX"
+    IDX=$(echo "$IDX+1" | bc)
+done
+
+paste $PASTEOP
+rm .tmp.*
+
+#IDX=1
+#for field in ${*:4}
+#do
+#    echo "$field $IDX"
+#    results[$IDX]=$(log-reader $LOGNAME $field)
+#    IDX=$(echo "$IDX+1" | bc)
+#done

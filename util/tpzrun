@@ -1,0 +1,131 @@
+#!/bin/bash
+
+CFG=$TOPAZ_ROOT/util
+
+
+
+# “a” and “arga” have optional arguments with default values.
+# “b” and “argb” have no arguments, acting as sort of a flag.
+# “c” and “argc” have required arguments.
+
+# set an initial value for the flag
+
+# read the options
+#TEMP=`getopt -o a::bc: --long arga::,argb,argc: -n 'test.sh' -- "$@"`
+APP=$(echo "$@" | grep -o -E "(--[a-z]|-[a-z]|[^-])*$")
+TEMP=`getopt -o er:p:m:f:a:d --long emulate,root-dir:,pin-args:,mpi-args:,fault-model:,axc-args:,debug -n 'tpzrun' -- "$@"`
+eval set -- "$TEMP"
+
+EMULATE=0
+DEBUG=0
+PIN_ARGS=""
+#AXC_ARGS=" -d1c 16 -d1b 32 -d1a 16 -axc_c 1 -axc_b 32 -axc_a 16 -u2c 512 -u2b 32 -u2a 16 -o profile/pin-stats.profile -axc axc.config"
+SIACT_ARGS=" -e -t trace.config -o profile/insmix -logfile profile/pin.log "
+MPI_ARGS="-np 2"
+FAULT_MODEL="default.cfg"
+ROOT_DIR=$(pwd)
+
+# extract options and their arguments into variables.
+while true ; do
+    case "$1" in
+        -e|--emulate)
+            EMULATE=1; shift;;
+        -d|--debug)
+			DEBUG=1; shift;;
+        -p|--pin-args) 
+					case "$2" in
+						"") shift 2 ;;
+						*) PIN_ARGS=$2 ; shift 2 ;;
+          esac ;;
+				-r|--root-dir)
+					case "$2" in		
+						"") shift 2 ;;
+						*) ROOT_DIR=$2; shift 2;;
+           esac ;;
+        -a|--axc-args) 
+					case "$2" in
+							"") shift 2 ;;
+							*) SIACT_ARGS=$2 ; shift 2 ;;
+					esac ;;
+        -m|--mpi-args)
+					case "$2" in
+							"") shift 2 ;;
+							*) MPI_ARGS=$2 ; shift 2 ;;
+					esac ;;
+        -f|--fault-model)
+					case "$2" in
+							"") shift 2 ;;
+							*) FAULT_MODEL=$2 ; shift 2 ;;
+					esac ;;
+        --) shift ; break ;;
+        *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
+if [ $EMULATE -eq 1 ]; then
+	if [ ! -e $TOPAZ_ROOT/util/fault-models/$FAULT_MODEL ]; then
+		echo "ERROR: $FAULT_MODEL doesn't exist";
+		exit 1;
+	fi
+fi
+if [ ! -d $ROOT_DIR ] || [ ! -d $ROOT_DIR/profile ] || [ ! -d $ROOT_DIR/logs ]; then
+	echo "ERROR: $ROOT_DIR doesn't exist or doesn't contain a profile/log subdir.";
+	exit 1;
+fi
+echo ""
+echo ""
+# do something with the variables -- in this case the lamest possible one :-)
+echo "#####"
+if [ $EMULATE -eq 1 ]; then
+echo "Pin Root: $PIN_ROOT"
+echo "Fault Model: $FAULT_MODEL"
+echo "Pin Arguments = $PIN_ARGS"
+echo "SIACT Arguments = $SIACT_ARGS"
+echo "Root Log/Profile Dir = $LOG_DIR"
+fi
+echo "MPI Arguments = $MPI_ARGS"
+echo "Application = $APP"
+echo "#####"
+echo ""
+
+if [ $EMULATE -eq 0 ]; then
+	FAULT_MODEL="none.cfg"
+fi
+LOG_DIR=$ROOT_DIR/logs
+PROFILE_DIR=$ROOT_DIR/profile
+SUFFIX=$(basename $FAULT_MODEL ".cfg")
+for file in $(ls $LOG_DIR/*.$SUFFIX)
+do
+	NEWNAME=$(basename $file $SUFFIX)
+	cp $file $NEWNAME
+done
+for file in $(ls $PROFILE_DIR/*.$SUFFIX)
+do
+	NEWNAME=$(basename $file $SUFFIX)
+	cp $file $NEWNAME
+done
+
+if [ $EMULATE -eq 1 ]; then
+	#pin -follow_execv $PIN_ARGS -t $PIN_ROOT/source/tools/AxC-PINTOOL/obj-*/axcAnyl.so $AXC_ARGS  -hwmodel $CFG/fault-models/$FAULT_MODEL -- mpirun $MPI_ARGS $APP
+	echo pin -follow_execv $PIN_ARGS -t $TOPAZ_ROOT/lib/siact.so $SIACT_ARGS -hwmodel $CFG/fault-models/$FAULT_MODEL -- mpirun $MPI_ARGS $APP
+    pin -follow_execv $PIN_ARGS -t $TOPAZ_ROOT/lib/siact.so $SIACT_ARGS -hwmodel $CFG/fault-models/$FAULT_MODEL -- mpirun $MPI_ARGS $APP
+fi
+if [ $EMULATE -eq 0 ]; then
+	if [ $DEBUG -eq 0 ]; then
+		echo mpirun $MPI_ARGS $APP
+		mpirun $MPI_ARGS $APP
+	else
+		echo mpirun $MPI_ARGS xterm -e gdb --args $APP
+		mpirun $MPI_ARGS xterm -e gdb --args $APP
+	fi
+fi
+
+for file in $(ls $LOG_DIR/*.log)
+do
+	NEWNAME=$file"."$SUFFIX
+	mv $file $NEWNAME
+done
+for file in $(ls $PROFILE_DIR/*.profile.place.[0-9])
+do
+	NEWNAME=$file"."$SUFFIX
+	mv $file $NEWNAME
+done

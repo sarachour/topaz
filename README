@@ -1,0 +1,9 @@
+# Setting up repo
+
+git submodule init
+git submodule update
+
+#Installing relevent packages
+
+sudo apt-get install libsvm libsvm-dev
+sudo apt-get install libglpk-dev

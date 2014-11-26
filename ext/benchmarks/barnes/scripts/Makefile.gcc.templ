@@ -1,0 +1,19 @@
+
+CFLAGS += -Wno-write-strings -Wno-unused-result $(EXTRAFLAGS)
+
+barnes:	barnes.o extfcts.o stat.o
+	mkdir -p $(OUT)
+	g++ -o $(OUT)/barnes $(OBJS) $(DEFAULTLIBS) 
+	mv *.o $(OUT)
+
+barnes.o:         barnes.C 
+	g++ $(CFLAGS) -c barnes.C
+
+extfcts.o:	extfcts.c
+	gcc $(CFLAGS) -c extfcts.c
+
+stat.o:	stat.c
+	gcc $(CFLAGS) -c stat.c
+
+clean:
+	rm -f $(OUT)/*

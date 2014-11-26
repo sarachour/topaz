@@ -1,0 +1,64 @@
+
+=================== TIME REPORT ===================
+(Threads=8)(entered_par_section=81)(use_lock=1)(iter_back=1)(sched=0)
+
+Total time - wall clock (s.ns): 3.707725927
+Total sequential time: 0.474820205
+
+
+Thread 0
+   Parallel execution time: 3.199630668
+   Waiting at the beginning barrier: 0.000769455
+   Waiting at the ending barrier: 0.002249619
+   Waiting for mutex lock: 0.030161078
+
+Thread 1
+   Parallel execution time: 3.183209524
+   Waiting at the beginning barrier: 0.475591391
+   Waiting at the ending barrier: 0.002365534
+   Waiting for mutex lock: 0.046442815
+
+Thread 2
+   Parallel execution time: 3.199138543
+   Waiting at the beginning barrier: 0.475591553
+   Waiting at the ending barrier: 0.002160348
+   Waiting for mutex lock: 0.030706365
+
+Thread 3
+   Parallel execution time: 3.199238076
+   Waiting at the beginning barrier: 0.478707184
+   Waiting at the ending barrier: 0.002300135
+   Waiting for mutex lock: 0.027352727
+
+Thread 4
+   Parallel execution time: 3.158792240
+   Waiting at the beginning barrier: 0.519122884
+   Waiting at the ending barrier: 0.002310112
+   Waiting for mutex lock: 0.027364869
+
+Thread 5
+   Parallel execution time: 3.190359108
+   Waiting at the beginning barrier: 0.477310651
+   Waiting at the ending barrier: 0.005954031
+   Waiting for mutex lock: 0.033931349
+
+Thread 6
+   Parallel execution time: 3.192074233
+   Waiting at the beginning barrier: 0.482422862
+   Waiting at the ending barrier: 0.002270436
+   Waiting for mutex lock: 0.030776303
+
+Thread 7
+   Parallel execution time: 3.131427593
+   Waiting at the beginning barrier: 0.511492732
+   Waiting at the ending barrier: 0.002151142
+   Waiting for mutex lock: 0.062465444
+
+=======================================================
+Total execution time (Wall) = 3.707725927
+Total time spent in sequential mode (Wseq) = 0.474820205
+Total time spent in parallel mode (Wpall) = 25.764832292
+Useful parallel time (puse) = 25.453869985
+Time spent waiting on synchronization (pidle) = 0.021761357
+Time spent waiting for task (pswait) = 3.421008712
+=======================================================

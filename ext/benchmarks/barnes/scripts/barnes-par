@@ -1,0 +1,17 @@
+#!/bin/bash
+threads=$THREADNUM
+if [ "X$PL_THREAD_NUM" == "X" ]; then
+    
+    if [ "X$2" != "X" ]; then
+	threads=$2
+    else
+	echo "Number of threads not specified (PL_THREAD_NUM or 2nd param)"
+	threads=`cat /proc/cpuinfo | grep "processor"`
+	echo "using the default value $threads"
+    fi
+
+    
+
+fi
+
+cat $1 | ./barnes-par.executable $threads

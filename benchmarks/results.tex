@@ -1,0 +1,206 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{verbatim}
+%Gummi|065|=)
+\title{\textbf{Results}}
+\author{Sara}
+\date{}
+\usepackage{graphicx}
+\begin{document}
+
+\maketitle
+\section {Replacing}
+\begin{comment}
+\begin{table*}
+\begin{tabular}{c|ccccc|}
+	          & Accepted & Rejected & Accepted    & Rejected  &  \\
+	Benchmark & Correct & Correct &  Error        &  Error & Reexecuted \\
+	\hline
+	Scale & 97.875\% & 0.915\% &  0.091\% &1.118\% & 2.034\%\\
+	BlackScholes & 98.611\% &0.997\%   &0.134\%  &  1.254\%& 1.254 \% \\
+	Water & 96.578\% & 0.788\% & 1.166\% & 1.467 \% & 2.25\%\\
+	Barnes & 96.704\% & 3.028\% & 0.134\% & 0.134\% & 3.162\%\\
+\end{tabular}
+\caption {Overall Outlier Detector Effectiveness}
+\label{tbl:outlierquality}
+\end{table*}
+\end{comment}
+
+
+\begin{table}[thbp]
+\centering
+% \footnotesize
+\begin{tabular}{c|ccccc|}
+	Benchmark & Target & Observed \\
+	Benchmark & Reexecution Rate & Reexecution Rate \\
+	\hline
+	
+	Scale & 1.333\% & 1.5988\%  \\
+              & 1.333\% & 1.4938\% \\
+              & 1.333\% & 1.4297\%  \\
+            
+	BlackScholes & 3.00\% & 2.9927\% \\
+        Barnes & 0.375\% & 0.463\$  \\
+               & 0.375\% & 0.454\% \\
+               & 0.375\% & 0.494\% \\
+               & 0.375\% & 0.414\%\\
+               & 0.375\% & 0.411\%\\
+               & 0.375\% & 0.448\% \\
+               & 0.375\% & 0.000\% \\
+               & 0.375\% & 0.303 \% \\
+        Water [1] & 0.28\% & 0.28\% \\
+                  & 0.28\% & 0.43\% \\ 
+                  & 0.28\% & 0.32\% \\ 
+                  & 0.28\% & 0.28\% \\ 
+                  & 0.28\% & 0.30\% \\ 
+                  & 0.28\% & 0.31\% \\ 
+                  & 0.28\% & 0.29\% \\ 
+                  & 0.28\% & 0.33\% \\ 
+                  & 0.28\% & 0.29\% \\ 
+                  & 0.28\% & 0.28\% \\ 
+                  & 0.28\% & 0.33\% \\ 
+                  & 0.28\% & 0.30\% \\ 
+                  & 0.28\% & 0.28\% \\ 
+                  & 0.28\% & 0.31\% \\ 
+                  & 0.28\% & 0.32\% \\ 
+                  & 0.28\% & 0.30\% \\ 
+                  & 0.28\% & 0.43\% \\ 
+                  & 0.28\% & 0.32\% \\ 
+                  & 0.28\% & 0.35\% \\ 
+                  & 0.28\% & 0.13\% \\ 
+                  & 0.28\% & 0.28\% \\ 
+	Water [2] & 1.97\% & 0.0017 \%  \\
+              & 1.97\% & 1.97\% \\
+              & 1.97\% & 1.98\%  \\
+   Search & 0.720\% & 0.721\% \\
+   		  & 0.720\% & 0.768\% \\
+   		  & 0.720\% & 0.934\% \\
+   		  & 0.720\% & 0.720\% \\
+   		  & 0.720\% & 0.719\% \\
+	
+\end{tabular}
+\caption {Individual Outlier Detector Reexecution Rates.}
+\label{tbl:individualoutlierquality}
+\end{table}
+
+
+\begin {table}[t]
+\centering
+\begin{tabular}{c|ccccc}
+	                           & Accepted & Actual & Maximum\\
+	\multirow{2}{*}{Benchmark} & Error  & Accepted & Component  \\
+	                           & Task   & Error & Error\\
+	                           & Bound (95\%)  & Tasks & \\
+	\hline
+	\multirow{3}{*}{scale} & \multirow{3}{*}{0.346\%???} & \multirow{3}{*}{0.258\%} & 203.581\\
+	&  &  &  173.836\\
+	&  &  & 176.561\\
+	\hline
+	
+	\multirow{1}{*}{blackscholes} & \multirow{1}{*}{0.309\%???} & \multirow{1}{*}{0.087\%} & 27.484\\
+	\hline
+	\multirow{8}{*}{barnes} & \multirow{8}{*}{0.201\%???} & \multirow{8}{*}{9.23\%} & 72.401\\
+	&  &  & 71.198\\
+	&  &  & 77.200\\
+	&  &  & 732.525\\
+	&  &  & 772.608\\
+	&  &  & 821.922\\
+	&  &  & 0.00\\
+	&  &  & 6625.218\\
+	\hline
+	
+	\multirow{18}{*}{water/intermol} & \multirow{18}{*}{1.327\%???} & \multirow{18}{*}{0.525\%} & 0.00757\\
+	&  &  & 0.0232\\
+	&  &  & 0.0102\\
+	
+	&  &  &  0.00956\\
+	&  &  &  0.0845\\
+	&  &  &  0.0931\\
+	
+	&  &  &  0.0231\\
+	&  &  & 0.465\\
+	&  &  &  0.0402\\
+	
+	
+	&  &  &  0.0229\\
+	&  &  &  0.0845\\
+	&  &  &  0.0400\\
+	
+	&  &  &  0.00863\\
+	&  &  &  0.00672\\
+	&  &  &  0.0845\\
+	
+	&  &  &  0.00762\\
+	&  &  &  0.0231\\
+	&  &  & 0.00938 \\
+	&  &  &  0.0389\\
+	&  &  &  97.246\\
+	&  &  &  95.358\\
+	
+	\hline
+	\multirow{3}{*}{water/poteng} & \multirow{3}{*}{12.103\%} & \multirow{3}{*}{4.285\%} & 0.000\\
+	&  &  &  0.161\\
+	&  &  & 0.00326\\
+\end{tabular}
+\caption{Probabilistic Error Bounds Results}
+\label{tbl:probabilistic}
+\end{table}
+
+
+\begin{table}
+\begin{tabular}{l|lll}
+	          &            & Outlier & Outlier \\
+	          & No Outlier & Detection & Detection \\
+	Benchmark & Detection & With & With \\
+	& & Reexecution & Discard \\
+	\hline
+	Scale [PSNR] & 28.16 & 43.92 & 23.13\\
+	BlackScholes &$6.04\cdot 10^{34}$\% &  $8.07 \cdot 10^{-2}$ \% & 0.51 \%\\
+	Water & nan & $7.10 \cdot 10^{-4}$ \% & $2.41 \cdot 10^{147}$\% \\
+	Barnes & inf & 0.125\% & 0.046\%\\
+\end{tabular}
+\caption {End-to-end Application Accuracy Measurements. For Scale, the table presents
+the PSNR for the output image. For BlackScholes the table presents the error
+as a percentage of the total value of the option portfolio. For Water the table presents the 
+mean relative error in the positions of the Water molecules (in comparison with
+the positions computed by the precise execution). For Barnes the table presents the
+mean relative error in the positions of the simulate bodies (in comparison with
+the positions computed by the precise execution).}
+\label{tbl:accuracy}
+\end {table}
+
+\begin{table}[h]
+\centering
+\footnotesize
+\begin{tabular}{l|lll}
+	Benchmark & Energy Consumption Equation  \\
+	\hline
+	Scale & $0.90 = 0.20 + 0.020*0.80 + 0.86*0.80 $ \\
+        BlackScholes & $0.89 = 0.14 + 0.012*0.86 + 0.86*0.86 $ \\ 
+        Water & $0.88 =  0.01 + 0.022*0.99 + 0.86*0.99 $ \\
+        Barnes & $0.90 = 0.04 + 0.031*0.96 + 0.86*0.96$ \\
+\end{tabular}
+\caption{Energy Consumption Equations}
+\label{tbl:energy}
+\end {table}
+
+
+\section {Tables}
+\begin{table}[H]
+\begin{tabular}{l|lllllll}
+Benchmark & Model & Maximum & Nominal & Strict & Porous & Discard &  \\
+\hline
+blackscholes & medium & 14.0\% & 9.641\% & 9.57\% & 9.634\% & 9.641\% & \\
+scale & aggressive & 15.75\% & 9.984\% & 9.854\% & 9.858\% & 9.984\% & \\
+barnes & medium & 14.0\% & 13.44\% & 13.425\% & 13.43\% & 13.44\% & \\
+water & medium & 14.0\% & 11.726\% & 11.575\% & 11.653\% & 11.726\% & \\
+search & medium & 14.0\% & 12.38\% & 12.38\% & 12.357\% & 12.38\% & \\
+
+\end{tabular}
+\end{table}
+
+
+
+\end{document}

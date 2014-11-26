@@ -1,0 +1,3 @@
+: image.c | image.h |> gcc -c -I. %f -o image.o |> image.o
+
+#: image.c | image.h |> $(CONFIG_CC_ARM) -c -I. %f -o image.arm.o |> image.arm.o

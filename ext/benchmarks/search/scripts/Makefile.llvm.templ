@@ -1,0 +1,21 @@
+
+OBJS = search.bc random.bc
+CFLAGS += -emit-llvm $(EXTRAFLAGS)
+
+
+.PHONY: clean
+
+search: $(OBJS)
+	mkdir -p $(OUT)
+	llvm-link $(OBJS) -o search-o.bc
+	opt $(COPTIM) search-o.bc -o search-o3.bc
+	llvm-ld -native -o $(OUT)/search search-o3.bc $(DEFAULTLIBS)
+	mv *.bc $(OUT)
+
+random.bc:
+	llvm-gcc $(CFLAGS) -o random.bc -c random.c
+search.bc: search.c
+	llvm-gcc $(CFLAGS) -o search.bc -c search.c 
+ 	
+clean:
+	rm -f $(OUT)/*

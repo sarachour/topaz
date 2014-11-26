@@ -1,0 +1,22 @@
+
+CFLAGS += -Wno-write-strings $(EXTRAFLAGS)
+
+barnes:	$(OBJS)
+	mkdir -p $(OUT)
+	llvm-link -f -o barnes-o.bc $(OBJS)
+	rm -f $(OUT)/barnes-o3.bc
+	opt $(COPTIM) barnes-o.bc -o $(OUT)/barnes-o3.bc
+	llvm-ld -o $(OUT)/barnes -native  $(DEFAULTLIBS) -lm $(OUT)/barnes-o3.bc
+	mv -f *.bc $(OUT)
+
+barnes.bc:         barnes.C 
+	llvm-g++ -o barnes.bc $(CFLAGS) $(CDEFS) -c barnes.C
+
+extfcts.bc:	extfcts.c
+	llvm-gcc -o extfcts.bc $(CFLAGS) $(CDEFS) -c extfcts.c
+
+stat.bc:	stat.c
+	llvm-gcc -o stat.bc $(CFLAGS) $(CDEFS) -c stat.c
+
+clean:
+	rm -f $(OUT)/*

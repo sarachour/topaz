@@ -1,0 +1,1 @@
+Topaz is an approximate-compute/reliable-combine C language extension and runtime environment for approximate platforms. It uses novel outlier detection and replacement techniques to ensure unacceptably inaccurate results are not integrated into the main computation.

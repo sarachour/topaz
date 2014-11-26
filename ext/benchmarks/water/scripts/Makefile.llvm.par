@@ -1,0 +1,14 @@
+#
+
+LEVEL = .
+
+include $(LEVEL)/Makefile.common
+
+OUT=$(LEVEL)/bin/llvm
+
+CFLAGS += $(CINCLUDE_LIB) $(COPTIM_LLVM)
+EXTRAFLAGS = 
+
+DEFAULTLIBS += $(RUNTIMELIB)
+
+include $(LOCALSCRIPT)/Makefile.llvm.templ

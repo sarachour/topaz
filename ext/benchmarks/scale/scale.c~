@@ -1,0 +1,72 @@
+#include "scale.h"
+#include "math.h"
+#define IDX(i,j,w) (i*w+j)
+#define R(k) (3*k)
+#define G(k) (3*k+1)
+#define B(k) (3*k+2)
+#define BILINEAR(ci, cj, nexti, nextj, previ, prevj, c_ul,c_ur,c_ll,c_lr) (1.0/((nexti-previ)*(nextj-prevj))*(c_lr*(nextj-cj)*(nexti-ci)+c_ur*(nextj-cj)*(ci-previ)+c_ll*(cj-prevj)*(nexti-ci)+c_ul*(cj-prevj)*(ci-previ)))
+
+extern float my_floor(float);
+extern float my_ceil(float);
+
+void scale(rely_float factor, rely_int_array_1D src, rely_int sw, rely_int sh, rely_int_array_1D dest, rely_int dw, rely_int dh){
+	int i,j,k=0;
+	rely_float si=0, sj=0;
+	rely_float delta_i=1/factor, delta_j=1/factor;
+	/*
+	 *
+	naive scale
+	for(i=0; i < dw; i++){
+		for(j=0; j < dh; j++, k++){
+			si = i/factor;
+			sj = j/factor;
+			sk = k/(factor*factor);
+			COPY(IDX(i,j,dw), dest, IDX(si,sj,sw), src);
+		}
+	}
+	*/
+	if(factor > 1){
+		for(i=0; i < dh; i++, si+=delta_i){
+			for(j=0, sj=0; j < dw; j++, sj+=delta_j){
+				int previ, prevj, nexti, nextj;
+				rely_float factor;
+				int * ll, * lr, * ul, * ur;
+				//corners
+				previ = my_floor(si); prevj = my_floor(sj);
+				nexti = my_ceil(si); nextj = my_ceil(sj);
+				previ = (previ !=0 && previ == nexti) ? previ-1: previ;
+				prevj = (prevj != 0 && prevj == nextj) ? prevj-1: prevj;
+				lr = &src.ptr[R(IDX(previ, prevj,sw))];
+				ll = &src.ptr[R(IDX(previ, nextj,sw))];
+				ur = &src.ptr[R(IDX(nexti, prevj,sw))];
+				ul = &src.ptr[R(IDX(nexti, nextj,sw))];
+				dest.ptr[R(IDX(i,j,dw))]= BILINEAR(si, sj, nexti, nextj, previ, prevj, ul[0], ur[0], ll[0], lr[0]);
+				dest.ptr[G(IDX(i,j,dw))]= BILINEAR(si, sj, nexti, nextj, previ, prevj, ul[1], ur[1], ll[1], lr[1]);
+				dest.ptr[B(IDX(i,j,dw))]= BILINEAR(si, sj, nexti, nextj, previ, prevj, ul[2], ur[2], ll[2], lr[2]);
+				
+			}
+		}
+	}
+	else{
+		
+		for(i=0, si=0; i < dh; i++, si+=delta_i){
+			for(j=0, sj=0; j < dw; j++, sj+=delta_j){
+				int previ, prevj, nexti, nextj;
+				rely_float factor;
+				int * ll, * lr, * ul, * ur;
+				//corners
+				previ = my_floor(si); prevj = my_floor(sj);
+				nexti = my_ceil(si); nextj = my_ceil(sj);
+				lr = &src.ptr[R(IDX(previ, prevj,sw))];
+				ll = &src.ptr[R(IDX(previ, nextj,sw))];
+				ur = &src.ptr[R(IDX(nexti, prevj,sw))];
+				ul = &src.ptr[R(IDX(nexti, nextj,sw))];
+				dest.ptr[R(IDX(i,j,dw))]= ul[0];
+				dest.ptr[G(IDX(i,j,dw))]= ul[1];
+				dest.ptr[B(IDX(i,j,dw))]= ul[2];
+				
+			}
+		}
+
+	}
+}

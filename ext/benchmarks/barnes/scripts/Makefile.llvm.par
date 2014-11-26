@@ -1,0 +1,13 @@
+#
+
+LEVEL=.
+
+include $(LEVEL)/Makefile.common
+
+OUT=$(LEVEL)/bin/llvm
+
+CFLAGS += -emit-llvm $(CINCLUDE_LIB) $(COPTIM_LLVM) $(CEXTRA_FLAGS)
+OBJS = barnes.bc extfcts.bc stat.bc
+DEFAULTLIBS += $(RUNTIMELIB)
+
+include $(LOCALSCRIPT)/Makefile.llvm.templ

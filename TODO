@@ -1,0 +1,5 @@
+# Outlier Detector
+1. Better understand bodytrack, barnes ill behaviour
+	- run barnes with 16K
+	- look at bodytrack weights properly.
+2. Add modifications to control system - target re-exec rate.

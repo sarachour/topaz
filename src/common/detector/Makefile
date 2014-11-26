@@ -1,0 +1,26 @@
+ROOT=$(TOPAZ_ROOT)
+INCLUDE=-I$(ROOT)/include
+COPTS=-Wall -fPIC -O3
+CC=mpic++
+
+all:  checker.o \
+	  detector.o \
+	  idetector.o \
+	  control_idetector.o \
+	  uniform_idetector.o \
+	  detector_manager.o \
+	  mean_detector.o \
+	  control_detector.o \
+	  dist_detector.o \
+	  distribution.o \
+	  abs_detector.o \
+	  abs_region_detector.o \
+	  abs_solid_region_detector.o 
+
+	
+%.o: %.cpp
+	$(CC) $(COPTS) $(INCLUDE) -o $@ -c $< 
+	
+clean:
+	rm *.o
+

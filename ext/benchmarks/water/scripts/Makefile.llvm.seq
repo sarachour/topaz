@@ -1,0 +1,12 @@
+#
+
+LEVEL = .
+
+include $(LEVEL)/Makefile.common
+
+OUT=$(LEVEL)/bin/llvm
+CFLAGS += $(CINCLUDE_SOLO) $(COPTIM_LLVM)
+EXTRAFLAGS = 
+
+
+include $(LOCALSCRIPT)/Makefile.llvm.templ

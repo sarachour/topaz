@@ -1,0 +1,14 @@
+#
+
+
+LEVEL = .
+OUT=$(LEVEL)/bin/gcc
+
+include $(LEVEL)/Makefile.common
+
+CFLAGS += $(CINCLUDE_LIB) $(COPTIM)
+EXTRAFLAGS = 
+
+DEFAULTLIBS += $(RUNTIMELIB)
+
+include $(LOCALSCRIPT)/Makefile.gcc.templ

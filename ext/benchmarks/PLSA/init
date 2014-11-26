@@ -1,0 +1,87 @@
+ParaSWGlobalMemory.cpp:bool ParaSWGlobalMemory::InitGlobalMemory(ParaSWParam *param, ParaSWPathGrid* path_grid)
+ParaSWParam.cpp:	InitParameters(
+ParaSWParam.cpp:void ParaSWParam::InitParameters(int ali_type,
+ParaSWParam.cpp:bool ParaSWGridBlockDivision::InitGridBlockDivision(
+ParaSWParam.cpp:bool ParaSWGridBlockDivision::InitGridBlockDivisionSimple(
+ParaSWPath.cpp:	InitPath();
+ParaSWPath.cpp:bool ParaSWPath::InitPath()
+ParaSWPath.cpp:bool ParaSWPathGrid::InitPathGrid(int start_i,int start_j,
+ParaSWPath.cpp:bool ParaSWPathGrid::InitPathGrid(int path_id,int start_i,int start_j,
+ParaSWProblem.cpp:	InitProblem();
+ParaSWProblem.cpp:bool ParaSWProblem::InitProblem()
+ParaSWProblem.cpp:bool ParaSWProblem::InitMainProblem(ParaSWParam *param,ParaSWPathGrid *pg)
+ParaSWProblem.cpp:	big_nodes.InitNodeArray(param->k);
+ParaSWProblem.cpp:bool ParaSWProblem::InitLocalProblem(ParaSWParam *param,ParaSWPathGrid *pg)
+ParaSWProblem.cpp:	big_nodes.InitNodeArray(param->k);
+ParaSWProblem.cpp:bool ParaSWProblem::InitMemory_Solvable()
+ParaSWProblem.cpp:	block_division->InitGridBlockDivision(end1-start1,end2-start2,
+ParaSWProblem.cpp://	block_Beach->InitBeachLine(this,&gMem);
+ParaSWProblem.cpp://	block_Beach_Admin->InitBeachLineFront(this,&gMem);
+ParaSWProblem.cpp:bool NodeArray::InitNodeArray(int k)
+ParaSWProblem.cpp:void Node::Init_nw_10(int s0,char t2,int st0h,int st0w,char ts0)
+ParaSWProblem.cpp:void Node::Init_nw_20(int s0,int st0h,int st0w,char ts0)
+ParaSWProblem.cpp:void Node::Init_nw_01(int s0,char t1,int st0h,int st0w,char ts0)
+ParaSWProblem.cpp:void Node::Init_nw_02(int s0,int st0h,int st0w,char ts0)
+ParaSWProblem.cpp:bool BeachLine::InitBeachLine(ParaSWProblem *problem,ParaSWGlobalMemory *gMem)
+ParaSWProblem.cpp:	return InitBeachLineNodes(problem,gMem) && InitBeachLineFront(problem,gMem);
+ParaSWProblem.cpp:bool BeachLine::InitBeachLineNodes(ParaSWProblem *problem,ParaSWGlobalMemory *gMem)
+ParaSWProblem.cpp:bool BeachLine::InitBeachLineFront(ParaSWProblem *problem,ParaSWGlobalMemory *gMem)
+ParaSWProblem.cpp:bool ParaSWReadyTaskArray::InitReadyTaksArray(int p_count)
+ParaSWProcessorSet.cpp:bool ParaSWProcessorSet::InitProcessorSet(ParaSWParam *param, ParaSWPathGrid* path_grid)
+ParaSWProcessorSet.cpp:		processors[i].InitProcessor(b_h[i],b_w);
+ParaSWProcessorSet.cpp:			processors[i].gMem->InitGlobalMemory(param, path_grid);
+ParaSWProcessorSet.cpp:bool ParaSWProcessor::InitProcessor(int h,int w)
+ParallelSW.cpp:	param.InitParameters(ali_type,
+ParallelSWAlgorithm.cpp:	path_grid->InitPathGrid(-1,0,0,param.seq1->length,param.seq2->length,NULL,NULL);
+ParallelSWAlgorithm.cpp:	processorSet.InitProcessorSet(&param, path_grid);
+ParallelSWAlgorithm.cpp:	problem->InitMainProblem(&param,path_grid);	
+ParallelSWAlgorithm.cpp:		problem->InitMemory_Solvable();	//problem need init memory
+ParallelSWAlgorithm.cpp:		InitTopLeftData_sw(problem);				//init top left data(sw global)
+ParallelSWAlgorithm.cpp:		InitTopLeftData_sw(problem);
+ParallelSWAlgorithm.cpp:		problem->InitLocalProblem(&param,path_grid);
+ParallelSWAlgorithm.cpp:		InitTopLeftData_nw(problem);
+ParallelSWAlgorithm.cpp:bool InitTopLeftData_sw(ParaSWProblem *problem)	//init top left data(sw global)
+ParallelSWAlgorithm.cpp:bool InitTopLeftData_nw(ParaSWProblem *problem)	//init top left data(nw local), according to path_grid start and end
+ParallelSWAlgorithm.cpp:			SM[1][0].Init_nw_10(go,TRACE_s_AFF_H,start1,start2,0);
+ParallelSWAlgorithm.cpp:			SM[0][1].Init_nw_01(go,TRACE_s_AFF_H,start1,start2,0);
+ParallelSWAlgorithm.cpp:			{	SM[i][0].Init_nw_20((i-1)*ge + go,start1,start2,0);	}
+ParallelSWAlgorithm.cpp:			{	SM[0][j].Init_nw_02((j-1)*ge + go,start1,start2,0);	}
+ParallelSWAlgorithm.cpp:			SM[1][0].Init_nw_10(go,TRACE_s_AFF_H,start1,start2,1);
+ParallelSWAlgorithm.cpp:			SM[0][1].Init_nw_01(ge,TRACE_s_AFF_E,start1,start2,1);
+ParallelSWAlgorithm.cpp:			{	SM[i][0].Init_nw_20((i-1)*ge + go,start1,start2,1);	}
+ParallelSWAlgorithm.cpp:			{	SM[0][j].Init_nw_02(j*ge,start1,start2,1);	}
+ParallelSWAlgorithm.cpp:			SM[1][0].Init_nw_10(ge,TRACE_s_AFF_F,start1,start2,2);
+ParallelSWAlgorithm.cpp:			SM[0][1].Init_nw_01(go,TRACE_s_AFF_H,start1,start2,2);
+ParallelSWAlgorithm.cpp:			{	SM[i][0].Init_nw_20(i*ge,start1,start2,2);	}
+ParallelSWAlgorithm.cpp:			{	SM[0][j].Init_nw_02((j-1)*ge + go,start1,start2,2);	}
+ParallelSWAlgorithm.cpp:			gridCols[0][1].Init_nw_10(go,TRACE_s_AFF_H,start1,start2,0);
+ParallelSWAlgorithm.cpp:			gridRows[0][1].Init_nw_01(go,TRACE_s_AFF_H,start1,start2,0);
+ParallelSWAlgorithm.cpp:			{	gridCols[0][i].Init_nw_20((i-1)*ge + go,start1,start2,0);	}
+ParallelSWAlgorithm.cpp:			{	gridRows[0][j].Init_nw_02((j-1)*ge + go,start1,start2,0);	}
+ParallelSWAlgorithm.cpp:			gridCols[0][1].Init_nw_10(go,TRACE_s_AFF_H,start1,start2,1);
+ParallelSWAlgorithm.cpp:			gridRows[0][1].Init_nw_01(ge,TRACE_s_AFF_E,start1,start2,1);
+ParallelSWAlgorithm.cpp:			{	gridCols[0][i].Init_nw_20((i-1)*ge + go,start1,start2,1);	}
+ParallelSWAlgorithm.cpp:			{	gridRows[0][j].Init_nw_02(j*ge,start1,start2,1);	}
+ParallelSWAlgorithm.cpp:			gridCols[0][1].Init_nw_10(ge,TRACE_s_AFF_F,start1,start2,2);
+ParallelSWAlgorithm.cpp:			gridRows[0][1].Init_nw_01(go,TRACE_s_AFF_H,start1,start2,2);
+ParallelSWAlgorithm.cpp:			{	gridCols[0][i].Init_nw_20(i*ge,start1,start2,2);	}
+ParallelSWAlgorithm.cpp:			{	gridRows[0][j].Init_nw_02((j-1)*ge + go,start1,start2,2);	}
+ParallelSWAlgorithm.cpp:			pg[k]->InitPathGrid(k,ali_start1,
+ParallelSWAlgorithm.cpp:			//pg[k].InitPathGrid(ali_start1,ali_start2,ali_end1,ali_end2,&(SM[ali_start1][ali_start2]),&(SM[ali_end1][ali_end2]));
+ParallelSWAlgorithm.cpp:		processors[i]->path_grid->InitPathGrid(start1 + gbd->blockHeights[i].start,
+ParallelSWAlgorithm.cpp:		processors[i]->sub_problem->InitLocalProblem(problem->global_param,processors[i]->path_grid);
+ParallelSWAlgorithm.cpp:		processors[i]->sub_problem->block_Beach->InitBeachLine(problem,processors[i]->gMem);	//use admin's problem to init block beach
+ParallelSWAlgorithm.cpp:		processors[i]->path_grid->InitPathGrid(start1 + gbd->blockHeights[i].start,
+ParallelSWAlgorithm.cpp:		processors[i]->sub_problem->InitLocalProblem(problem->global_param,processors[i]->path_grid);
+ParallelSWAlgorithm.cpp:		processors[i]->sub_problem->block_Beach->InitBeachLine(problem,processors[i]->gMem);	//use admin's problem to init block beach
+ParallelSWAlgorithm.cpp:				pg->InitPathGrid(i,pre_pos.i,pre_pos.j,pos.i,pos.j,start_node,end_node);	//pg->InitPathGrid(pre_pos.i,pre_pos.j,pos.i,pos.j,start_node,end_node);
+ParallelSWAlgorithm.cpp:				pg->InitPathGrid(problem->path_grid->pathID,pre_pos.i,pre_pos.j,pos.i,pos.j,start_node,end_node);
+ParallelSWAlgorithm.cpp:		processorSet.InitProcessorSet(&param, path_grid);
+ParallelSWAlgorithm.cpp:		problem->InitLocalProblem(&param,path_grid);
+ParallelSWAlgorithm.cpp:		InitTopLeftData_nw(problem);
+ParallelSWAlgorithm.cpp:		processorSet.InitProcessorSet(&param, path_grid);
+ParallelSWAlgorithm.cpp:		problem->InitLocalProblem(&param,prog);
+ParallelSWAlgorithm.cpp:		problem->InitMemory_Solvable();	//problem need init memory
+ParallelSWAlgorithm.cpp:		InitTopLeftData_nw(problem);				//init top left data(nw local), according to path_grid start and end
+ParseFile.cpp:	InitData();
+ParseFile.cpp:bool CParseFile::InitData()

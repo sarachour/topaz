@@ -1,0 +1,12 @@
+#
+
+LEVEL = .
+
+include $(LEVEL)/Makefile.common
+
+OUT=$(LEVEL)/bin/gcc
+
+CFLAGS += $(CINCLUDE_SOLO) $(COPTIM)
+EXTRAFLAGS = 
+
+include $(LOCALSCRIPT)/Makefile.gcc.templ

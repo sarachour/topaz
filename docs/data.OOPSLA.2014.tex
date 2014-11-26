@@ -1,0 +1,210 @@
+\documentclass[11pt]{article}
+\usepackage{float}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{multirow}
+%Gummi|065|=)
+\title{\textbf{Data for OOPSLA}}
+\author{Sara Achour\\Martin Rinard}
+\date{}
+\begin{document}
+
+\maketitle
+
+
+\section{Data}
+\subsection {}
+\subsection {Error Bounds Method}
+Topaz needs some means to estimate the accepted error rate in order to provide some sort of probabilistic bounds on the output. 
+
+\subsection{Outlier Detection Control Algorithm}
+\label{sec:outlierdetectionimpl}
+\textbf{Target Re-Execution Rate}\\
+Topaz uses a control system based outlier detector to determine if a particular task output is reasonable while balancing re-execution rate and output quality. The user specifies a target an overall re-execution rate $r$. If a particular task t has n outputs, then an output with dimension m is given a target re-execution rate of $r_{targ}=\frac {r} {n \cdot m}$. The outlier detector will aim to reject exactly $r_{targ}\%$ of correct tasks.\\\\
+\subsubsection {Initial Step: Seeding the Outlier Detector}
+The outlier detector must be seeded with an initial $l,r$ and $\mu$ before switching to re-execution feedback to control the bounds. The outlier detector rejects the first n tasks and computes the mean and standard deviation of the output from the re-execution. The detector then uses the mean as the detector $\mu$ and the standard deviation as the initial $l,r$.\\
+\subsubsection {Control System}
+The outlier detector rejects elements that fall outside of the range $[\mu - l, \mu + r]$. The variables l,r are controlled by two distinct PID control systems $C_l$ and $C_r$. Both control systems aim to maintain a re-execution rate of $r_{targ}$. The left control system is updated when the tested value $v<\mu$. The right control system is updated and tested when value $v>\mu$.\\\\
+For the following formalization, we use control system $C_b$ which perturbs target bound b.\\
+\textbf{Relevant Parameters}\\
+n: number tasks executed.\\
+\begin{itemize}
+	\item 
+\end{itemize}
+$r_b^n$: number tasks ordered re-executed by outlier detector, where the trigger value v falls in bound b.\\
+$r_e^{n}*$: The exponentially decayed sum (decay=D) of all previous observed re-execution rate errors.\\
+$r_e^{n}$: The last re-execution rate error\\\\
+\textbf {Relevant Intermediate Parameters}\\
+$o_{b}^n$: The re-execution rate of tasks whose values fell in bound b.\\
+$o_{b}^n = \frac {\sum r_b^n} {n}$\\
+$r_{e}^{n+1}$: The error between the target re-execution rate and the current re-execution rate. \\
+$r_e^{n+1} = o_{b}^n -r_{targ}$\\\\
+\textbf{General Relation}\\
+The following discretized PID formula determines the amount to perturb bound b:\\
+
+\[
+	u(t) = K_{pres} \cdot r_e^{n+1} + K_{int} \cdot (r_e^{n+1} + D \cdot r_e^{n*}) + K_{der} \cdot(r_e^{n+1} - r_e^n)
+\]
+The constants $K_{pres}, K_{int}, K_{der}$ are empirically determined through tuning the system.\\\\
+\textbf {Updating the Control System}\\
+With Re-Execution: $C_b$ is updated under the following circumstances:\\
+1. value $v \in b$, accepted $\rightarrow$ $r_b^n = r_b^n+1$, $n=n+1$, $b = b+u(t)$\\
+2. value $v \in b$, rejected, is verified correct on re-execution $\rightarrow$ $n=n+1$, $b = b+u(t)$\\\\
+The outlier detector maintains the observed data bounds $[v_{min}, v_{max}]$ of the outputs. We constrain l,r bounds using the observed data bounds as follows:\\
+$v_{min} >= \mu - l$\\
+$v_{max} <= \mu + r$\\\\
+With Discard: $C_b$ is updated under the following circumstances:\\
+1. value $v \in b$, accepted $\rightarrow$ $r_b^n = r_b^n+1$, $n=n+1$, $b = b+u(t)$\\
+2. value $v \in b$, rejected $\rightarrow$ $n=n+1$, $b = b+u(t)$\\
+
+
+\section {Estimating the \% Accepted Errors}
+The following parameters are available at runtime.:\\
+$e_{sram} = 0.5 \cdot 10^{-3}$: probability of read/write error occurring for SRAM.\\
+$n_{sram}^{fp}$: number reads/writes to floating point SRAM.\\
+$n_{task}$: number tasks.\\
+$n_{rej}^{err}$: number rejected erroneous tasks.\\\\
+On average, there are $n_{sram}^{fp} \cdot e$ erroneous SRAM operations. Assuming an even distribution of SRAM operations across tasks, we predict there are $e_{task} = \frac {n_{sram}^{fp} \cdot e} {n_{task}}$ erroneous operations per task. We use the inverse Poisson distribution with $\lambda = e_{task}$ to determine the lowest frequency of errors that may occur with probability q:
+\[
+	e_{task}^{\prime} = Poiss^{-1}(q, \lambda=e_{task})
+\]
+We then determine the probable number of erroneous tasks:
+\[
+n_{task}^{err}\prime = n_{task} \cdot e_{task}^{\prime}
+\] 
+Recall $n_{rej}^{err}$ is available at runtime since rejected tasks are re-executed. We can the probably number of accepted erroneous tasks as follows:
+\[
+	n_{acc}^{err}\prime = n_{task}^{err}\prime - n_{rej}^{err}
+\]
+
+\subsubsection {Estimating the Error Bounds}
+The outlier detector tracks the bounds $[f_{min}, f_{max}]$ of each task output. Since errors must fall in outlier detector bound to be accepted, we may estimate the maximum error as:\\
+\[
+	f_{max} - f_{min}
+\]
+Therefore, the average error of a particular output across all tasks is:\\
+\[
+	\bar e_{out} = (f_{max} - f_{min}) \cdot \frac {n_{acc}^{err}\prime} {n_{task}}
+\]
+
+\subsection {Predicted Error Table}
+
+\begin {table*}[t]
+\centering
+\begin{tabular}{c|ccccc}
+	\multirow{2}{*}{Benchmark} & Predicted  & Actual & \multirow{2}{*}{Output} & Maximum\\
+	 &  Accepted Errors (p) & Accepted Errors &  &  Output Error (E)\\
+	\hline
+	\multirow{3}{*}{scale} & \multirow{3}{*}{0.346\%} & \multirow{3}{*}{0.091\%} & red & 250.962\\
+	&  &  & green & 255.000\\
+	&  &  & blue & 255.000\\
+	\hline
+	\multirow{1}{*}{blackscholes} & \multirow{1}{*}{0.309\%} & \multirow{1}{*}{0.134\%} & price & 27.148\\
+	\hline
+	\multirow{8}{*}{barnes} & \multirow{8}{*}{0.201\%} & \multirow{8}{*}{0.133\%} & vel[0] & 62.951\\
+	&  &  & vel[1] & 59.416\\
+	&  &  & vel[2] & 62.379\\
+	&  &  & acc[0] & 523.376\\
+	&  &  & acc[1] & 581.120\\
+	&  &  & acc[2] & 483.629\\
+	&  &  & siz & 0.00\\
+	&  &  & phi & 6682.954\\
+	\hline
+	\multirow{18}{*}{water/intermol} & \multirow{18}{*}{1.327\%} & \multirow{18}{*}{0.414\%} & res1[0] &0.0130\\
+	&  &  & res1[1] & 0.0286\\
+	&  &  & res1[2] & 0.00547\\
+	&  &  & res1[3] & 0.00609\\
+	&  &  & res1[4] & 0.00581\\
+	&  &  & res1[5] & 0.00498\\
+	&  &  & res1[6] & 0.0103\\
+	&  &  & res1[7] &0.0207\\
+	&  &  & res1[8] & 0.00742\\
+	&  &  & res2[0] & 0.00734\\
+	&  &  & res2[1] & 0.0217\\
+	&  &  & res2[2] & 0.00952\\
+	&  &  & res2[3] & 0.00734\\
+	&  &  & res2[4] & 0.00672\\
+	&  &  & res2[5] & 0.00357\\
+	&  &  & res2[6] & 0.00874\\
+	&  &  & res2[7] & 0.0295\\
+	&  &  & res2[8] &0.00789 \\
+	&  &  & incr & 0.0325\\
+	&  &  & ranki & 998.000\\
+	&  &  & rankj & 998.000\\
+	
+	\hline
+	\multirow{3}{*}{water/poteng} & \multirow{3}{*}{12.103\%} & \multirow{3}{*}{4.285\%} & res[0] & 0.000\\
+	&  &  & res[1] & 0.113\\
+	&  &  & res[2] & 0.00126\\
+	
+\end{tabular}
+\label{fig:fnpred}
+\caption{Error bounds analysis.}
+\end{table*}
+
+\subsection {Outlier Detector Quality Table}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\begin{tabular}{c|ccccc|}
+	          & Accepted & Rejected & Accepted    & Rejected  &  \\
+	Benchmark & Correct & Correct &  Error        &  Error & Re-Executed \\
+	\hline
+	scale & 97.875\% & 0.915\% &  0.091\% &1.118\% & 2.034\%\\
+	blackscholes & 98.611\% &0.997\%   &0.134\%  &  1.254\%& 1.254 \% \\
+	water & 96.578\% & 0.788\% & 1.166\% & 1.467 \% & 2.25\%\\
+	barnes & 96.704\% & 3.028\% & 0.134\% & 0.134\% & 3.162\%\\
+\end{tabular}
+\caption {control-based outlier detector quality }
+\label{tbl:outlier}
+\end{table*}
+
+\subsection {Output Quality Table}
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\begin{tabular}{l|lll}
+	benchmark & no outlier detector & outlier detector/re-execution & outlier detector/discard\\
+	\hline
+	scale [PSNR] & 28.1601 & 43.9167 & 23.1269\\
+	blackscholes [portfolio error] &$6.042\cdot 10^{34}$\% &  $8.075 \cdot 10^{-2}$ \% & 0.513 \%\\
+	water [position error] & nan* & $7.100 \cdot 10^{-4}$ \% & $2.415 \cdot 10^{147}$\%** \\
+	barnes [position error]& 0.699\% & 0.125\% & 0.046\%\\
+\end{tabular}
+\caption {output quality without, with control outlier detector. (*) after the first time step, all positions go to nan. (**) spurious nans as positions, a few bad values badly skew the output.}
+\label{tbl:replace}
+\end {table*}
+
+\subsection {Energy Table}
+\begin{table*}[t]
+\centering
+\footnotesize
+\begin{tabular}{l|llll}
+	benchmark & \% main computation & \% reliable re-execution & \% unreliable tasks (0.85* something) & total\\
+	\hline
+	scale & 22 & 23 & 24 & 25\\
+	blackscholes & 32 & 33 & 34 & 35\\
+	water & 42 & 43 & 44 & 45\\
+	barnes & 42 & 43 & 44 & 45 \\
+\end{tabular}
+\caption {Energy Savings}
+\label{tbl:energy}
+\end{table*}
+\subsubsection {Raw Data}
+\subsection {Control System Based Outlier Detector}
+PID control:\\
+\subsubsection {Initial Step: Seeding the Outlier Detector}
+1. Reject the first n tasks - find the mean and standard deviation of the outputs ($\mu, \sigma$)\\
+2. update the $mean=\mu,l=\sigma,r=\sigma$. the effective bounds this detector accepts is: [$\mu-l, \mu+r$]\\
+3. After n tasks have been used to get an initial $l,r$ and $m$ for the control system, we move to the control phase.
+\subsubsection {Control System}
+We have two distinct control systems, the left-bound control system, which impacts bound parameter $l$ and the right bound control system, which impacts bound parameter $r$. 
+
+Continuous version:\\
+$\mu(t) = K_p r_e + K_i \int r_e + K_d \frac {\delta} {\delta t} r_e$\\
+Discretized version:\\
+given new re-execution rate error $r_e$, previous state ($r_e^*, r_d^*, r_i^*$), the error, error derivative, error integral. Also given decay D=0.99.\\
+$\mu(t) = K_p r_e + K_i (r_e + D \cdot r_i^*) + (r_e - r_e^*)$\\
+
+\end{document}

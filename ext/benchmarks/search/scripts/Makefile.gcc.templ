@@ -1,0 +1,18 @@
+
+OBJS = search.o
+CFLAGS +=  $(EXTRAFLAGS)
+
+.PHONY: clean
+
+CFLAGS += -Wno-unused-result 
+
+search: $(OBJS)
+	mkdir -p $(OUT)
+	gcc $(CFLAGS) -o $(OUT)/$@ $^ $(DEFAULTLIBS)
+	mv *.o $(OUT)
+
+search.o: search.c
+	gcc $(CFLAGS) -o search.o -c search.c 
+ 	
+clean:
+	rm -f $(OUT)/*

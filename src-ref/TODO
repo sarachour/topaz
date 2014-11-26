@@ -1,0 +1,26 @@
+TODO:
+- Barnes: Add build-tree task.
+- Add struct/class task param addition
+- Add log analysis for barnes, water
+	- convert barnes to ptr.
+- Fix: Segfault in matrix-arr-acc.
+- add timeouts, keepalive messages
+- Resend failed data functionality (worker sends response).  [Assuming no dropped messages]
+- Handle MPI status messages.  [Assuming no dropped messages]
+
+FINISHED
+- Fix Logging [FINISHED]
+- add hardware fault model. [FINISHED]
+- add log analysis for blackscholes, search, scale [FINISHED]
+# 1/03
+- Change loc [FINISHED]
+- Send/Recieve to particular location [FINISHED]
+- actually update individual process running counts. [FINISHED]
+- Change recieve to non-blocking [FINISHED]
+- Variable size input message [FINISHED]
+- Adjust message size to input/output buf size [FINISHED]
+- Dynamic Hashtable [FINISHED]
+- Handle program end. [FINISHED]
+- Realloc mem loc [FINISHED]
+- Fix: Barnes-Hut
+- Adapt: Black-scholes, search

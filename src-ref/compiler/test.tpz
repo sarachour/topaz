@@ -1,0 +1,57 @@
+#include "stdlib.h"
+#include "stdio.h"
+#define M 200
+#define N 100
+
+float sumarr(float * origarray){
+	float sumres=0;
+	int chnksize;
+	taskset sumarr (i=0; i < N; i+=1)
+	{
+		before{
+			chnksize = M < N*(M-i);
+		}
+		task in(float mat[M] = &origarray[i*M] ;int siz=M) out(float res=0; char res2)
+		{
+			int j=0; 
+			res = 0;
+			for(j=0; j < siz; j++){
+				res += mat[j];
+			}
+		}
+		accept{
+			printf("%d\n", i);
+			assert(res <= 50);
+		}
+		reject{
+			assert(res < 0);
+		}
+		auto(res2,  res )
+		reduce
+		{
+			sumres += res;
+		}
+		single(yes){}
+		
+	}
+	return sumres;
+}
+
+int topaz_main(topaz_info * topaz, int argv, char ** argc){
+
+	float arr[N*M];
+	int i; int j;
+	float sum=0;
+	printf("populating array\n");
+	for(i=0; i < N; i++){
+		for(j=0; j < M; j++){
+			arr[i*M+j] = ((float) rand())/RAND_MAX;
+			sum += arr[i*M+j];
+		}
+	}
+	printf("computing array\n");
+	float computed;
+	computed = sumarr(arr);
+	printf("Actual: %f, Computed %f\n", sum, computed); 
+
+}

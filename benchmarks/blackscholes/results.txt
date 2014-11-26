@@ -1,0 +1,71 @@
+# MINERVA 6
+	> WHOLE PROGRAM ERROR
+Successfully Read: 32770, Failed on: 0
+
+mean 0.329368
+
+std 0.330206
+
+max 2.300000
+
+	> TASK ERROR
+Successfully Read: 32770, Failed on: 0
+
+mean 0.326560
+
+std 0.325257
+
+max 2.300000
+
+# MINERVA 6 - UMEM 4
+	> WHOLE PROGRAM ERROR
+	** SEGFAULTED **
+Successfully Read: 32770, Failed on: 0
+
+mean 0.464366
+
+std 1.783564
+
+max 202.450000
+
+	> TASK ERROR
+Successfully Read: 32770, Failed on: 0
+
+mean 0.464366
+
+std 1.783564
+
+max 202.450000
+
+# WITHOUT OUTLIER ERROR
+Successfully Read: 32770, Failed on: 0
+
+mean 0.464366
+
+std 1.783564
+
+max 202.450000
+
+# WITH OUTLIER ERROR [FILL]
+Successfully Read: 32770, Failed on: 0
+
+mean 0.442592
+
+std 0.497714
+
+max 18.200000
+
+# WITH OUTLIER ERROR [DISCARD]
+
+mean 0.439630
+
+std 0.459907
+
+max 18.200000
+
+
+========== Instruction Mix
+
+FP Count: 68596530	0.0789651
+MEM CORRUPTION Count:0
+NON-Instrumented Count:800097566	0.921035

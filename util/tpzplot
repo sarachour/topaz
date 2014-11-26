@@ -1,0 +1,77 @@
+#!/usr/bin/python 
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import math
+import sys
+
+'''
+Plotting format:
+{
+   plot1 : {
+		series1: {color:r|o|b, marker:x|o|^, x:[], y:[], z:[]}
+		series2: ...
+   }
+
+}
+
+
+'''
+def subplot(sp, name, data):
+	sp.clear();
+	sp.set_title(name);
+	i=0;
+	color=['r','k','b'];
+	marker=['+','x','-'];
+	for series_name in data:
+		series = data[series_name];
+		print series_name
+		print series['marker'], series['color']
+		#print series['x'],series['y'],series['z']
+		if(series['marker'] == 'o'):
+				series['marker'] = "+"
+		sp.scatter(series['x'], series['y'], series['z'], c=color[i], s=50, marker=marker[i]);
+		i+=1;
+		
+def create_plot(data):
+	res = {};
+	fig = plt.figure();
+	res['fig'] = fig;
+	res['subfigs'] = {};
+	i=1;
+	c=math.ceil(math.sqrt(len(data)));
+	r=math.ceil(math.sqrt(len(data)));
+	for subfig in data:
+		print r,c,i,len(data)
+		subp = fig.add_subplot(r,c,i, projection='3d');
+		subplot(subp, subfig, data[subfig]);
+		res['subfigs'][subfig] = subp;
+		i+=1;
+	return res;
+	
+def update_plot(res, data, name):
+	for subfig in data:
+		subp = res['subfigs'][subfig]
+		subplot(subp, subfig, data[subfig])
+	plt.savefig(name);
+	
+
+
+
+filename = sys.argv[1]
+file = open(filename, 'r');
+datstr=file.read();
+file.close();
+datstr = datstr.replace('\n', ' ');
+
+data=eval(datstr);
+
+
+n=len(data);
+keys=data.keys();
+q = create_plot(data[keys[0]]);
+
+for i in range(0,n):
+	update_plot(q, data[keys[i]], "frame"+str(i));
+	
+

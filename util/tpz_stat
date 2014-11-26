@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+import sys
+from os import listdir
+from os.path import isfile, join
+
+import os
+
+if(len(sys.argv) <= 2):
+	print "usage: FILE id#"
+	exit(1)
+
+path = sys.argv[1];
+o_id = int(sys.argv[2]);
+label = "Task "+str(o_id)
+
+def read_file(file):
+	TRAIN = 0
+	TEST_OK = 1
+	TEST_BAD = 2
+	CORRECT = 3
+	
+	f = open(file,'r')
+	data = {0:{}, 1:{}};
+	data[0]["gen"] = {"acc":0.0, 'hwerr':0.0, "err":0.0, "total":0.0, "err-rej":0.0, "corr-rej":0.0};
+	data[1]["gen"] = {"acc":0.0, 'hwerr':0.0, "err":0.0, "total":0.0, "err-rej":0.0, "corr-rej":0.0};
+
+	for l in f:
+		try:
+			fields = l.split("\t");
+			f_id = int(fields[1]);
+			f_mach = 1;
+			if(f_mach != 1):
+				f_mach = 1;
+			
+			if(f_id == o_id):
+				acc = int(fields[4]);
+				err = int(fields[5]);
+				if(len(fields) >= 13):
+					hwerr = float(fields[12]);
+				else:
+					raise ValueError;
+					
+				data[f_mach]["gen"]["acc"] += acc;
+				data[f_mach]["gen"]["err"] += err;
+				if(acc == 0 and err == 1):
+					data[f_mach]["gen"]["err-rej"] += 1.0;
+				if(acc == 0 and err == 0):
+					data[f_mach]["gen"]["corr-rej"] += 1.0;
+				if(hwerr > 0):
+					data[f_mach]["gen"]["hwerr"] += 1.0;
+				data[f_mach]["gen"]["total"] += 1.0;
+				
+		except ValueError:
+			print "skipping line."
+	return data;
+
+def stats(d):
+	m = d[0]['data'][0]['gen'];
+	w = d[0]['data'][1]['gen'];
+	
+	
+	worker = float(w["total"]);
+	main = float(m["total"]);
+	accepted = float(w["acc"])
+	error = float(w["err"]);
+	hwerr = float(w["hwerr"]);
+	err_rej = float(w["err-rej"]);
+	corr_rej =  float(w["corr-rej"]);
+	
+	total = float(w["total"] + m["total"]);
+	
+	print "Number Tasks:", total
+	print "Worker Tasks:", worker
+	print "	Accepted Tasks:", accepted
+	print "	Errorneous Tasks:", error
+	print "	Actual Erroneous Tasks:", hwerr
+	print "	Rejected-Error Tasks:", err_rej
+	print "Main Tasks:", main
+	
+	print "Percent Re-executed Tasks:", (100.0 - accepted/worker*100.0)
+	print "Percent Errorneous Tasks:",  (error/worker*100.0);
+	print "Percent Actual Errorneous Tasks:",  (hwerr/worker*100.0);
+	print "Percent Rejected Errorneous Tasks:",  (err_rej/worker*100.0);
+	print "Percent Rejected Correct Tasks:",  (corr_rej/worker*100.0);
+		
+def read():
+	profile_list = {};
+	for f in listdir(path):
+		if isfile(join(path,f)):
+			profile = {};
+			if((f.split('.')[0]) == "task"):
+				profile["path"] = join(path,f)
+				profile["id"] = int(f.split('.')[1]);
+				profile["data"] = read_file(join(path,f));
+				profile_list[profile["id"]] = profile;
+				#print profile_list.keys();
+		#print profile_list
+	return profile_list;
+
+#plt.show();
+data = read()
+print data
+info = stats(data);
+

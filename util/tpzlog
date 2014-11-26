@@ -1,0 +1,121 @@
+#!/bin/bash
+IN=$1
+
+rm -rf .tmp
+mkdir .tmp
+
+echo "--- Splitting ---"
+split -l 1000000 -d $IN .tmp/dat_ 
+echo "--- Splitted ---"
+CNT=$(ls .tmp | wc -l)
+
+I=1
+TP=0
+FN=0
+FPS=0
+TNS=0
+FPN=0
+TNN=0
+ICW=0
+ICM=0
+MEMW=0
+MEMRW=0
+MEMWW=0
+REEXEC=0
+BASE=0
+TOTAL=0
+for fil in $(ls .tmp)
+do
+	echo "$I/$CNT"
+	ADATA=$(cat .tmp/$fil)
+	DATA=$(echo "$ADATA" | grep -v "^0")
+	RDATA=$(echo "$ADATA" | grep "^0")
+	
+	CTP=$(echo "$DATA" | cut -f5 | grep "1" | wc -l)
+	CFN=$(echo "$DATA" | cut -f6 | grep "1" | wc -l)
+	CFPS=$(echo "$DATA" | cut -f7 | grep "1" | wc -l)
+	CTNS=$(echo "$DATA" | cut -f8 | grep "1" | wc -l)
+	CFPN=$(echo "$DATA" | cut -f9 | grep "1" | wc -l)
+	CTNN=$(echo "$DATA" | cut -f10 | grep "1" | wc -l)
+	CICW=$(echo "$DATA" | cut -f19 | tail -n +2 | paste -sd+ | bc );
+	CICM=$(echo "$RDATA" | cut -f19  | tail -n +2 | paste -sd+ | bc);
+	
+	MEM_ERR=$(echo "$DATA" | cut -f13  | tail -n +2 | paste -sd+ | bc);
+	MEM_READ=$(echo "$DATA" | cut -f15  | tail -n +2 | paste -sd+ | bc);
+	MEM_WRITE=$(echo "$DATA" | cut -f16  | tail -n +2 | paste -sd+ | bc);
+	MEM_BOTH=$(echo "$DATA" | cut -f17  | tail -n +2 | paste -sd+ | bc);
+	
+	CTOTAL=$(echo "$ADATA" | wc -l)
+	CREEXEC=$(echo "$RDATA" | wc -l)
+	CBASE=$(echo "$DATA"| wc -l);
+	
+	TP=$(echo "$TP + $CTP" | bc -l)
+	FN=$(echo "$FN + $CFN" | bc -l)
+	FPS=$(echo "$FPS + $CFPS" | bc -l)
+	TNS=$(echo "$TNS + $CTNS" | bc -l)
+	FPN=$(echo "$FPN + $CFPN" | bc -l)
+	TNN=$(echo "$TNN + $CTNN" | bc -l)
+	
+	ICW=$(echo "$ICW + $CICW" | bc -l)
+	ICM=$(echo "$ICM + $CICM" | bc -l)
+	MEMW=$(echo "$MEMW + $MEM_BOTH" | bc -l)
+	MEMRW=$(echo "$MEMRW + $MEM_READ" | bc -l)
+	MEMWW=$(echo "$MEMWW + $MEM_WRITE" | bc -l)
+	TOTAL=$(echo "$TOTAL + $CTOTAL" | bc -l)
+	BASE=$(echo "$BASE + $CBASE" | bc -l)
+	REEXEC=$(echo "$REEXEC + $CREEXEC" | bc -l)
+	
+	I=$(echo "$I+1" | bc -l);
+	
+	echo "####    ######"
+	echo "True Positive [Err]: $TP"
+	echo "False Negative [Err]: $FN"
+	echo "False Positive [Sil]: $FPS"
+	echo "True Negative [Sil]: $TNS"
+	echo "False Positive [None]: $FPN"
+	echo "True Negative [None]: $TNN"
+	echo "----------"
+	echo "IC Worker: $ICW"
+	echo "IC Main: $ICM"
+	echo "IC MEM Worker: $MEMW"
+	echo "IC MEM Read Worker: $MEMRW"
+	echo "IC MEM Write Worker: $MEMWW"
+	echo "----------"
+	echo "Base: $BASE"
+	echo "ReExec: $REEXEC"
+	echo "TOTAL: $TOTAL"
+done
+PREEXEC=$(echo "$REEXEC/$BASE*100" | bc -l)
+PTP=$(echo "$TP/($BASE)*100" | bc -l)
+PFN=$(echo "$FN/($BASE)*100" | bc -l)
+PFP=$(echo "($FPS + $FPN)/($BASE)*100" | bc -l)
+PTN=$(echo "($TNS + $TNN)/($BASE)*100" | bc -l)
+PMEM=$(echo "$MEMW/$BASE" | bc -l)
+echo "#########################"
+echo "#########################"
+echo "#########################"
+echo "True Positive [Err]: $TP"
+echo "False Negative [Err]: $FN"
+echo "False Positive [Sil]: $FPS"
+echo "True Negative [Sil]: $TNS"
+echo "False Positive [None]: $FPN"
+echo "True Negative [None]: $TNN"
+echo "----------"
+echo "Percent Re-exec: $PREEXEC"
+echo "Percent TP: $PTP"
+echo "Percent FN: $PFN"
+echo "Percent FP: $PFP"
+echo "Percent TN: $PTN"
+echo "----------"
+echo "IC Worker: $ICW"
+echo "IC Main: $ICM"
+echo "MEM ERRS: $MEMW"
+echo "IC MEM Read Worker: $MEMRW"
+echo "IC MEM Write Worker: $MEMWW"
+echo "AVG Mem Errs per Task: $PMEM"
+echo "----------"
+echo "Base: $BASE"
+echo "ReExec: $REEXEC"
+echo "TOTAL: $TOTAL"
+
+rm -rf .tmp

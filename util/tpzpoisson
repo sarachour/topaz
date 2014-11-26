@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+from scipy.stats import poisson
+import sys
+
+op = sys.argv[1]
+inp = float(sys.argv[2]);
+lmb = float(sys.argv[3]);
+
+if op == 'i':
+	N = poisson.ppf(inp, lmb, 0.0)
+	print "likely:",N
+
+if op == 'f':
+	prob=poisson.cdf(inp,lmb,0.0);
+	print "prob:",prob
