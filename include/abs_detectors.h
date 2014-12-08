@@ -71,41 +71,47 @@ class AbsDetector{
 
 #define MAX_REGIONS 5
 #define WINDOW 1000.0
-typedef struct REGION_T{
-	float * min;
-	float * max;
-	float * center;
-	//the error probability of training data
-	float p_train_err;
-	float p_train_corr;
-	float p_train_total;
-	float p_train_n;
-	//the correct probability of training data.
-	float p_test_err;
-	float p_test_corr;
-	float p_test_total;
-	float p_test_n;
-} region_t;
-typedef struct NEG_REGION_T {
-	float p_test_err;
-	float p_test_corr;
-	float p_test_total;
-	float p_test_n;
-	float p_train_err;
-	float p_train_corr;
-	float p_train_total;
-	float p_train_n;
-} env_t;
-typedef struct GLBL_STATS_T{
-	float n_acc;
-	float n_rej;
-	float n_true;
-	float n_false;
-	float n_total_train;
-	float n_total_test;
-} stats_t;
+#define FRAC_WINDOW (1.0/WINDOW)
+#define FRAC_REST_WINDOW (1.0 - FRAC_WINDOW)
 
 class AbsScarRegionDetector : public AbsDetector {
+	
+		typedef struct REGION_T{
+			float * min;
+			float * max;
+			//weighted center of region
+			float * center; 
+			//number of points that fall in region.
+			float mass;
+			//the error probability of training data
+			float p_train_err;
+			float p_train_corr;
+			float p_train_total;
+			float p_train_n;
+			//the correct probability of training data.
+			float p_test_err;
+			float p_test_corr;
+			float p_test_total;
+			float p_test_n;
+		} region_t;
+		typedef struct NEG_REGION_T {
+			float p_test_err;
+			float p_test_corr;
+			float p_test_total;
+			float p_test_n;
+			float p_train_err;
+			float p_train_corr;
+			float p_train_total;
+			float p_train_n;
+		} env_t;
+		typedef struct GLBL_STATS_T{
+			float n_acc;
+			float n_rej;
+			float n_true;
+			float n_false;
+			float n_total_train;
+			float n_total_test;
+		} stats_t;
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
 		env_t * environment; //rest of distribution
 		stats_t stats;
@@ -126,6 +132,8 @@ class AbsScarRegionDetector : public AbsDetector {
 		bool test_point(float * d);
 		
 		void record(int cat);
+		void contract_region(region_t * region);
+		
 	public:
 		AbsScarRegionDetector(int n);
 		~AbsScarRegionDetector();
@@ -135,8 +143,41 @@ class AbsScarRegionDetector : public AbsDetector {
 		void print();
 };
 
-
 class AbsSolidRegionDetector : public AbsDetector {
+			
+		typedef struct REGION_T{
+			float * min;
+			float * max;
+			float * center;
+			//the error probability of training data
+			float p_train_err;
+			float p_train_corr;
+			float p_train_total;
+			float p_train_n;
+			//the correct probability of training data.
+			float p_test_err;
+			float p_test_corr;
+			float p_test_total;
+			float p_test_n;
+		} region_t;
+		typedef struct NEG_REGION_T {
+			float p_test_err;
+			float p_test_corr;
+			float p_test_total;
+			float p_test_n;
+			float p_train_err;
+			float p_train_corr;
+			float p_train_total;
+			float p_train_n;
+		} env_t;
+		typedef struct GLBL_STATS_T{
+			float n_acc;
+			float n_rej;
+			float n_true;
+			float n_false;
+			float n_total_train;
+			float n_total_test;
+		} stats_t;
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
 		env_t * environment; //rest of distribution
 		stats_t stats;

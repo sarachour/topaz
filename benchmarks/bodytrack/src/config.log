@@ -35,7 +35,7 @@ PATH: /sbin
 PATH: /bin
 PATH: /usr/games
 PATH: /usr/local/games
-PATH: /mnt/hgfs/sachour/Documents/git/research/topaz/emul/siACT/tool/pin-2.12-58423-gcc.4.4.7-linux
+PATH: /mnt/hgfs/sachour/Documents/git/research/topaz/emul/siact/tool/pin-2.12-58423-gcc.4.4.7-linux
 PATH: /mnt/hgfs/sachour/Documents/git/research/topaz/util
 PATH: /home/sachour/.cabal/bin
 
@@ -672,7 +672,7 @@ configure:19419: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:51:6: warning: conflicting types for built-in function 'sqrt' [enabled by default]
  char sqrt ();
       ^
-/tmp/ccxeBXoM.o: In function `main':
+/tmp/ccAkUIR6.o: In function `main':
 /mnt/hgfs/sachour/Documents/git/research/topaz/benchmarks/bodytrack/src/conftest.c:62: undefined reference to `sqrt'
 collect2: error: ld returned 1 exit status
 configure:19419: $? = 1

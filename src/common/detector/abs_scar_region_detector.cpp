@@ -33,6 +33,8 @@ void AbsScarRegionDetector::log(){
 			l->set(i,name, q->min[v]); i++;
 			sprintf(name, "%d.max", r); 
 			l->set(i,name,q->max[v]); i++;
+			sprintf(name, "%d.center", r); 
+			l->set(i,name,q->center[v]); i++;
 			sprintf(name, "%d.prob", r); 
 			l->set(i,name,prob); i++;
 		}
@@ -107,13 +109,19 @@ void AbsScarRegionDetector::print(){
 			r->p_test_err/r->p_test_n, r->p_test_corr/r->p_test_n);
 		printf("min: ");
 		for(int j=0; j < this->dim; j++){
-			printf("%e ",r->min[j]);
+			printf("%f ",r->min[j]);
 		}
 		printf("\n");
 		printf("max: ");
 		for(int j=0; j < this->dim; j++){
-			printf("%e ",r->max[j]);
+			printf("%f ",r->max[j]);
 		}
+		printf("\n");
+		printf("center: ");
+		for(int j=0; j < this->dim; j++){
+			printf("%f ",r->center[j]);
+		}
+		
 		printf("\n------\n\n");
 	}
 	printf("ENVIRONMENT\n");
@@ -140,6 +148,7 @@ void AbsScarRegionDetector::allocate_region(region_t * region, float * d){
 	region->min = new float[this->dim];
 	region->max = new float[this->dim];
 	region->center = new float[this->dim];
+	region->mass = 1.0;
 	region->p_train_err = region->p_test_err = 0;
 	region->p_train_corr = region->p_test_corr = 0;
 	region->p_train_total = region->p_test_total = 0;
@@ -195,8 +204,10 @@ void AbsScarRegionDetector::merge_regions(int id1, int id2){
 		if(r2->max[i] > r1->max[i]){
 			r1->max[i] = r2->max[i];
 		}
-		r1->center[i] = (r1->max[i] + r1->min[i])/2.0;
+		r1->center[i] = (r2->center[i]*r2->mass + r1->center[i]*r1->mass)/(r1->mass + r2->mass);
 	}
+	r1->mass = (r1->mass + r2->mass);
+	
 	r1->p_test_err = (r1->p_test_err + r2->p_test_err);
 	r1->p_test_corr = (r1->p_test_corr + r2->p_test_corr);
 	r1->p_test_n += r2->p_test_n;
@@ -264,12 +275,23 @@ int AbsScarRegionDetector::find_closest_region(int idx, float * score){
 	}
 	return id;
 }
+void AbsScarRegionDetector::contract_region(region_t * r){
+	float factor = FRAC_REST_WINDOW;
+	//scar out region.
+	for(int i=0; i < this->dim; i++){
+		r->min[i] = r->center[i] - factor*(r->center[i] - r->min[i]);
+		r->max[i] = r->center[i] + factor*(r->max[i] - r->center[i]);
+	}
+	r->mass *= FRAC_REST_WINDOW;
+}
+
 void AbsScarRegionDetector::update_test_regions(int id, bool iserr){
 	//forget behavior
 	float factor =  1.0-1.0/WINDOW;
 	for(int i=0; i < this->n_regions; i++){
 		//probability output falls in this output
 		this->regions[i]->p_test_total *= factor;
+		if(id != i) this->contract_region(this->regions[i]);
 	}
 	this->environment->p_test_total *= factor;
 	if(id >= 0){
@@ -288,25 +310,28 @@ void AbsScarRegionDetector::update_test_regions(int id, bool iserr){
 	}
 	
 }
+
 void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr){
 	
 	//forget behavior
 	for(int i=0; i < this->n_regions; i++){
 		//probability output falls in this output
-		this->regions[i]->p_train_total *= 1.0-1.0/WINDOW;
+		this->regions[i]->p_train_total *= FRAC_REST_WINDOW;
+		if(id != i) this->contract_region(this->regions[i]);
 	}
 	//we do not have a region.
 	if(id < 0){
 		env_t * e = this->environment;
 		e->p_train_err += 1.0;
 		e->p_train_n += 1.0;
-		e->p_train_total += 1.0/WINDOW;
+		e->p_train_total += FRAC_WINDOW;
 		return;
 	}
 	//we have a region
 	region_t * r = this->regions[id];
 	r->p_train_n += 1.0;
-	r->p_train_total += 1.0/WINDOW;
+	r->p_train_total += FRAC_WINDOW;
+	r->mass = r->mass*FRAC_REST_WINDOW + FRAC_WINDOW;
 	//update with most recent behavior.
 	if(iserr){
 		//probability, given it falls in output
@@ -321,7 +346,8 @@ void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr
 	for(int i=0; i < this->dim; i++){
 		if(val[i] > r->max[i]) r->max[i] = val[i];
 		else if(val[i] < r->min[i]) r->min[i] = val[i];
-		r->center[i] = (r->max[i] + r->min[i])/2.0;
+		//center of mass.
+		r->center[i] = (r->center[i]*(r->mass-1.0) + val[i])/r->mass;
 	}
 }
 bool AbsScarRegionDetector::test_point(float * d){
@@ -333,7 +359,6 @@ bool AbsScarRegionDetector::test_point(float * d){
 		isok = false;
 	}
 	if(isok){
-		region_t * r = this->regions[id];
 		isok= true;
 		this->update_test_regions(id,!isok);
 	}

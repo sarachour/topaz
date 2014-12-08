@@ -33,6 +33,8 @@ void AbsSolidRegionDetector::log(){
 			l->set(i,name, q->min[v]); i++;
 			sprintf(name, "%d.max", r); 
 			l->set(i,name,q->max[v]); i++;
+			sprintf(name, "%d.center", r); 
+			l->set(i,name,q->center[v]); i++;
 			sprintf(name, "%d.prob", r); 
 			l->set(i,name,prob); i++;
 		}

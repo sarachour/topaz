@@ -13,24 +13,11 @@ false_accept=0.0;
 true_reject=0.0;
 false_reject=0.0;
 
-id_idx=0;
-is_accept_idx = 6;
-is_corr_idx = 7;
-out_idx=3
-n_region_idx=13
-val_idx=4
-cval_idx=5
-
 
 regions = [];
 pts = {'err':[], 'corr':[], 'actual':[],'regions':[]};
 
 
- 
-log = sys.argv[1];
-prefix = sys.argv[2];
-sel_id = int(sys.argv[3]);
-flog = open(log);
 
 
 def pct(n,t):
@@ -38,9 +25,10 @@ def pct(n,t):
 		return "div-by-zero"
 	return str(round(n/t*100.0,5))+"%";
 
-def test_first(line):
+def test_first(s,h,line):
 	fields = line.split('\t');
-	if("0" in fields[out_idx] and str(sel_id) in fields[id_idx]):
+	if("0" in fields[h.index('OUT-ID')] and 
+	str(s) in fields[h.index("ID")]):
 		return 1 
 	else:
 		return 0
@@ -73,40 +61,56 @@ def plot_data(pts,name):
 			rx = pts['regions'][i][j]['x']
 			ry = pts['regions'][i][j]['y']
 			ra= pts['regions'][i][j]['p']
+			cx = pts['regions'][i][j]['cx']
+			cy = pts['regions'][i][j]['cy']
 			
 			for k in range(0,len(rx)):
 				plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
 	
 		plt.plot(px,py,"xg");
 		plt.plot(ex,ey,"^r");
+		plt.plot(cx,cy,"b");
 		plt.savefig(prefix+'.'+str(i)+".png");
 	
 	
 if(len(sys.argv) < 3):
+	print "logname graph-prefix task-id"
 	exit(1);
 
+ 
+log = sys.argv[1];
+prefix = sys.argv[2];
+sel_id = int(sys.argv[3]);
 
-num_lines = sum(test_first(line) for line in flog);
+flog = open(log);
+header = flog.readline().split('\t');
+num_lines = sum(test_first(sel_id, header,line) for line in flog);
 
 nycoords = 10000.0
 nptsperx = 10000.0
 YPROB = 1.0/max(float(num_lines)/nycoords,1.0);
 print "Finished Computing Length, Prob Accept:",num_lines,YPROB
 flog = open(log);
-t =0;
 epts = [];
 cpts = [];
+t=0;
+header = flog.readline().split('\t');
+print header;
+
+
 for line in flog:
 	try:
 		fields=line.split('\t')
-		id = int(fields[id_idx]);
-		is_accept = "y" in fields[is_accept_idx];
-		is_corr = "y" in fields[is_corr_idx];
-		out_id = int(float(fields[out_idx]));
-		n = int(float(fields[n_region_idx]));
+		id = int(fields[header.index("ID")]);
 		
 		if(id != sel_id):
 			continue;
+			
+		is_accept = "y" in fields[header.index("IS-ACCEPT")];
+		is_corr = "y" in fields[header.index("IS-CORR")];
+		out_id = int(float(fields[header.index("OUT-ID")]));
+		n = int(float(fields[header.index("n-regions")]));
+		
 		# count
 		if is_accept and is_corr:
 			true_accept+=1;
@@ -126,10 +130,10 @@ for line in flog:
 			pts['regions'].append([]);
 		
 		while n >= len(pts['regions'][out_id]):
-			pts['regions'][out_id].append({'x':[],'y':[],'p':[]})
+			pts['regions'][out_id].append({'x':[],'y':[],'p':[], 'cx':[], 'cy':[], 't':0})
 		
-		cpt=float(fields[cval_idx])
-		ept=float(fields[val_idx])
+		cpt=float(fields[header.index("CORR-VAL")])
+		ept=float(fields[header.index("VAL")])
 		#print len(cpts[out_id]),len(pts['corr'][out_id]['x'])
 		if(random.random() < YPROB):
 			if(abs(ept - cpt) < 1e-4):	
@@ -139,20 +143,20 @@ for line in flog:
 		
 		#randomly sample regions and consolidate points
 		if(random.random() < YPROB):
-			q = n_region_idx+1;
 			tregions=[];
+			
 			for i in range(0,n):
-				min_idx = q+3*i;
-				max_idx = q+3*i+1;
-				prob_idx = q+3*i+2;
-				minx = float(fields[min_idx]);
-				maxx = float(fields[max_idx]);
-				probx = float(fields[prob_idx]);
+				minx = float(fields[header.index(str(i)+".min")]);
+				maxx = float(fields[header.index(str(i)+".max")]);
+				probx = float(fields[header.index(str(i)+".prob")]);
+				cx = float(fields[header.index(str(i)+".center")]);
 				if(math.isnan(probx)):
 					probx = 0;
 				pts['regions'][out_id][i]['x'].append([minx,maxx]);
 				pts['regions'][out_id][i]['y'].append([t,t]);
 				pts['regions'][out_id][i]['p'].append(probx);
+				pts['regions'][out_id][i]['cx'].append(cx);
+				pts['regions'][out_id][i]['cy'].append(t);
 			PDENS = nptsperx/(len(cpts))
 			#print len(cpts),num_lines,YPROB,PDENS
 			for c in cpts[out_id]:
@@ -165,10 +169,10 @@ for line in flog:
 				if(random.random() < PDENS):
 					pts['err'][out_id]['x'].append(e);
 					pts['err'][out_id]['y'].append(t);
+					print e
 					
 			cpts[out_id]=[];
 			epts[out_id]=[];
-		if(out_id == 0):
 			t+=1;
 			
 	except ValueError:

@@ -62,10 +62,13 @@ extern "C" void scale(float fact, int* src, int sw, int sh, int * dest, int dw, 
 					 dest_b =  ul[2];
 				 }
 			 }
-	     transform in(int lr, int dest_r, int dest_g, int dest_b) out(int err){
+	     transform in(int lr, int dest_r, int dest_g, int dest_b) out(int ir,int ig, int ib){
 			//per pixel error
 			#define pr(x) (x)*(x)
-			err = pr(dest_r-lr[0])+pr(dest_g-lr[1])+pr(dest_b-lr[2]);
+			//err = pr(dest_r-lr[0])+pr(dest_g-lr[1])+pr(dest_b-lr[2]);
+			ir = dest_r;
+			ig = dest_g;
+			ib = dest_b;
 			
 		 }
 		 combine {
