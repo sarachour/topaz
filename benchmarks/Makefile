@@ -7,6 +7,7 @@ make-all:
 	cd blackscholes; make
 	cd bodytrack; make
 	cd streamcluster; make
+	cd imgops; make
 	
 clean:
 	cd water; make clean
@@ -14,3 +15,5 @@ clean:
 	cd blackscholes; make clean
 	cd bodytrack; make clean
 	cd streamcluster; make clean
+	cd imgops; make
+
