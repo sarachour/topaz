@@ -33,7 +33,7 @@ DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON_DETECTOR)/control_detector.o \
 		$(COMMON_DETECTOR)/detector_manager.o \
 		$(COMMON_DETECTOR)/abs_detector.o \
-		$(COMMON_DETECTOR)/abs_region_detector.o \
+		$(COMMON_DETECTOR)/abs_scar_region_detector.o \
 		$(COMMON_DETECTOR)/abs_solid_region_detector.o \
 		$(COMMON_DETECTOR)/dist_detector.o \
 		$(COMMON_DETECTOR)/distribution.o \

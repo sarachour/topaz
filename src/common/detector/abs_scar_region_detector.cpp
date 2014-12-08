@@ -5,7 +5,7 @@
 #include "topaz.h"
 //FIXME: Must leave index 0 open for err-value
 
-void AbsRegionDetector::log(){
+void AbsScarRegionDetector::log(){
 	DetectorLogInfo * l = Topaz::topaz->getDLog();
 	bool isaccepted = DetectorLogInfo::getAccepted();
 	bool iscorr = this->compare();
@@ -41,7 +41,7 @@ void AbsRegionDetector::log(){
 
 	
 }
-AbsRegionDetector::AbsRegionDetector(int n) : AbsDetector(n){
+AbsScarRegionDetector::AbsScarRegionDetector(int n) : AbsDetector(n){
 	this->dim = n;
 	this->n_regions = 0;
 	this->environment = new env_t[1];
@@ -55,7 +55,7 @@ AbsRegionDetector::AbsRegionDetector(int n) : AbsDetector(n){
 		this->regions[i] = NULL; //initialize all to null
 	}
 }
-AbsRegionDetector::~AbsRegionDetector(){
+AbsScarRegionDetector::~AbsScarRegionDetector(){
 	for(int i=0; i < this->max_regions; i++){
 		if(this->regions[i] != NULL){
 			delete this->regions[i];
@@ -65,7 +65,7 @@ AbsRegionDetector::~AbsRegionDetector(){
 	this->clean();
 }
 #define WEIGHT 0.999
-bool AbsRegionDetector::test(){
+bool AbsScarRegionDetector::test(){
 	if(AbsDetector::getMode() ==  ABS_DETECTOR_KEY) return true;
 	bool res =  this->test_point(this->data);
 	//update running statistics
@@ -78,7 +78,7 @@ bool AbsRegionDetector::test(){
 	//printf("test: %f %s -> pct-rej:%f\n", this->data[0], res ? "accept" : "reject", this->stats.n_rej/this->stats.n_total_test);
 	return res;
 }
-bool AbsRegionDetector::train(){
+bool AbsScarRegionDetector::train(){
 	if(AbsDetector::getMode() ==  ABS_DETECTOR_KEY) return true;
 	bool corr = this->compare();
 	
@@ -95,7 +95,7 @@ bool AbsRegionDetector::train(){
 	if(!corr) this->insert_point(this->data_key,true);
 	return true;
 }
-void AbsRegionDetector::print(){
+void AbsScarRegionDetector::print(){
 	for(int i=0; i < this->n_regions; i++){
 		region_t * r = this->regions[i];
 		printf("BLOCK %d\n",i);
@@ -129,14 +129,14 @@ void AbsRegionDetector::print(){
 
 
 
-bool AbsRegionDetector::is_valid(float * val){
+bool AbsScarRegionDetector::is_valid(float * val){
 	for(int i=0; i < this->dim; i++){
 		if(isNaN(val[i]) || isInf(val[i]) || isNegInf(val[i])) 
 			return false;
 	}
 	return true;
 }
-void AbsRegionDetector::allocate_region(region_t * region, float * d){
+void AbsScarRegionDetector::allocate_region(region_t * region, float * d){
 	region->min = new float[this->dim];
 	region->max = new float[this->dim];
 	region->center = new float[this->dim];
@@ -148,16 +148,15 @@ void AbsRegionDetector::allocate_region(region_t * region, float * d){
 		region->min[i] = region->max[i] = region->center[i] = d[i];
 	}
 }
-void AbsRegionDetector::deallocate_region(region_t * region){
+void AbsScarRegionDetector::deallocate_region(region_t * region){
 	delete region->min;
 	delete region->max;
 	delete region->center;
 }
 
-int AbsRegionDetector::find_region(float * d, float * score){
+int AbsScarRegionDetector::find_region(float * d){
 	int idx = -1;
-	*score = 0;
-	float size = -1;
+	float score = -1;
 	for(int i=0; i < this->n_regions; i++){
 		region_t * region = this->regions[i];
 		bool is_idx = true;
@@ -176,27 +175,17 @@ int AbsRegionDetector::find_region(float * d, float * score){
 			if(region->min[j] > d[j] || region->max[j] < d[j])
 				is_idx = false;
 		}
-		tmp_score = sqrt(area/dist);
-		if(is_idx){
-			if(size < 0 || area < size){
-				*score = 1;
-				size = area;
+		//used to just be smallest area.
+		tmp_score = 1/area;
+		if(is_idx && (idx < 0 || tmp_score > score)){
 				idx = i;
-			}
-		}
-		else{
-			//compute distance and normalizing factor.
-			//the score is the 1/(distance/scale);
-			if(idx == -1 || (*score < tmp_score && size == -1)){
-				idx = i;
-				*score = tmp_score;
-			}
+				score = tmp_score;
 		}
 	}
 	return idx;
 }
 //merge r2 into r1
-void AbsRegionDetector::merge_regions(int id1, int id2){
+void AbsScarRegionDetector::merge_regions(int id1, int id2){
 	region_t * r1 =	this->regions[id1];
 	region_t * r2 = this->regions[id2];
 	for(int i=0; i < this->dim; i++){
@@ -231,7 +220,7 @@ void AbsRegionDetector::merge_regions(int id1, int id2){
 /* We want to merge nearby regions with a good score
  * 
  */
-float AbsRegionDetector::score_region(region_t * r1, region_t * r2){
+float AbsScarRegionDetector::score_region(region_t * r1, region_t * r2){
 	float distance = 0;
 	//compute the distance
 	for(int j=0; j < this->dim; j++){
@@ -260,7 +249,7 @@ float AbsRegionDetector::score_region(region_t * r1, region_t * r2){
 	
 	return score;
 }
-int AbsRegionDetector::find_closest_region(int idx, float * score){
+int AbsScarRegionDetector::find_closest_region(int idx, float * score){
 	region_t * region = this->regions[idx];
 	int id = -1;
 	for(int i=0; i < this->n_regions; i++){
@@ -275,7 +264,7 @@ int AbsRegionDetector::find_closest_region(int idx, float * score){
 	}
 	return id;
 }
-void AbsRegionDetector::update_test_regions(int id, bool iserr){
+void AbsScarRegionDetector::update_test_regions(int id, bool iserr){
 	//forget behavior
 	float factor =  1.0-1.0/WINDOW;
 	for(int i=0; i < this->n_regions; i++){
@@ -299,7 +288,7 @@ void AbsRegionDetector::update_test_regions(int id, bool iserr){
 	}
 	
 }
-void AbsRegionDetector::update_train_regions(int id, float * val, bool iserr){
+void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr){
 	
 	//forget behavior
 	for(int i=0; i < this->n_regions; i++){
@@ -335,33 +324,17 @@ void AbsRegionDetector::update_train_regions(int id, float * val, bool iserr){
 		r->center[i] = (r->max[i] + r->min[i])/2.0;
 	}
 }
-bool AbsRegionDetector::test_point(float * d){
-	float score;
+bool AbsScarRegionDetector::test_point(float * d){
 	bool isok = true;
-	int id = find_region(d, &score); // find the closest scoring info.
+	int id = find_region(d); // find the closest scoring info.
 	//printf("test: %f grp:%d score:%f\n", d[0], id, score);
 	//printf("score: %f\n", score);
 	if(!this->is_valid(d) || id < 0){
 		isok = false;
 	}
-	if(isok &&rand_norm() <= score){
+	if(isok){
 		region_t * r = this->regions[id];
-		//probability, given this event happens, that this event is an error.
-		//basically, the true positive rate.
-		float prob = r->p_train_err/r->p_train_n*r->p_test_err/r->p_test_n;
-		if(isNaN(prob)) prob = 0;
-		else if(isInf(prob)) prob = 1;
-		//printf("train| test-err:%f	train-err:%f min:%f , max:%f\n",r->p_test_err/r->p_test_n, r->p_train_err/r->p_train_n, r->min[0],r->max[0]);
-		if(rand_norm() > prob){
-			/*
-			printf("accept %f (id=%d, bnd=[%f,%f] prob=%f, score=%f)\n",data[0],id,
-				regions[id]->min[0], regions[id]->max[0],prob, score);
-			*/
-			isok= true;
-		}
-		else {
-			isok= false;
-		}
+		isok= true;
 		this->update_test_regions(id,!isok);
 	}
 	else {
@@ -372,20 +345,14 @@ bool AbsRegionDetector::test_point(float * d){
 		
 	return isok;
 }
-void AbsRegionDetector::insert_point(float * d, bool iserr){
+void AbsScarRegionDetector::insert_point(float * d, bool iserr){
 	if(!this->is_valid(d)) return;
 	/*
 	 * try and optimistically find a region the float belongs to
 	 */
-	float score;
-	int id = find_region(d, &score);
-	//printf("train: %f grp:%d score:%f\n", d[0], id, score);
-	/*v
-	 * Probabilistically choose whether we should extend an existing group 
-	 * or create a new group.
-	 */
+	int id = find_region(d);
 	// case: update an existing a group
-	if(id >= 0 && (score == 1.0 || rand_norm() <= score)){
+	if(id >= 0){
 		this->update_train_regions(id,d,iserr); //updates statistics.
 		return;
 	}
@@ -408,7 +375,7 @@ void AbsRegionDetector::insert_point(float * d, bool iserr){
 		//completely obstructed by another region.
 		int merge_1=-1;
 		int merge_2=-1;
-		score = 0;
+		float score = 0;
 		for(int i=0; i < this->n_regions; i++){
 			float tmp_score=0;
 			int tmp_other = find_closest_region(i, &tmp_score);

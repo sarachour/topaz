@@ -14,9 +14,8 @@ all:  checker.o \
 	  dist_detector.o \
 	  distribution.o \
 	  abs_detector.o \
-	  abs_region_detector.o \
-	  abs_solid_region_detector.o 
-
+	  abs_solid_region_detector.o \
+	  abs_scar_region_detector.o
 	
 %.o: %.cpp
 	$(CC) $(COPTS) $(INCLUDE) -o $@ -c $< 

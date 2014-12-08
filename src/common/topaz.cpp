@@ -30,6 +30,7 @@ Topaz::Topaz(int argc, char ** argv){
 	
 	
 	this->config.DETECTOR_ENABLED = false;
+	this->config.SCAR_DETECTOR_ENABLED = false;
 	this->config.CROSSDETECTOR_ENABLED = false;
 	this->config.LOG_DETECTORS_ENABLED = false;
 	this->config.SCHEDULE_ENABLED = false;
@@ -64,16 +65,14 @@ Topaz::Topaz(int argc, char ** argv){
 				i--;
 			}
 		}
-		if(strcmp(argv[i], "--cross-detector") ==0 || strcmp(argv[i], "-c") == 0)
-			this->config.CROSSDETECTOR_ENABLED=true;
+		if(strcmp(argv[i], "--scar-detector") ==0 || strcmp(argv[i], "-sc") == 0)
+			this->config.SCAR_DETECTOR_ENABLED=true;
 		if(strcmp(argv[i], "--log-detector") ==0 || strcmp(argv[i], "-l") == 0)
 			this->config.LOG_DETECTORS_ENABLED=true;
 		if(strcmp(argv[i], "--godmode") ==0 || strcmp(argv[i], "-g") == 0)
 			this->config.GODMODE_ENABLED=true;
 		if(strcmp(argv[i], "--discard") ==0 || strcmp(argv[i], "-d") == 0)
 			this->config.DISCARD_TASK=true;
-		if(strcmp(argv[i], "--prob-accept") ==0 || strcmp(argv[i], "-pa") == 0)
-			this->config.PROB_DROP_ENABLED=true;
 		if(strcmp(argv[i], "--time") ==0 || strcmp(argv[i], "-t") == 0)
 			this->config.TIMERS_ENABLED=true;
 	}

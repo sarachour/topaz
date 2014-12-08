@@ -1,6 +1,7 @@
 #include "abs_detectors.h"
 #include "util.h"
 #include "stdio.h"
+#include "topaz.h"
 
 int AbsDetector::MODE = ABS_DETECTOR_TEST;
 bool AbsDetector::compare(){
@@ -43,5 +44,13 @@ void AbsDetectorManager::init(int siz){
 	this->detectors = new AbsDetector*[siz];
 	for(int i=0; i < siz; i++){
 		this->detectors[i] = NULL;
+	}
+}
+void AbsDetectorManager::add(int taskid, int nouts){
+	if(Topaz::topaz->config.SCAR_DETECTOR_ENABLED){
+		this->detectors[taskid] = new AbsScarRegionDetector(nouts);
+	}
+	else{
+		this->detectors[taskid] = new AbsSolidRegionDetector(nouts);
 	}
 }

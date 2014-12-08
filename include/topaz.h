@@ -24,6 +24,7 @@ typedef struct CONFIG_T_M{
 	bool TIMERS_ENABLED;
 	bool PROB_DROP_ENABLED;
 	bool CROSSDETECTOR_ENABLED;
+	bool SCAR_DETECTOR_ENABLED;
 	bool PACK_FULL_TASK;
 } config_t;
 

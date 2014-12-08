@@ -105,6 +105,37 @@ typedef struct GLBL_STATS_T{
 	float n_total_test;
 } stats_t;
 
+class AbsScarRegionDetector : public AbsDetector {
+		region_t * regions[MAX_REGIONS]; //regions from the distribution
+		env_t * environment; //rest of distribution
+		stats_t stats;
+		const int max_regions = MAX_REGIONS;
+		int n_regions;
+		int dim;
+		bool is_valid(float * d);
+		void allocate_region(region_t * region, float * d);
+		void deallocate_region(region_t * region);
+		int find_region(float * d);
+		void merge_regions(int r1, int r2);
+		float score_region(region_t * r1, region_t * r2);
+		int find_closest_region(int idx, float * score);
+		//insert an output or an error
+		void update_test_regions(int id, bool iserr);
+		void update_train_regions(int id, float * val, bool iserr);
+		void insert_point(float * d, bool iserr);
+		bool test_point(float * d);
+		
+		void record(int cat);
+	public:
+		AbsScarRegionDetector(int n);
+		~AbsScarRegionDetector();
+		bool test();
+		bool train();
+		void log();
+		void print();
+};
+
+
 class AbsSolidRegionDetector : public AbsDetector {
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
 		env_t * environment; //rest of distribution
@@ -136,35 +167,6 @@ class AbsSolidRegionDetector : public AbsDetector {
 };
 
 
-class AbsRegionDetector : public AbsDetector {
-		region_t * regions[MAX_REGIONS]; //regions from the distribution
-		env_t * environment; //rest of distribution
-		stats_t stats;
-		const int max_regions = MAX_REGIONS;
-		int n_regions;
-		int dim;
-		bool is_valid(float * d);
-		void allocate_region(region_t * region, float * d);
-		void deallocate_region(region_t * region);
-		int find_region(float * d, float * score);
-		void merge_regions(int r1, int r2);
-		float score_region(region_t * r1, region_t * r2);
-		int find_closest_region(int idx, float * score);
-		//insert an output or an error
-		void update_test_regions(int id, bool iserr);
-		void update_train_regions(int id, float * val, bool iserr);
-		void insert_point(float * d, bool iserr);
-		bool test_point(float * d);
-		
-		void record(int cat);
-	public:
-		AbsRegionDetector(int n);
-		~AbsRegionDetector();
-		bool test();
-		bool train();
-		void log();
-		void print();
-};
 
 class AbsDetectorManager {
 	private:
@@ -176,7 +178,7 @@ class AbsDetectorManager {
 	    ~AbsDetectorManager();
 	    void print();
 	    void init(int siz);
-		void add(int taskid, int nouts){this->detectors[taskid] = new AbsSolidRegionDetector(nouts);}
+		void add(int taskid, int nouts);
 		void setTarget(int id, float val){this->detectors[id]->setTarget(val);}
 		//train particular output for task
 		void set(int taskid, int i, float v){this->detectors[taskid]->set(i,v);}
