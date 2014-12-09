@@ -614,7 +614,7 @@ void ensemble_init_ensemble(ensemble * e, int num){
   //ensure skratchpad is a multiple of 
   int l = lcm(AUTOICHUNKSIZE, AUTOJCHUNKSIZE);
   int rem = l - (e->numMol % l);
-  e->pad = new skratch_pad[e->numMol+rem];
+  e->pad = new skratch_pad[e->numMol+rem > MAX_MOLEC ? e->numMol+rem  : MAX_MOLEC];
 
   e->TTMV = 0.0;
   e->TVIR = 0.0;

@@ -46,46 +46,29 @@ float fastabs(float f){
 }
 
 
+#define CHUNKSIZE 5
+
 //improve by calculating by block.simparm
 void ensemble_interfLoop1(ensemble * e){
 	int i, j;
-	int m, n = e->numMol;
-	int ntasks = ((n-1)*n)/2;
-	int isiz;
-	int jsiz;
+	int n = e->numMol;
+	int ntasks = n*n;
 	i=0;
 	j=0;
 	//const char instead of char for parms
 	taskset interfLoop1(k=0; k < ntasks; k+=1){
 		before {
-			isiz = 1;
-			jsiz = 1;
-			
-			if( k > 0){
-				if(j + jsiz < n) 
-				{
-					j+= jsiz;
-					
-				}
-				else 
-				{
-					i+=isiz;
-					j=i+1;
-					if(i >= n-1) 
-						break;
-				}
-			}
-			else{
-				j=i+1;
-			}
-			
+			i = k/n;
+			j = k%n;
+			if(j <= i) continue;
 			//printf("before %d, %d, t=%d\n", i ,j, k);
 			//printf("%d,%d\n",i,j);
 		}
 		compute 
 			in (
-			   char p1[sizeof(skratch_pad)]= (char *) &e->pad[i],
-			   char p2[sizeof(skratch_pad)]= (char *) &e->pad[j],
+			   int ti=i,
+			   int tj=j,
+			   const char cmolec[sizeof(skratch_pad)*MAX_MOLEC]= (char *) e->pad,
 			   const char tparms[sizeof(simparm_t)]= (char *) parms
 			   )
 			   
@@ -93,9 +76,10 @@ void ensemble_interfLoop1(ensemble * e){
 				double Res2[9],
 				double incr)
 		{
+			skratch_pad * molecs = (skratch_pad *) cmolec;
 			parms = (simparm_t *) tparms;
-			skratch_pad * P1 = (skratch_pad *) p1;
-			skratch_pad * P2 = (skratch_pad *) p2;
+			skratch_pad * P1 = (skratch_pad *) &molecs[ti];
+			skratch_pad * P2 = (skratch_pad *) &molecs[tj];
 			double Res1Tmp[3][3];
 			double Res2Tmp[3][3];
 			incr = 0;
@@ -106,6 +90,8 @@ void ensemble_interfLoop1(ensemble * e){
 				Res1[pi] = Res1Tmp[pi/3][pi%3];
 				Res2[pi] = Res2Tmp[pi/3][pi%3];
 			}
+			P1->update_forces_1D(Res1);
+			P2->update_forces_1D(Res2);
 			//printf("task %d,%d\n", ci+ti ,cj+tj);
 			
 			
@@ -134,16 +120,15 @@ void ensemble_interfLoop1(ensemble * e){
 		}
 		combine {
 			
-			if(j > i){
-				double * u1 = Res1;
-				double * u2 = Res2;
-				skratch_pad * r1;
-				skratch_pad * r2;
-				r1 = ensemble_getPad(e,i);
-				r2 = ensemble_getPad(e,j);
-				r1->update_forces_1D(u1);
-				r2->update_forces_1D(u2);
-			}
+			double * u1 = Res1;
+			double * u2 = Res2;
+			skratch_pad * r1;
+			skratch_pad * r2;
+			r1 = ensemble_getPad(e,i);
+			r2 = ensemble_getPad(e,j);
+			r1->update_forces_1D(u1);
+			r2->update_forces_1D(u2);
+			
 			e->VIR.addval(incr);
 		}
 	}
@@ -202,44 +187,27 @@ void ensemble_potengLoop2(ensemble * e, int idx){
 void ensemble_poteng_topaz(ensemble * e){
 	int i, j;
 	int isiz, jsiz;
-	int m, n = e->numMol;
-	int ntasks = ((n-1)*n)/2;
+	int n = e->numMol;
+	int ntasks = n*n;
 	i=0;
 	j=0;
     taskset poteng(k=0; k < ntasks; k+=1){
 		before {
-			isiz = n - i - 1 < AUTOICHUNKSIZE ? n-i-1 : AUTOICHUNKSIZE;
-			jsiz = n - j < AUTOJCHUNKSIZE ? n-j : AUTOJCHUNKSIZE;
-			
-			if( k > 0){
-				if(j + jsiz < n) 
-				{
-					j+= jsiz;
-					
-				}
-				else 
-				{
-					i+=isiz;
-					j=i+1;
-					if(i >= n-1) break;
-				}
-			}
-			else{
-				j=i+1;
-			}
-			//printf("forking %d,%d\n", i, j);
-			//printf("before %d, %d, t=%d\n", i ,j, k);
-			//printf("%d,%d\n",i,j);
+			i = k/n;
+			j = k%n;
+			if(j <= i) continue;
 		}
 		compute 
 			in(
-			   char p1[sizeof(skratch_pad)]= (char *) &e->pad[i],
-			   char p2[sizeof(skratch_pad)]= (char *) &e->pad[j],
+			   int ti=i,
+			   int tj=j,
+			   const char cmolecs[sizeof(skratch_pad)*MAX_MOLEC]= (char *) e->pad,
 			   const char tparms[sizeof(simparm_t)]= (char *) parms)
 			out(double res[3])
 		{
-			skratch_pad * P1 = (skratch_pad*) p1;
-			skratch_pad * P2 = (skratch_pad*) p2;
+			skratch_pad * molecs = (skratch_pad*) cmolecs;
+			skratch_pad * P1 =  &molecs[ti];
+			skratch_pad * P2 =  &molecs[tj];
 			parms = ((simparm_t *) tparms);
 			res[0] = res[1] = res[2]=0;
 			ensemble_interPoteng2Aux(P1,P2,res);
@@ -255,9 +223,7 @@ void ensemble_poteng_topaz(ensemble * e){
 		}
 		combine{
 			//printf("poteng:%d,%d] %f %f %f\n---\n", i, j,res[0], res[1], res[2]);
-			if(j > i){
-				e->POT.vecAdd(res);
-			}
+			e->POT.vecAdd(res);
 		}
 		
 	 }

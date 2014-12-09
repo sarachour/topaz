@@ -9,6 +9,8 @@
 #define max(f1,f2) (f1 > f2? f1: f2)
 
 
+#define MAX_MOLEC 512
+
 extern FILE * en_outfile;
 extern FILE * pos_outfile;
 // -------- CONSTANT_H ---------------------------------------------------

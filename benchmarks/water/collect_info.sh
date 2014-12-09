@@ -13,8 +13,8 @@ TAGS="TAGS"
 CTRL="c"
 if [[ $FLAGS == *c* ]]
 then
-	LOGS=$LOGS" --cross-detector"
-	TAGS=$TAGS".cross"
+	LOGS=$LOGS" --scar-detector"
+	TAGS=$TAGS".scar"
 fi
 if [[ $FLAGS == *g* ]]
 then
