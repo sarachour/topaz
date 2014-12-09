@@ -291,7 +291,7 @@ void AbsScarRegionDetector::update_test_regions(int id, bool iserr){
 	for(int i=0; i < this->n_regions; i++){
 		//probability output falls in this output
 		this->regions[i]->p_test_total *= factor;
-		if(id != i) this->contract_region(this->regions[i]);
+		this->contract_region(this->regions[i]);
 	}
 	this->environment->p_test_total *= factor;
 	if(id >= 0){
@@ -317,7 +317,7 @@ void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr
 	for(int i=0; i < this->n_regions; i++){
 		//probability output falls in this output
 		this->regions[i]->p_train_total *= FRAC_REST_WINDOW;
-		if(id != i) this->contract_region(this->regions[i]);
+		this->contract_region(this->regions[i]);
 	}
 	//we do not have a region.
 	if(id < 0){
@@ -331,7 +331,7 @@ void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr
 	region_t * r = this->regions[id];
 	r->p_train_n += 1.0;
 	r->p_train_total += FRAC_WINDOW;
-	r->mass = r->mass*FRAC_REST_WINDOW + FRAC_WINDOW;
+	r->mass = r->mass >= WINDOW ? r->mass : r->mass+1;
 	//update with most recent behavior.
 	if(iserr){
 		//probability, given it falls in output
@@ -347,7 +347,7 @@ void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr
 		if(val[i] > r->max[i]) r->max[i] = val[i];
 		else if(val[i] < r->min[i]) r->min[i] = val[i];
 		//center of mass.
-		r->center[i] = (r->center[i]*(r->mass-1.0) + val[i])/r->mass;
+		r->center[i] = r->center[i] - r->center[i]/r->mass + val[i]/r->mass;
 	}
 }
 bool AbsScarRegionDetector::test_point(float * d){

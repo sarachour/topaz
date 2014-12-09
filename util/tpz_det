@@ -6,6 +6,7 @@ from os import listdir
 from os.path import isfile, join
 import random
 import math
+from numpy import array
 
 total=0.0;
 true_accept=0.0;
@@ -41,7 +42,7 @@ def colormap(value):
 	r = colors[idx]*local_frac + colors[idx+1]*(1-local_frac)
 	
 def plot_data(pts,name):
-	colors=["c","m","r","b","r","k","y","o"]
+	colors=["c","m","r","b","r","y","o"]
 	for i in range(0, len(pts['corr'])):
 		print "Plotting Output "+str(i)
 		plt.clf();
@@ -58,18 +59,27 @@ def plot_data(pts,name):
 		ex = [max(minx,min(maxx,x)) for x in ex];
 		
 		for j in range(0,len(pts['regions'][i])):
-			rx = pts['regions'][i][j]['x']
-			ry = pts['regions'][i][j]['y']
+			rmin = array(pts['regions'][i][j]['xmin'])
+			rmax = array(pts['regions'][i][j]['xmax'])
+			ry = array(pts['regions'][i][j]['y'])
 			ra= pts['regions'][i][j]['p']
-			cx = pts['regions'][i][j]['cx']
-			cy = pts['regions'][i][j]['cy']
 			
-			for k in range(0,len(rx)):
-				plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
+			plt.plot(rmin,ry,rmax,ry,"k-",lw=1,c=colors[j], alpha=0.5);
+			plt.fill_betweenx((ry),(rmin),(rmax),where=rmax>=rmin,facecolor=colors[j], alpha=0.5);
+			plt.fill_betweenx(ry,rmin,rmax,where=rmax<=rmin,facecolor='black');
+			
+			#for k in range(0,len(rx)):
+			#	plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
+
 	
-		plt.plot(px,py,"xg");
-		plt.plot(ex,ey,"^r");
-		plt.plot(cx,cy,"b");
+		plt.plot(px,py,"xg",alpha=0.4);
+		plt.plot(ex,ey,"^r",alpha=0.4);
+		
+		for j in range(0,len(pts['regions'][i])):
+			cx = pts['regions'][i][j]['cx']
+			cy = pts['regions'][i][j]['y']
+			plt.plot(cx,cy,"k--", c=colors[j],alpha=0.2);
+			
 		plt.savefig(prefix+'.'+str(i)+".png");
 	
 	
@@ -130,7 +140,7 @@ for line in flog:
 			pts['regions'].append([]);
 		
 		while n >= len(pts['regions'][out_id]):
-			pts['regions'][out_id].append({'x':[],'y':[],'p':[], 'cx':[], 'cy':[], 't':0})
+			pts['regions'][out_id].append({'xmin':[],'xmax':[],'y':[],'p':[], 'cx':[], 'cy':[]})
 		
 		cpt=float(fields[header.index("CORR-VAL")])
 		ept=float(fields[header.index("VAL")])
@@ -152,11 +162,12 @@ for line in flog:
 				cx = float(fields[header.index(str(i)+".center")]);
 				if(math.isnan(probx)):
 					probx = 0;
-				pts['regions'][out_id][i]['x'].append([minx,maxx]);
-				pts['regions'][out_id][i]['y'].append([t,t]);
+				pts['regions'][out_id][i]['xmin'].append(minx);
+				pts['regions'][out_id][i]['xmax'].append(maxx);
+				pts['regions'][out_id][i]['y'].append(t);
 				pts['regions'][out_id][i]['p'].append(probx);
 				pts['regions'][out_id][i]['cx'].append(cx);
-				pts['regions'][out_id][i]['cy'].append(t);
+				
 			PDENS = nptsperx/(len(cpts))
 			#print len(cpts),num_lines,YPROB,PDENS
 			for c in cpts[out_id]:
@@ -169,7 +180,6 @@ for line in flog:
 				if(random.random() < PDENS):
 					pts['err'][out_id]['x'].append(e);
 					pts['err'][out_id]['y'].append(t);
-					print e
 					
 			cpts[out_id]=[];
 			epts[out_id]=[];

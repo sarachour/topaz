@@ -19,6 +19,13 @@ then
 	LOGS=$LOGS" --time"
 	TAGS=$TAGS".ltime"
 fi
+
+if [[ $FLAGS == *c* ]]
+then
+	LOGS=$LOGS" --scar-detector"
+	TAGS=$TAGS".scar"
+fi
+
 if [[ $FLAGS == *d* ]]
 then
 	LOGS=$LOGS" --log-detector"
