@@ -7,6 +7,7 @@ from os.path import isfile, join
 import random
 import math
 from numpy import array
+import subprocess
 
 total=0.0;
 true_accept=0.0;
@@ -26,13 +27,10 @@ def pct(n,t):
 		return "div-by-zero"
 	return str(round(n/t*100.0,5))+"%";
 
-def test_first(s,h,line):
-	fields = line.split('\t');
-	if("0" in fields[h.index('OUT-ID')] and 
-	str(s) in fields[h.index("ID")]):
-		return 1 
-	else:
-		return 0
+def calc_length(s,line,n):
+	if(line.startswith(s+"\t")):
+		return n+1;
+	return n;
 
 def colormap(value):
 	colors = [[0,0,1],[0,1,0],[1,1,0],[1,0,0],[1,0,0]];
@@ -59,6 +57,7 @@ def plot_data(pts,name):
 		ex = [max(minx,min(maxx,x)) for x in ex];
 		
 		for j in range(0,len(pts['regions'][i])):
+			plt.clf();
 			rmin = array(pts['regions'][i][j]['xmin'])
 			rmax = array(pts['regions'][i][j]['xmax'])
 			ry = array(pts['regions'][i][j]['y'])
@@ -68,20 +67,20 @@ def plot_data(pts,name):
 			plt.fill_betweenx((ry),(rmin),(rmax),where=rmax>=rmin,facecolor=colors[j], alpha=0.5);
 			plt.fill_betweenx(ry,rmin,rmax,where=rmax<=rmin,facecolor='black');
 			
-			#for k in range(0,len(rx)):
-			#	plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
-
-	
-		plt.plot(px,py,"xg",alpha=0.4);
-		plt.plot(ex,ey,"^r",alpha=0.4);
-		
-		for j in range(0,len(pts['regions'][i])):
+			plt.plot(px,py,"xg",alpha=0.4);
+			plt.plot(ex,ey,"^r",alpha=0.4);
+			
 			cx = pts['regions'][i][j]['cx']
 			cy = pts['regions'][i][j]['y']
 			plt.plot(cx,cy,"k--", c=colors[j],alpha=0.2);
 			
+			plt.savefig(prefix+'.'+str(i)+".region."+str(j)+".png");
+			#for k in range(0,len(rx)):
+			#	plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
+		plt.clf();
+		plt.plot(px,py,"xg",alpha=0.4);
+		plt.plot(ex,ey,"^r",alpha=0.4);
 		plt.savefig(prefix+'.'+str(i)+".png");
-	
 	
 if(len(sys.argv) < 3):
 	print "logname graph-prefix task-id"
@@ -93,8 +92,10 @@ prefix = sys.argv[2];
 sel_id = int(sys.argv[3]);
 
 flog = open(log);
-header = flog.readline().split('\t');
-num_lines = sum(test_first(sel_id, header,line) for line in flog);
+ssel_id = str(sel_id);
+num_lines = 0
+for line in flog:
+	num_lines = calc_length(ssel_id,line,num_lines) 
 
 nycoords = 10000.0
 nptsperx = 10000.0
