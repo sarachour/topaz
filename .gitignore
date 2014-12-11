@@ -1,1 +1,6 @@
 *.o
+*.so
+*.lo
+*.topaz.c
+*.a
+*.la

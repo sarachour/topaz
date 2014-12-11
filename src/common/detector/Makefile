@@ -15,7 +15,9 @@ all:  checker.o \
 	  distribution.o \
 	  abs_detector.o \
 	  abs_solid_region_detector.o \
-	  abs_scar_region_detector.o
+	  abs_scar_region_detector.o \
+	  control_system.o \
+	  stat.cpp
 	
 %.o: %.cpp
 	$(CC) $(COPTS) $(INCLUDE) -o $@ -c $< 

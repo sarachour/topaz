@@ -2,11 +2,14 @@
 #ifndef DETECTORS_H
 #define DETECTORS_H
 
+#include "ctrl_system.h"
 
 #define ABS_DETECTOR_TEST 0
 #define ABS_DETECTOR_TRAIN 1
 #define ABS_DETECTOR_KEY 2
 #define ABS_DETECTOR_LOG 3
+
+class DetectorLogInfo;
 class AbsDetector{
 	private:
 		float thresh;
@@ -69,53 +72,60 @@ class AbsDetector{
 	
 };
 
+class RegionStats {
+	float p_train_err;
+	float p_train_corr;
+	float p_train_total;
+	float p_train_n;
+	float p_test_err;
+	float p_test_corr;
+	float p_test_total;
+	float p_test_n;
+	public:
+		RegionStats();
+		void update_accept_rate(bool iselem, bool is_acc);
+		void update_accuracy_rate(bool iselem, bool is_true);
+		void merge(RegionStats * o);
+		void print();
+		int log(DetectorLogInfo * d, int r, int i);
+};
+
+class GlobalStats {
+	float n_acc;
+	float n_rej;
+	float n_true;
+	float n_false;
+	float n_total_train;
+	float n_total_test;
+	public:
+		GlobalStats();
+		void update_accept_rate(bool is_corr_label);
+		void update_accuracy_rate(bool isacc);
+		void print();
+		int log(DetectorLogInfo * d, int i);
+		float get_reexec();
+};
 #define MAX_REGIONS 5
 #define WINDOW 1000.0
 #define FRAC_WINDOW (1.0/WINDOW)
 #define FRAC_REST_WINDOW (1.0 - FRAC_WINDOW)
 
 class AbsScarRegionDetector : public AbsDetector {
-	
+		const float CENTER_WINDOW = 1000;
 		typedef struct REGION_T{
 			float * min;
 			float * max;
 			//weighted center of region
 			float * center; 
-			//number of points that fall in region.
-			float mass;
 			//the error probability of training data
-			float p_train_err;
-			float p_train_corr;
-			float p_train_total;
-			float p_train_n;
-			//the correct probability of training data.
-			float p_test_err;
-			float p_test_corr;
-			float p_test_total;
-			float p_test_n;
+			RegionStats stats;
 		} region_t;
-		typedef struct NEG_REGION_T {
-			float p_test_err;
-			float p_test_corr;
-			float p_test_total;
-			float p_test_n;
-			float p_train_err;
-			float p_train_corr;
-			float p_train_total;
-			float p_train_n;
-		} env_t;
-		typedef struct GLBL_STATS_T{
-			float n_acc;
-			float n_rej;
-			float n_true;
-			float n_false;
-			float n_total_train;
-			float n_total_test;
-		} stats_t;
+		
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
-		env_t * environment; //rest of distribution
-		stats_t stats;
-		const int max_regions = MAX_REGIONS;
+		ControlSystem * ctrl;
+		RegionStats * env; //rest of distribution
+		GlobalStats * stats;
+		int max_regions;
 		int n_regions;
 		int dim;
 		bool is_valid(float * d);
@@ -126,13 +136,13 @@ class AbsScarRegionDetector : public AbsDetector {
 		float score_region(region_t * r1, region_t * r2);
 		int find_closest_region(int idx, float * score);
 		//insert an output or an error
-		void update_test_regions(int id, bool iserr);
+		void update_test_regions(int id, float * val, bool iserr);
 		void update_train_regions(int id, float * val, bool iserr);
 		void insert_point(float * d, bool iserr);
 		bool test_point(float * d);
 		
 		void record(int cat);
-		void contract_region(region_t * region);
+		void adjust_region(region_t * region);
 		
 	public:
 		AbsScarRegionDetector(int n);
@@ -149,16 +159,7 @@ class AbsSolidRegionDetector : public AbsDetector {
 			float * min;
 			float * max;
 			float * center;
-			//the error probability of training data
-			float p_train_err;
-			float p_train_corr;
-			float p_train_total;
-			float p_train_n;
-			//the correct probability of training data.
-			float p_test_err;
-			float p_test_corr;
-			float p_test_total;
-			float p_test_n;
+			RegionStats stats;
 		} region_t;
 		typedef struct NEG_REGION_T {
 			float p_test_err;
@@ -170,18 +171,10 @@ class AbsSolidRegionDetector : public AbsDetector {
 			float p_train_total;
 			float p_train_n;
 		} env_t;
-		typedef struct GLBL_STATS_T{
-			float n_acc;
-			float n_rej;
-			float n_true;
-			float n_false;
-			float n_total_train;
-			float n_total_test;
-		} stats_t;
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
-		env_t * environment; //rest of distribution
-		stats_t stats;
-		const int max_regions = MAX_REGIONS;
+		RegionStats * env; //rest of distribution
+		GlobalStats * stats;
+		int max_regions;
 		int n_regions;
 		int dim;
 		bool is_valid(float * d);

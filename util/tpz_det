@@ -40,7 +40,7 @@ def colormap(value):
 	r = colors[idx]*local_frac + colors[idx+1]*(1-local_frac)
 	
 def plot_data(pts,name):
-	colors=["c","m","r","b","r","y","o"]
+	colors=["k","m","r","b","r","y","o"]
 	for i in range(0, len(pts['corr'])):
 		print "Plotting Output "+str(i)
 		plt.clf();
@@ -63,16 +63,16 @@ def plot_data(pts,name):
 			ry = array(pts['regions'][i][j]['y'])
 			ra= pts['regions'][i][j]['p']
 			
+			plt.plot(px,py,"xg",alpha=0.1);
+			plt.plot(ex,ey,"^r",alpha=0.1);
+			
 			plt.plot(rmin,ry,rmax,ry,"k-",lw=1,c=colors[j], alpha=0.5);
 			plt.fill_betweenx((ry),(rmin),(rmax),where=rmax>=rmin,facecolor=colors[j], alpha=0.5);
 			plt.fill_betweenx(ry,rmin,rmax,where=rmax<=rmin,facecolor='black');
-			
-			plt.plot(px,py,"xg",alpha=0.4);
-			plt.plot(ex,ey,"^r",alpha=0.4);
-			
+		
 			cx = pts['regions'][i][j]['cx']
 			cy = pts['regions'][i][j]['y']
-			plt.plot(cx,cy,"k--", c=colors[j],alpha=0.2);
+			plt.plot(cx,cy,"k-", c=colors[j],alpha=0.4);
 			
 			plt.savefig(prefix+'.'+str(i)+".region."+str(j)+".png");
 			#for k in range(0,len(rx)):
@@ -116,7 +116,7 @@ for line in flog:
 		
 		if(id != sel_id):
 			continue;
-			
+		
 		is_accept = "y" in fields[header.index("IS-ACCEPT")];
 		is_corr = "y" in fields[header.index("IS-CORR")];
 		out_id = int(float(fields[header.index("OUT-ID")]));
@@ -146,14 +146,14 @@ for line in flog:
 		cpt=float(fields[header.index("CORR-VAL")])
 		ept=float(fields[header.index("VAL")])
 		#print len(cpts[out_id]),len(pts['corr'][out_id]['x'])
-		if(random.random() < YPROB):
+		if(random.random() < YPROB or not is_corr):
 			if(abs(ept - cpt) < 1e-4):	
 				cpts[out_id].append(ept);
 			else:
 				epts[out_id].append(ept);
 		
 		#randomly sample regions and consolidate points
-		if(random.random() < YPROB):
+		if(random.random() < YPROB or not is_corr):
 			tregions=[];
 			
 			for i in range(0,n):
@@ -189,7 +189,7 @@ for line in flog:
 	except ValueError:
 		print "skipping.."
 
-
+print true_accept,false_accept,true_reject,false_reject
 print "Percent True Accepts:",pct(true_accept,total)
 print "Percent False Accepts:",pct(false_accept,total)
 print "Percent True Rejects:",pct(true_reject,total)

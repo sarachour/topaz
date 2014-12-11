@@ -38,9 +38,10 @@ then
 fi
 if [[ $OP == *replace* ]]
 then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT
-	TAGS=$TAGS".ctrl."$AMOUNT
+	AMOUNT=$(echo "$OP" | grep -o "p[0-9\.]*" | grep -o "[0-9\.]*")
+	BLKS=$(echo "$OP" | grep -o "b[0-9]*" | grep -o "[0-9\.]*")
+	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT" --detect-blocks "$BLKS
+	TAGS=$TAGS".ctrl.p"$AMOUNT".b"$BLKS
 fi
 if [[ $OP == *preplace* ]]
 then

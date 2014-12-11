@@ -3,6 +3,7 @@
 #include "stdio.h"
 #include "logger.h"
 #include "topaz.h"
+#include "ctrl_system.h"
 //FIXME: Must leave index 0 open for err-value
 
 void AbsScarRegionDetector::log(){
@@ -12,31 +13,23 @@ void AbsScarRegionDetector::log(){
 	int tid = DetectorLogInfo::getTaskId();
 	int rank = DetectorLogInfo::getRank();
 	int iid = DetectorLogInfo::getIID();
-	stats_t * s = &this->stats;
 	
 	for(int v=0; v < this->dim; v++){
 		int i=1;
 		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 
-		l->set(i,"pct_rej", s->n_acc/s->n_total_test); i++;
-		l->set(i,"pct_acc",s->n_rej/s->n_total_test); i++;
-		l->set(i,"pct_true_rej",s->n_true/s->n_total_train); i++;
-		l->set(i,"pct_false_rej",s->n_false/s->n_total_train); i++;
+		i=this->stats->log(l, i);
 		l->set(i,"n-regions", this->n_regions); i++;
 		for(int r=0; r < this->n_regions; r++){
 			char name[128];
 			region_t * q = this->regions[r];
-			float prob, tr_prob, te_prob;
-			tr_prob = q->p_train_corr/q->p_train_n; 
-			te_prob = q->p_test_corr/q->p_test_n;
-			prob = tr_prob*te_prob;
+			
 			sprintf(name, "%d.min", r); 
 			l->set(i,name, q->min[v]); i++;
 			sprintf(name, "%d.max", r); 
 			l->set(i,name,q->max[v]); i++;
 			sprintf(name, "%d.center", r); 
 			l->set(i,name,q->center[v]); i++;
-			sprintf(name, "%d.prob", r); 
-			l->set(i,name,prob); i++;
+			i=q->stats.log(l,r,i);
 		}
 		l->end_entry();
 	}
@@ -46,13 +39,12 @@ void AbsScarRegionDetector::log(){
 AbsScarRegionDetector::AbsScarRegionDetector(int n) : AbsDetector(n){
 	this->dim = n;
 	this->n_regions = 0;
-	this->environment = new env_t[1];
-	this->stats.n_rej = 0;
-	this->stats.n_acc = 0;
-	this->stats.n_true = 0;
-	this->stats.n_false = 0;
-	this->stats.n_total_test = 0;
-	this->stats.n_total_train = 0;
+	this->max_regions = Topaz::topaz->config.DETECTOR_NBLOCKS;
+	this->env = new RegionStats[1];
+	this->stats = new GlobalStats[1];
+	this->ctrl = new PIDControlSystem[1];
+	
+	this->ctrl->goal(Topaz::topaz->config.DETECTOR_TARGET);
 	for(int i=0; i < this->max_regions; i++){
 		this->regions[i] = NULL; //initialize all to null
 	}
@@ -63,37 +55,23 @@ AbsScarRegionDetector::~AbsScarRegionDetector(){
 			delete this->regions[i];
 		}
 	}
-	
+	delete this->env;
+	delete this->stats;
+	delete this->ctrl;
 	this->clean();
 }
-#define WEIGHT 0.999
 bool AbsScarRegionDetector::test(){
 	if(AbsDetector::getMode() ==  ABS_DETECTOR_KEY) return true;
 	bool res =  this->test_point(this->data);
-	//update running statistics
-	this->stats.n_acc*=WEIGHT;
-	this->stats.n_rej*=WEIGHT;
-	this->stats.n_total_test*=WEIGHT;
-	if(res) this->stats.n_acc+=1-WEIGHT;
-	else this->stats.n_rej+=1-WEIGHT;
-	this->stats.n_total_test+=1-WEIGHT;
 	//printf("test: %f %s -> pct-rej:%f\n", this->data[0], res ? "accept" : "reject", this->stats.n_rej/this->stats.n_total_test);
 	return res;
 }
 bool AbsScarRegionDetector::train(){
 	if(AbsDetector::getMode() ==  ABS_DETECTOR_KEY) return true;
 	bool corr = this->compare();
-	
-	this->stats.n_true*=WEIGHT;
-	this->stats.n_false*=WEIGHT;
-	this->stats.n_total_train*=WEIGHT;
-	if(!corr) this->stats.n_true+=1-WEIGHT;
-	else this->stats.n_false+=1-WEIGHT;
-	this->stats.n_total_train+=1-WEIGHT;
-	
 	//printf("train: %f = %f : %s pct_fp:%f\n", this->data[0], this->data_key[0], corr ? "same":"not same", this->stats.n_false/this->stats.n_total_train);
 	//insert the training point
-	this->insert_point(this->data, !corr);
+	this->insert_point(this->data, corr);
 	if(!corr) this->insert_point(this->data_key,true);
 	return true;
 }
@@ -101,38 +79,23 @@ void AbsScarRegionDetector::print(){
 	for(int i=0; i < this->n_regions; i++){
 		region_t * r = this->regions[i];
 		printf("BLOCK %d\n",i);
-		printf("train | n: %f  p(total): %f   p(err): %f   p(out): %f\n", 
-			r->p_train_n, r->p_train_total,
-			r->p_train_err/r->p_train_n, r->p_train_corr/r->p_train_n);
-		printf("test | n: %f  p(total): %f   p(err): %f   p(out): %f\n", 
-			r->p_test_n, r->p_test_total,
-			r->p_test_err/r->p_test_n, r->p_test_corr/r->p_test_n);
+		r->stats.print();
 		printf("min: ");
 		for(int j=0; j < this->dim; j++){
-			printf("%f ",r->min[j]);
+			printf("%e ",r->min[j]);
 		}
 		printf("\n");
 		printf("max: ");
 		for(int j=0; j < this->dim; j++){
-			printf("%f ",r->max[j]);
+			printf("%e ",r->max[j]);
 		}
-		printf("\n");
-		printf("center: ");
-		for(int j=0; j < this->dim; j++){
-			printf("%f ",r->center[j]);
-		}
-		
 		printf("\n------\n\n");
 	}
 	printf("ENVIRONMENT\n");
-	env_t * e = this->environment;
-	printf("test | n: %f  p(total): %f   p(err): %f   p(out): %f\n", 
-			e->p_test_n, e->p_test_total,
-			e->p_test_err/e->p_test_n, e->p_test_corr/e->p_test_n);
+	this->env->print();
 	printf("STATISTICS\n");
-	stats_t * s = &this->stats;
-	printf("accept:%f reject%f total:%f\n", s->n_acc/s->n_total_test, s->n_rej/s->n_total_test, s->n_total_test);
-	printf("true-rej:%f false-rej:%f total-rej:%f\n", s->n_true/s->n_total_train, s->n_false/s->n_total_train, s->n_total_train);
+	this->stats->print();
+	
 }
 
 
@@ -148,11 +111,6 @@ void AbsScarRegionDetector::allocate_region(region_t * region, float * d){
 	region->min = new float[this->dim];
 	region->max = new float[this->dim];
 	region->center = new float[this->dim];
-	region->mass = 1.0;
-	region->p_train_err = region->p_test_err = 0;
-	region->p_train_corr = region->p_test_corr = 0;
-	region->p_train_total = region->p_test_total = 0;
-	region->p_train_n = region->p_test_n = 0;
 	for(int i=0; i < this->dim; i++){
 		region->min[i] = region->max[i] = region->center[i] = d[i];
 	}
@@ -204,19 +162,9 @@ void AbsScarRegionDetector::merge_regions(int id1, int id2){
 		if(r2->max[i] > r1->max[i]){
 			r1->max[i] = r2->max[i];
 		}
-		r1->center[i] = (r2->center[i]*r2->mass + r1->center[i]*r1->mass)/(r1->mass + r2->mass);
+		r1->center[i] = (r1->center[i] + r1->center[i])/2;
 	}
-	r1->mass = (r1->mass + r2->mass);
-	
-	r1->p_test_err = (r1->p_test_err + r2->p_test_err);
-	r1->p_test_corr = (r1->p_test_corr + r2->p_test_corr);
-	r1->p_test_n += r2->p_test_n;
-	r1->p_test_total = (r1->p_test_total + r2->p_test_total);
-	
-	r1->p_train_err = (r1->p_train_err + r2->p_train_err);
-	r1->p_train_corr = (r1->p_train_corr + r2->p_train_corr);
-	r1->p_train_n += r2->p_train_n;
-	r1->p_train_total = (r1->p_train_total + r2->p_train_total);
+	r1->stats.merge(&r2->stats);
 	
 	this->deallocate_region(r2);
 	//move everything over
@@ -275,114 +223,81 @@ int AbsScarRegionDetector::find_closest_region(int idx, float * score){
 	}
 	return id;
 }
-void AbsScarRegionDetector::contract_region(region_t * r){
-	float factor = FRAC_REST_WINDOW;
-	//scar out region.
+void AbsScarRegionDetector::adjust_region(region_t * r){
+	float amt = this->ctrl->get();
+	amt = amt < 0.5 ? 0.5 : (amt > 1 ? 1 : amt);
 	for(int i=0; i < this->dim; i++){
-		r->min[i] = r->center[i] - factor*(r->center[i] - r->min[i]);
-		r->max[i] = r->center[i] + factor*(r->max[i] - r->center[i]);
+		r->min[i] = r->center[i] - (r->center[i] - r->min[i])*amt;
+		r->max[i] = r->center[i] + (r->max[i] - r->center[i])*amt;
 	}
-	r->mass *= FRAC_REST_WINDOW;
 }
-
-void AbsScarRegionDetector::update_test_regions(int id, bool iserr){
+void AbsScarRegionDetector::update_test_regions(int id, float * val, bool is_accept){
 	//forget behavior
-	float factor =  1.0-1.0/WINDOW;
+	this->ctrl->update(this->stats->get_reexec());
 	for(int i=0; i < this->n_regions; i++){
-		//probability output falls in this output
-		this->regions[i]->p_test_total *= factor;
-		this->contract_region(this->regions[i]);
+		this->regions[i]->stats.update_accept_rate(i == id, is_accept);
+		this->adjust_region(this->regions[i]);
 	}
-	this->environment->p_test_total *= factor;
 	if(id >= 0){
-		region_t * r;
-		r = this->regions[id];
-		r->p_test_n += 1.0;
-		r->p_test_total += 1-factor;
-		if(iserr) r->p_test_err += 1.0;
-		else r->p_test_corr += 1.0;
+		//update center of mass.
+		for(int i=0; i < this->dim; i++){
+			this->regions[id]->center[i] *= 1.0 - 1.0/this->CENTER_WINDOW;
+			this->regions[id]->center[i] += val[i]*1.0/this->CENTER_WINDOW;
+		}
 	}
-	else{
-		env_t * e = this->environment;
-		e->p_test_err += 1.0;
-		e->p_test_n += 1.0;
-		e->p_test_total += 1.0/WINDOW;
-	}
-	
+	else 
+		this->env->update_accept_rate(id < 0, false);
+		
+	this->stats->update_accept_rate(is_accept);
 }
-
-void AbsScarRegionDetector::update_train_regions(int id, float * val, bool iserr){
+void AbsScarRegionDetector::update_train_regions(int id, float * val, bool is_correct){
 	
 	//forget behavior
 	for(int i=0; i < this->n_regions; i++){
-		//probability output falls in this output
-		this->regions[i]->p_train_total *= FRAC_REST_WINDOW;
-		this->contract_region(this->regions[i]);
+		this->regions[i]->stats.update_accuracy_rate(id == i, is_correct);
 	}
 	//we do not have a region.
-	if(id < 0){
-		env_t * e = this->environment;
-		e->p_train_err += 1.0;
-		e->p_train_n += 1.0;
-		e->p_train_total += FRAC_WINDOW;
-		return;
-	}
+	this->env->update_accuracy_rate(id < 0, true);
+	
+	this->stats->update_accuracy_rate(is_correct); //is accept, is error
+	
+	if(id < 0 || !is_correct) return; //if outside of region, or error.
 	//we have a region
 	region_t * r = this->regions[id];
-	r->p_train_n += 1.0;
-	r->p_train_total += FRAC_WINDOW;
-	r->mass = r->mass >= WINDOW ? r->mass : r->mass+1;
-	//update with most recent behavior.
-	if(iserr){
-		//probability, given it falls in output
-		r->p_train_err += 1.0;
-		return;
-	}
-	else{
-		r->p_train_corr += 1.0;
-	}
 	
 	//update boundaries to include point.
+	//on train update center of mass.
 	for(int i=0; i < this->dim; i++){
 		if(val[i] > r->max[i]) r->max[i] = val[i];
 		else if(val[i] < r->min[i]) r->min[i] = val[i];
-		//center of mass.
-		r->center[i] = r->center[i] - r->center[i]/r->mass + val[i]/r->mass;
+		r->center[i] *= 1.0 - 1.0/this->CENTER_WINDOW;
+		r->center[i] += val[i]*1.0/this->CENTER_WINDOW;
 	}
+	
 }
 bool AbsScarRegionDetector::test_point(float * d){
-	bool isok = true;
 	int id = find_region(d); // find the closest scoring info.
 	//printf("test: %f grp:%d score:%f\n", d[0], id, score);
 	//printf("score: %f\n", score);
 	if(!this->is_valid(d) || id < 0){
-		isok = false;
+		this->update_test_regions(-1,d,false);
+		return false;
 	}
-	if(isok){
-		isok= true;
-		this->update_test_regions(id,!isok);
+	else{
+		this->update_test_regions(id,d,true);
+		return true;
 	}
-	else {
-		id=-1; //we decided it's not part of the distribution.
-		isok = false; //reject because this point does not belong anywhere.
-		this->update_test_regions(-1,!isok);
-	}
-		
-	return isok;
+	
 }
-void AbsScarRegionDetector::insert_point(float * d, bool iserr){
+void AbsScarRegionDetector::insert_point(float * d, bool is_correct){
 	if(!this->is_valid(d)) return;
 	/*
 	 * try and optimistically find a region the float belongs to
 	 */
 	int id = find_region(d);
 	// case: update an existing a group
-	if(id >= 0){
-		this->update_train_regions(id,d,iserr); //updates statistics.
-		return;
-	}
-	if(iserr){
-		this->update_train_regions(-1,d,iserr); //updates statistics.
+	if(id > 0 || !is_correct){
+		this->update_train_regions(id,d,is_correct); //updates statistics.
 		return;
 	}
 	// case: create a new group
@@ -392,7 +307,7 @@ void AbsScarRegionDetector::insert_point(float * d, bool iserr){
 	this->allocate_region(r,d);
 	this->regions[this->n_regions] = r;
 	this->n_regions++;
-	this->update_train_regions(this->n_regions-1,d, iserr);
+	this->update_train_regions(this->n_regions-1,d, is_correct);
 	//add region
 	//if we're full of space, make room for another region.
 	if(this->n_regions == this->max_regions){ //if we're full.

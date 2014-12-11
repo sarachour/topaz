@@ -38,6 +38,8 @@ Topaz::Topaz(int argc, char ** argv){
 	this->config.DISCARD_TASK = false;
 	this->config.PROB_DROP_ENABLED = false;
 	this->config.TIMERS_ENABLED = false;
+	this->config.DETECTOR_NBLOCKS = 5;
+	this->config.DETECTOR_TARGET = 0.01;
 	
 	for(int i=0; i < argc; i++){
 		if(strcmp(argv[i], "--sched")==0 || strcmp(argv[i], "-s") ==0)
@@ -62,6 +64,13 @@ Topaz::Topaz(int argc, char ** argv){
 			if(i < argc-1){
 				i++; 
 				this->config.DETECTOR_TARGET = atof(argv[i]);
+				i--;
+			}
+		}
+		if(strcmp(argv[i], "--detect-blocks") ==0 || strcmp(argv[i], "-db") == 0){
+			if(i < argc-1){
+				i++; 
+				this->config.DETECTOR_NBLOCKS = atoi(argv[i]);
 				i--;
 			}
 		}

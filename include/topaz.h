@@ -20,6 +20,7 @@ typedef struct CONFIG_T_M{
 	bool GODMODE_ENABLED;
 	detector_type_t DETECTOR_TYPE;
 	float DETECTOR_TARGET;
+	int DETECTOR_NBLOCKS;
 	bool DISCARD_TASK;
 	bool TIMERS_ENABLED;
 	bool PROB_DROP_ENABLED;
