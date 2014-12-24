@@ -6,9 +6,9 @@ MAXCLUST=7; #5 for all but med:10, large 12
 CHUNKSIZE=1000;
 CLUSTERSIZE=1000;
 
-	#&& ./visualize.py input/$FILENAME $FILENAME.clust
+	#&& ./visualize.py inputs/$FILENAME $FILENAME.clust
 
-#src/streamcluster $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE input/$FILENAME $FILENAME.clust 1 && ./visualize.py input/$FILENAME $FILENAME.clust
+#src/streamcluster $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$FILENAME $FILENAME.clust 1 && ./visualize.py inputs/$FILENAME $FILENAME.clust
 #!/bin/bash
 
 
@@ -29,8 +29,8 @@ TAGS="TAGS"
 CTRL="c"
 if [[ $FLAGS == *c* ]]
 then
-	LOGS=$LOGS" --cross-detector"
-	TAGS=$TAGS".cross"
+	LOGS=$LOGS" --scar-detector"
+	TAGS=$TAGS".scar"
 fi
 if [[ $FLAGS == *g* ]]
 then
@@ -54,15 +54,17 @@ then
 fi
 if [[ $OP == *replace* ]]
 then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT
-	TAGS=$TAGS".ctrl."$AMOUNT
+	AMOUNT=$(echo "$OP" | grep -o "p[0-9\.]*" | grep -o "[0-9\.]*")
+	BLKS=$(echo "$OP" | grep -o "b[0-9]*" | grep -o "[0-9\.]*")
+	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT" --detect-blocks "$BLKS
+	TAGS=$TAGS".ctrl.p"$AMOUNT".b"$BLKS
 fi
 if [[ $OP == *discard* ]]
 then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --discard --detect "$CTRL" --detect-target "$AMOUNT
-	TAGS=$TAGS".ctrl."$AMOUNT
+	AMOUNT=$(echo "$OP" | grep -o "p[0-9\.]*" | grep -o "[0-9\.]*")
+	BLKS=$(echo "$OP" | grep -o "b[0-9]*" | grep -o "[0-9\.]*")
+	LOGS=$LOGS" --discard --detect "$CTRL" --detect-target "$AMOUNT" --detect-blocks "$BLKS
+	TAGS=$TAGS".ctrl.p"$AMOUNT".b"$BLKS
 fi
 
 
@@ -161,8 +163,8 @@ if [ "$OP" == "debug" ]
 then
 	outdir="debug".$TAGS
 	createDirectories $outdir
-	tpzrun -d -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE input/$FILENAME output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
-	./visualize.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
+	tpzrun -d -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$FILENAME output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
+	./visualize.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
 	mv diagram.png output/$outdir/diagram.$FILENAME.png
 	cleanupDirectories $outdir $FILENAME
 fi
@@ -172,10 +174,10 @@ if [ "$OP" == "correct" ]
 then
 	outdir="correct".$TAGS
 	createDirectories $outdir
-	tpzrun  -e -f perfect.cfg  -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
-	./visualize.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
+	tpzrun  -e -f perfect.cfg  -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
+	./visualize.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
 	mv diagram.png output/$outdir/diagram.$FILENAME.png
-	./eval_output.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
+	./eval_output.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
 	cleanupDirectories $outdir $FILENAME
 fi
 
@@ -184,10 +186,10 @@ if [ "$OP" == "basic" ]
 then
 	outdir="basic".$TAGS.$MACHINE
 	createDirectories $outdir
-	tpzrun -e -f $MACHINE -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME
-	./visualize.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
+	tpzrun -e -f $MACHINE -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME
+	./visualize.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
 	mv diagram.png output/$outdir/diagram.$FILENAME.png
-	./eval_output.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
+	./eval_output.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
 	cleanupDirectories $outdir $FILENAME
 fi
 
@@ -196,10 +198,10 @@ then
 	outdir="replace".$TAGS.$MACHINE
 	createDirectories $outdir
 	#tpzrun -e -f $MACHINE 
-	tpzrun -e -f $MACHINE  -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
-	./visualize.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
+	tpzrun -e -f $MACHINE  -- src/streamcluster  $LOGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt 1 &>output/$outdir/log-$FILENAME.txt
+	./visualize.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt
 	mv diagram.png output/$outdir/diagram.$FILENAME.png
-	./eval_output.py input/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
+	./eval_output.py inputs/$FILENAME.txt output/$outdir/clust.$FILENAME.txt > output/$outdir/err.$FILENAME.txt
 	cleanupDirectories $outdir $FILENAME
 fi
 

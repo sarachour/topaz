@@ -11,6 +11,11 @@ echo "USAGE: KIND INPUT MACHINE 'FLAGS[g=--godmode t=--time d=--log-detector]'"
 LOGS=""
 TAGS="TAGS"
 CTRL="c"
+if [[ $FLAGS == *c* ]]
+then
+	LOGS=$LOGS" --scar-detector"
+	TAGS=$TAGS".scar"
+fi
 if [[ $FLAGS == *g* ]]
 then
 	LOGS=$LOGS" --godmode"
@@ -28,29 +33,19 @@ then
 fi
 if [[ $OP == *replace* ]]
 then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT
-	TAGS=$TAGS".ctrl."$AMOUNT
-fi
-if [[ $OP == *preplace* ]]
-then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS"  --prob-accept"
-	TAGS=$TAGS".pa"
+	AMOUNT=$(echo "$OP" | grep -o "p[0-9\.]*" | grep -o "[0-9\.]*")
+	BLKS=$(echo "$OP" | grep -o "b[0-9]*" | grep -o "[0-9\.]*")
+	LOGS=$LOGS" --detect "$CTRL" --detect-target "$AMOUNT" --detect-blocks "$BLKS
+	TAGS=$TAGS".ctrl.p"$AMOUNT".b"$BLKS
 fi
 if [[ $OP == *discard* ]]
 then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --discard --detect "$CTRL" --detect-target "$AMOUNT
-	TAGS=$TAGS".ctrl."$AMOUNT
+	AMOUNT=$(echo "$OP" | grep -o "p[0-9\.]*" | grep -o "[0-9\.]*")
+	BLKS=$(echo "$OP" | grep -o "b[0-9]*" | grep -o "[0-9\.]*")
+	LOGS=$LOGS" --discard --detect "$CTRL" --detect-target "$AMOUNT" --detect-blocks "$BLKS
+	TAGS=$TAGS".ctrl.p"$AMOUNT".b"$BLKS
 fi
 
-if [[ $OP == *pdiscard* ]]
-then
-	AMOUNT=$(echo "$OP" | grep -o "[0-9\.]*")
-	LOGS=$LOGS" --prob-accept"
-	TAGS=$TAGS".pa"
-fi
 #MACHINE="sram3.cfg"
 
 

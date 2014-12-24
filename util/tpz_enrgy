@@ -5,6 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 if(len(sys.argv) < 2):
+	print "tpz_enrgy path model"
 	exit(1);
  
 path = sys.argv[1];
@@ -72,12 +73,12 @@ def analyze_detail(name,m):
 	#print "	Percent Communication:", p_c
 	#print "	Percent Serialization:", p_s
 def analyze_overhead(m,mc,w,wc):
-	print "	#Main"
-	for key in m:
-		print "		",key,":",m[key]/(wc['task']+mc['task'])
-	print "	#Worker"
-	for key in w:
-		print "		",key,":",w[key]/(wc['task']+mc['task'])
+	#print "	#Main"
+	print wc
+	print mc
+	print "" 
+	ser_overhead = (1.0*wc['comm'])/(mc['task']+ wc['task']);
+	print "Serialization Overhead (Ser:Task)",ser_overhead 
 		
 def analyze(d, mode):
 	#topaz timer: includes comm
@@ -106,9 +107,9 @@ def analyze(d, mode):
 	#fraction of cpu power
 	cpu_sram_pct = 0.35;
 	cpu_inst_pct = 0.65;
-	dram_ref_pct = 0.3; #dram refresh is 30 percent
+	dram_ref_pct = 0.33; #dram refresh is 30 percent
 	fp_sram_pct = 0.5;
-	vol_dram_pct = 0.85;
+	vol_dram_pct = 0.75;
 	#sram savings
 	sram_savings = {};
 	sram_savings['agg'] = 0.90;
@@ -128,6 +129,7 @@ def analyze(d, mode):
 	fp_mix=0
 	sram_factor = sram_savings[mode]*fp_sram_pct;
 	dram_factor = dram_savings[mode]*vol_dram_pct;
+	# 0.85 * 1 * 0.30
 	factor = dram_ref_pct*dram_mach*dram_factor + cpu_mach*cpu_sram_pct*sram_factor;
 	savings = p_w
 	nreexec_savings =p_w_r;

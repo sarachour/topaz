@@ -153,7 +153,7 @@ for line in flog:
 				epts[out_id].append(ept);
 		
 		#randomly sample regions and consolidate points
-		if(random.random() < YPROB or not is_corr):
+		if(random.random() < YPROB or not is_corr or not is_accept):
 			tregions=[];
 			
 			for i in range(0,n):
@@ -194,6 +194,10 @@ print "Percent True Accepts:",pct(true_accept,total)
 print "Percent False Accepts:",pct(false_accept,total)
 print "Percent True Rejects:",pct(true_reject,total)
 print "Percent False Rejects:",pct(false_reject,total)
+print "------------------------------------"
+print "Percent Errors:",pct(false_accept + true_reject,total)
+print "Percent Errors Undetected:", pct(false_accept, false_accept + true_reject)
+print "Percent Rejects:",pct(true_reject + false_reject,total)
 
 plot_data(pts, prefix);
 #print regions[0];

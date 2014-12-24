@@ -1,5 +1,19 @@
 # Outlier Detector
-1. Better understand bodytrack, barnes ill behaviour
+1. Better understand bodytrack, barnes ill behaviour [DONE]
 	- run barnes with 16K
 	- look at bodytrack weights properly.
-2. Add modifications to control system - target re-exec rate.
+2. Add modifications to control system - target re-exec rate. [DONE]
+
+1. Add 10 random seed trials to script
+   - refactor scripts to do these random seeds.
+   - heavy workload on everything.
+   
+2. Add more hardware models. 
+   - reduced precision fpu experiments.
+   - other hardware models
+
+3. Task size?
+   - too small? high overhead.
+   - too large? high error probability.
+   - solution 1: scheduling between high priority and low priority machines [no; large engineering effort]
+   - solution 2: sanity checks (restarts task)
