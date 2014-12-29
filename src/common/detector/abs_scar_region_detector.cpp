@@ -44,7 +44,7 @@ AbsScarRegionDetector::AbsScarRegionDetector(int n) : AbsDetector(n){
 	this->stats = new GlobalStats[1];
 	this->ctrl = new PIDControlSystem[1];
 	
-	this->ctrl->goal(Topaz::topaz->config.DETECTOR_TARGET);
+	this->set_control_target();
 	for(int i=0; i < this->max_regions; i++){
 		this->regions[i] = NULL; //initialize all to null
 	}
@@ -231,9 +231,18 @@ void AbsScarRegionDetector::adjust_region(region_t * r){
 		r->max[i] = r->center[i] + (r->max[i] - r->center[i])*amt;
 	}
 }
+
+void AbsScarRegionDetector::adjust_control(){
+	this->ctrl->update(this->stats->get_reexec());
+}
+void AbsScarRegionDetector::set_control_target(){
+	this->ctrl->goal(Topaz::topaz->config.DETECTOR_TARGET);
+}
+
 void AbsScarRegionDetector::update_test_regions(int id, float * val, bool is_accept){
 	//forget behavior
-	this->ctrl->update(this->stats->get_reexec());
+	this->adjust_control();
+	
 	for(int i=0; i < this->n_regions; i++){
 		this->regions[i]->stats.update_accept_rate(i == id, is_accept);
 		this->adjust_region(this->regions[i]);

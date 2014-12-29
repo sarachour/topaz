@@ -22,6 +22,7 @@ class PIDControlSystem: public ControlSystem{
 	bool hit_below;
 	public:
 	PIDControlSystem();
+	~PIDControlSystem();
 	float update(float curr);
 };
 

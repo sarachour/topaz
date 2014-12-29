@@ -111,6 +111,7 @@ class GlobalStats {
 #define FRAC_REST_WINDOW (1.0 - FRAC_WINDOW)
 
 class AbsScarRegionDetector : public AbsDetector {
+	protected:
 		const float CENTER_WINDOW = 1000;
 		typedef struct REGION_T{
 			float * min;
@@ -144,6 +145,9 @@ class AbsScarRegionDetector : public AbsDetector {
 		void record(int cat);
 		void adjust_region(region_t * region);
 		
+		virtual void adjust_control();
+		virtual void set_control_target();
+		
 	public:
 		AbsScarRegionDetector(int n);
 		~AbsScarRegionDetector();
@@ -151,6 +155,15 @@ class AbsScarRegionDetector : public AbsDetector {
 		bool train();
 		void log();
 		void print();
+};
+
+class AbsAutoScarRegionDetector : public AbsScarRegionDetector {
+	private:
+		virtual void adjust_control();
+		virtual void set_control_target();
+	public:
+		AbsAutoScarRegionDetector(int n);
+		~AbsAutoScarRegionDetector();
 };
 
 class AbsSolidRegionDetector : public AbsDetector {

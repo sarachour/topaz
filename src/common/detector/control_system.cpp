@@ -9,6 +9,9 @@ PIDControlSystem::PIDControlSystem() : ControlSystem(){
 	this->m_val = 1;
 	this->hit_below = false;
 }
+PIDControlSystem::~PIDControlSystem(){
+	
+}
 float PIDControlSystem::update(float curr){
 	const float K = 1;
 	const float KD = 0.5;

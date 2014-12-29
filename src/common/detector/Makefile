@@ -16,6 +16,7 @@ all:  checker.o \
 	  abs_detector.o \
 	  abs_solid_region_detector.o \
 	  abs_scar_region_detector.o \
+	  abs_autoscar_region_detector.o \
 	  control_system.o \
 	  stat.cpp
 	

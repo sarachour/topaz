@@ -47,10 +47,18 @@ void AbsDetectorManager::init(int siz){
 	}
 }
 void AbsDetectorManager::add(int taskid, int nouts){
-	if(Topaz::topaz->config.SCAR_DETECTOR_ENABLED){
-		this->detectors[taskid] = new AbsScarRegionDetector(nouts);
-	}
-	else{
-		this->detectors[taskid] = new AbsSolidRegionDetector(nouts);
+	switch(Topaz::topaz->config.DETECTOR_TYPE){
+		case DETECTOR_TYPE_SOLID:
+			this->detectors[taskid] = new AbsSolidRegionDetector(nouts);
+			break;
+		case DETECTOR_TYPE_SCAR:
+			this->detectors[taskid] = new AbsScarRegionDetector(nouts);
+			break;
+		case DETECTOR_TYPE_AUTOSCAR:
+			this->detectors[taskid] = new AbsAutoScarRegionDetector(nouts);
+			break;
+		default:
+			this->detectors[taskid] = new AbsSolidRegionDetector(nouts);
+			break;
 	}
 }
