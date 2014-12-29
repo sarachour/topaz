@@ -60,5 +60,18 @@ then
 fi
 for num in $(head $TOPAZ_ROOT/util/rands.txt -n $NRANDS);
 do
+	echo "PIN-ARGS : $PIN_ARGS"
+	echo "TOPAZ-ARGS : $TOPAZ_ARGS"
+	echo "TAGS : $TAGS"
+	echo "INPUT : $INPUT"
+	echo "SEED : $num"
+	echo "==== Starting in 5 Seconds ==="
+	sleep 3
+	echo "==== Starting in 2 Seconds ==="
+	sleep 2
+	echo "==== Starting in 1 Second ==="
+	sleep 2
+	echo "#### Starting Run ####"
+
  ./$CHILD_SCRIPT "$PIN_ARGS" "$TOPAZ_ARGS" "$TAGS" $INPUT $num
 done

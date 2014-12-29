@@ -20,13 +20,6 @@ function updateDirectories {
 	mv err.txt output/$outdir/err.$suff.txt
 	mv log.txt output/$outdir/log.$suff.txt
 }
-echo "PIN-ARGS : $PIN_ARGS"
-echo "TOPAZ-ARGS : $TOPAZ_ARGS"
-echo "TAGS : $TAGS"
-echo "INPUT : $INPUT / $INPUT_FILE"
-echo "SEED : $SEED"
-sleep 2
-echo "...Starting.."
 
 OUTDIR=$TAGS
 SUFFIX="$INPUT.$SEED"
@@ -35,5 +28,5 @@ SUFFIX="$INPUT.$SEED"
 
 createDirectories $OUTDIR
 tpzrun $PIN_ARGS -- ./t.blackscholes $TOPAZ_ARGS @ 1 inputs/$INPUT_FILE price.txt  > log.txt
-./diff_output.py output/perfect.none/price.*.txt price.txt > err.txt
+./diff_output.py output/perfect.none*/price.*.txt price.txt > err.txt
 updateDirectories $OUTDIR $SUFFIX
