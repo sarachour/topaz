@@ -25,18 +25,10 @@ DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON_SCHEDULER)/schedule_node.o \
 		$(COMMON_SCHEDULER)/task_metric.o \
 		$(COMMON_DETECTOR)/checker.o \
-		$(COMMON_DETECTOR)/detector.o \
-		$(COMMON_DETECTOR)/idetector.o \
-		$(COMMON_DETECTOR)/control_idetector.o \
-		$(COMMON_DETECTOR)/uniform_idetector.o \
-		$(COMMON_DETECTOR)/mean_detector.o \
-		$(COMMON_DETECTOR)/control_detector.o \
-		$(COMMON_DETECTOR)/detector_manager.o \
 		$(COMMON_DETECTOR)/abs_detector.o \
 		$(COMMON_DETECTOR)/abs_scar_region_detector.o \
+		$(COMMON_DETECTOR)/abs_autoscar_region_detector.o \
 		$(COMMON_DETECTOR)/abs_solid_region_detector.o \
-		$(COMMON_DETECTOR)/dist_detector.o \
-		$(COMMON_DETECTOR)/distribution.o \
 		$(COMMON_DETECTOR)/control_system.o \
 		$(COMMON_DETECTOR)/stat.o \
 		$(COMMON_LOG)/logger.o \

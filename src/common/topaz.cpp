@@ -30,13 +30,10 @@ Topaz::Topaz(int argc, char ** argv){
 	
 	
 	this->config.DETECTOR_ENABLED = false;
-	this->config.SCAR_DETECTOR_ENABLED = false;
-	this->config.CROSSDETECTOR_ENABLED = false;
 	this->config.LOG_DETECTORS_ENABLED = false;
 	this->config.SCHEDULE_ENABLED = false;
 	this->config.GODMODE_ENABLED = false;
 	this->config.DISCARD_TASK = false;
-	this->config.PROB_DROP_ENABLED = false;
 	this->config.TIMERS_ENABLED = false;
 	this->config.DETECTOR_NBLOCKS = 5;
 	this->config.DETECTOR_TARGET = 0.01;
@@ -48,12 +45,12 @@ Topaz::Topaz(int argc, char ** argv){
 			this->config.DETECTOR_ENABLED=true;
 			if(i < argc-1){
 				i++; 
-				if(strcmp(argv[i], "c") == 0) 
-					this->config.DETECTOR_TYPE = DETECTOR_CONTROL;
-				else if(strcmp(argv[i], "m") == 0)
-					this->config.DETECTOR_TYPE = DETECTOR_MEAN;
-				else if(strcmp(argv[i], "d") == 0){
-					this->config.DETECTOR_TYPE = DETECTOR_DISTRIBUTION;
+				if(strcmp(argv[i], "x") == 0) 
+					this->config.DETECTOR_TYPE = DETECTOR_TYPE_SOLID;
+				else if(strcmp(argv[i], "s") == 0)
+					this->config.DETECTOR_TYPE = DETECTOR_TYPE_SCAR;
+				else if(strcmp(argv[i], "c") == 0){
+					this->config.DETECTOR_TYPE = DETECTOR_TYPE_AUTOSCAR;
 				}
 				else
 					i--;
@@ -74,8 +71,6 @@ Topaz::Topaz(int argc, char ** argv){
 				i--;
 			}
 		}
-		if(strcmp(argv[i], "--scar-detector") ==0 || strcmp(argv[i], "-sc") == 0)
-			this->config.SCAR_DETECTOR_ENABLED=true;
 		if(strcmp(argv[i], "--log-detector") ==0 || strcmp(argv[i], "-l") == 0)
 			this->config.LOG_DETECTORS_ENABLED=true;
 		if(strcmp(argv[i], "--godmode") ==0 || strcmp(argv[i], "-g") == 0)
@@ -99,12 +94,7 @@ Topaz::Topaz(int argc, char ** argv){
 	if(this->config.DETECTOR_ENABLED){
 		this->detector = new AbsDetectorManager(MAX_TASKS);
 		if(this->config.LOG_DETECTORS_ENABLED){
-			if(this->config.DETECTOR_TYPE == DETECTOR_CONTROL){
-				this->logdetector = new RealDetectorLogInfo("ldet.out",160); //make a ton of fields.
-			}
-			else if(this->config.DETECTOR_TYPE == DETECTOR_DISTRIBUTION){
-				this->logdetector = new RealDetectorLogInfo("ldet.out", 160);
-			}
+			this->logdetector = new RealDetectorLogInfo("ldet.out", 160);
 		}
 		else{
 			this->logdetector = new DummyDetectorLogInfo();
