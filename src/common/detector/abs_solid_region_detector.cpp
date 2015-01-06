@@ -1,4 +1,4 @@
-#include "abs_detectors.h"
+#include "solid_detector.h"
 #include "util.h"
 #include "stdio.h"
 #include "logger.h"

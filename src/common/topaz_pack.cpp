@@ -1,7 +1,6 @@
 #include "topaz.h"
 #include "task.h"
 #include "scheduler.h"
-#include "detector.h"
 #include "logger.h"
 
 #include "mpi.h"

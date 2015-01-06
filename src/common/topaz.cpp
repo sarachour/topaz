@@ -35,6 +35,7 @@ Topaz::Topaz(int argc, char ** argv){
 	this->config.GODMODE_ENABLED = false;
 	this->config.DISCARD_TASK = false;
 	this->config.TIMERS_ENABLED = false;
+	this->config.DETECTOR_TYPE = DETECTOR_TYPE_SOLID;
 	this->config.DETECTOR_NBLOCKS = 5;
 	this->config.DETECTOR_TARGET = 0.01;
 	

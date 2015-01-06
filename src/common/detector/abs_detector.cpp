@@ -1,4 +1,9 @@
 #include "abs_detectors.h"
+#include "solid_detector.h"
+#include "scar_detector.h"
+#include "dist_detector.h"
+#include "solid_detector.h"
+
 #include "util.h"
 #include "stdio.h"
 #include "topaz.h"

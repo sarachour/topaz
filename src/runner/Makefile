@@ -1,6 +1,6 @@
 ROOT=$(TOPAZ_ROOT)
 INCLUDE=-I$(ROOT)/include
-COPTS=-Wall -fPIC -O3 -lglpk
+COPTS=-Wall -fPIC -O3
 CC=mpic++
 LIB=$(ROOT)/lib
 COMMON=$(ROOT)/src/common
@@ -29,6 +29,7 @@ DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON_DETECTOR)/abs_scar_region_detector.o \
 		$(COMMON_DETECTOR)/abs_autoscar_region_detector.o \
 		$(COMMON_DETECTOR)/abs_solid_region_detector.o \
+		$(COMMON_DETECTOR)/abs_dist_region_detector.o \
 		$(COMMON_DETECTOR)/control_system.o \
 		$(COMMON_DETECTOR)/stat.o \
 		$(COMMON_LOG)/logger.o \

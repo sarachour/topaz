@@ -107,6 +107,9 @@ float GlobalStats::get_reexec(){
 	return n_rej/(n_total_test);
 
 }
+float GlobalStats::get_frac_rej_tp(){
+	return n_true/(n_total_train);
+}
 void GlobalStats::update_accept_rate(bool isacc){
 	this->n_acc*=STAT_OLD_WEIGHT;
 	this->n_rej*=STAT_OLD_WEIGHT;

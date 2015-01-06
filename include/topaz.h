@@ -5,7 +5,6 @@
 #include "machine.h"
 #include "scheduler.h"
 #include "logger.h"
-#include "logger.h"
 #include "pin_util.h"
 
 typedef enum DETECTOR_TYPE_T{
