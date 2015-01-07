@@ -62,6 +62,9 @@ void AbsDetectorManager::add(int taskid, int nouts){
 		case DETECTOR_TYPE_AUTOSCAR:
 			this->detectors[taskid] = new AbsAutoScarRegionDetector(nouts);
 			break;
+		case DETECTOR_TYPE_DIST:
+			this->detectors[taskid] = new AbsDistDetector(nouts);
+			break;
 		default:
 			this->detectors[taskid] = new AbsSolidRegionDetector(nouts);
 			break;
