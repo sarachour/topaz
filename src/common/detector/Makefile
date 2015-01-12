@@ -5,7 +5,6 @@ CC=mpic++
 
 all:  checker.o \
 	  vector.o \
-	  hypersphere.o \
 	  distribution.o \
 	  abs_detector.o \
 	  abs_solid_region_detector.o \

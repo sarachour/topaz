@@ -1,20 +1,24 @@
 #include "dist_detector.h"
+#include "topaz.h"
+
 
 AbsDistDetector::AbsDistDetector(int n){
 	this->dists = new Distribution[n];
 	this->n_dists = 0;
 	this->max_dists = n;
+	this->targ_fp = Topaz::topaz->config.DETECTOR_TARGET;
 }
 AbsDistDetector::~AbsDistDetector(){
 	delete this->dists;
 }
 bool AbsDistDetector::test(){
-	Vector pt(this->data, this->n);
+	vector_t pt = Vector::wrap(this->data, this->n);
+	
 	float lowest_score = -1;
 	int best_dist = -1;
 	//for each distribution
 	for(int i=0; i < this->n_dists; i++){
-		float sc = this->dists[i].dist(i);
+		float sc = this->dists[i].dist(pt);
 		float tsc = this->dists[i].thresh();
 		if(sc < tsc && (sc < lowest_score || best_dist == -1)){
 			best_dist = i;
@@ -29,18 +33,23 @@ bool AbsDistDetector::test(){
 	}
 	else return false;
 }
+float red_mag_diff(float a, float b, float r){
+	return r + pow(a - b, 2);
+}
 bool AbsDistDetector::train(){
-	Vector pt(this->data, this->n);
-	Vector ptk(this->data, this->n);
+	vector_t  pt = Vector::wrap(this->data, this->n);
+	vector_t ptk = Vector::wrap(this->data, this->n);
 	
-	float diff = pt.sub(ptk)->mag();
+	float diff = sqrt(Vector::reduce(&red_mag_diff, pt, ptk, 0));
 	bool is_err = diff > EPS ? true : false;
 	
 	//add a new distribution
 	if(this->n_dists < this->max_dists){
 		int nu = this->n_dists;
 		//update distribution
+		this->dists[nu].init(n);
 		this->dists[nu].update(ptk);
+		this->dists[nu].set_targ(targ_fp);
 		this->n_dists++;
 	}
 	float score=0;
@@ -51,6 +60,7 @@ bool AbsDistDetector::train(){
 	for(int i=0; i < this->n_dists; i++){
 		float c_score = this->dists[i].dist(pt) - this->dists[i].thresh();
 		float c_score_k = this->dists[i].dist(ptk) - this->dists[i].thresh();
+		
 		if(curr_dist < 0 || c_score < score){
 			curr_dist = i;
 			score = c_score;
