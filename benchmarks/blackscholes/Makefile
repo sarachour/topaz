@@ -5,7 +5,7 @@ CC=mpic++
 all: t.inputgen t.blackscholes blackscholes.topaz.c
 
 t.blackscholes: blackscholes.topaz.o
-	$(CC) -L$(LIB)  -ltopaz -lglpk blackscholes.topaz.o -o t.blackscholes
+	$(CC) -L$(LIB)  -ltopaz blackscholes.topaz.o -o t.blackscholes
 	
 %.topaz.c: %.tpz
 	tpzcc $<

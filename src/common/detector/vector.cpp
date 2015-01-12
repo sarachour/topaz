@@ -156,7 +156,7 @@ float DSVector::reduce(float (*fun)(float,float,float), ds_vector_t a, vector_t 
 		if(b.d[i] >= 0)
 			v = fun(a.pos[i],b.d[i],v);
 		else
-			v= fun(a.neg[i],b.d[i],v);
+			v = fun(a.neg[i],b.d[i],v);
 	}
 	return v;
 }
@@ -166,7 +166,7 @@ float DSVector::reduce(float (*fun)(float,float,float), ds_vector_t a, ds_vector
 		v = fun(a.pos[i],b.pos[i],v);
 	}
 	for(int i=0; i < a.n; i++){
-		v= fun(a.neg[i],b.neg[i],v);
+		v = fun(a.neg[i],b.neg[i],v);
 	}
 	return v;
 }
@@ -176,7 +176,7 @@ float DSVector::reduce(float (*fun)(float,float), ds_vector_t a, float v){
 		v = fun(a.pos[i],v);
 	}
 	for(int i=0; i < a.n; i++){
-		v= fun(a.neg[i],v);
+		v = fun(a.neg[i],v);
 	}
 	return v;
 }

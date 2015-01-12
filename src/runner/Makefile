@@ -31,6 +31,8 @@ DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON_DETECTOR)/abs_solid_region_detector.o \
 		$(COMMON_DETECTOR)/abs_dist_region_detector.o \
 		$(COMMON_DETECTOR)/control_system.o \
+		$(COMMON_DETECTOR)/distribution.o \
+		$(COMMON_DETECTOR)/vector.o \
 		$(COMMON_DETECTOR)/stat.o \
 		$(COMMON_LOG)/logger.o \
 		$(COMMON_LOG)/logger_util.o \
