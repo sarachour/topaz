@@ -1,0 +1,44 @@
+#include "stdio.h"
+#include "example_util.h"
+#include "stdlib.h"
+
+
+
+dist_set_t * DISTS = NULL;
+
+int topaz_main(int argc, char **argv){
+	if(argc < 4){
+		printf("USAGE: ndists npts file");
+		return 1;
+	}
+	char * filename = argv[3];
+	int n = atoi(argv[2]);
+	int nd = atoi(argv[1]);
+	
+	FILE * file = fopen(filename, "w");
+	
+	
+	printf("#dists: %d, #pts: %d, output: %s\n", nd, n, filename);
+	
+	
+	taskset sample(i=0; i < n; i+=1){
+		compute in(const int numdim = nd) out(float pt[2])
+		{
+			DISTS = sample_dists(DISTS, numdim, 2, pt);
+		}
+		abstract in(float pt) out(float v)
+		{
+			v1 = pt[0];
+			v2 = pt[1];
+		}
+		combine {
+			fprintf(file, "%f\t%f\n", pt[0],pt[1]);
+		}
+	}
+	
+	fclose(file);
+	
+	
+	return 0;
+}
+
