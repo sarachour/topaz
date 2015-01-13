@@ -58,6 +58,11 @@ then
 	TOPAZ_ARGS=$TOPAZ_ARGS" --discard --detect "${typemap[$TYPE]}" --detect-target "$AMOUNT" --detect-blocks "$BLKS
 	TAGS="$MACHINE.discard.$TYPE.p"$AMOUNT".b"$BLKS"$TAGS"
 fi
+
+if [[ "$TAGS" -eq "" ]]; then
+	TAGS="none"
+fi 
+
 for num in $(head $TOPAZ_ROOT/util/rands.txt -n $NRANDS);
 do
 	echo "PIN-ARGS : $PIN_ARGS"

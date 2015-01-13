@@ -13,25 +13,24 @@ function createDirectories {
 }
 
 function updateDirectories {
-	baseUpdateDirectories $1 $2
+	baseUpdateDirectories $outdir $suff
 	outdir=$1
 	suff=$2
-	mv price.txt output/$outdir/price.$suff.txt
+	mv out.txt output/$outdir/out.$suff.txt
 	mv err.txt output/$outdir/err.$suff.txt
 	mv log.txt output/$outdir/log.$suff.txt
+	mv figure.png output/$outdir/fig.$suff.png
 }
 
 OUTDIR=$TAGS
 SUFFIX="$INPUT.$SEED"
-
 #sutil_run_script.sh run_ex.sh 1.100 1 reexec:t=scar,b=5,p=0.10 heavy-dram d
-#sutil_run_script.sh run_ex.sh 1.100 1 basic heavy-dram 
+#sutil_run_script.sh run_ex.sh 1.100 1 none heavy-dram 
 
 ND=$(echo "$INPUT" | grep -o "^[0-9]*")
 NPTS=$(echo "$INPUT" | grep -o "[0-9]*$")
 
-echo $ND $NPTS
 createDirectories $OUTDIR
 tpzrun $PIN_ARGS -- ./ex1d $TOPAZ_ARGS @ $ND $NPTS out.txt  > log.txt
-./diff_output.py output/perfect.none*/price.*.txt price.txt > err.txt
+./disp_out.py out.txt
 updateDirectories $OUTDIR $SUFFIX
