@@ -13,9 +13,9 @@ function createDirectories {
 }
 
 function updateDirectories {
-	baseUpdateDirectories $outdir $suff
 	outdir=$1
 	suff=$2
+	baseUpdateDirectories $outdir $suff
 	mv out.txt output/$outdir/out.$suff.txt
 	mv err.txt output/$outdir/err.$suff.txt
 	mv log.txt output/$outdir/log.$suff.txt
