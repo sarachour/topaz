@@ -13,9 +13,9 @@ function createDirectories {
 }
 
 function updateDirectories {
-	baseUpdateDirectories $outdir $suff
 	outdir=$1
 	suff=$2
+	baseUpdateDirectories $outdir $suff
 	mv out.txt output/$outdir/out.$suff.txt
 	mv err.txt output/$outdir/err.$suff.txt
 	mv log.txt output/$outdir/log.$suff.txt
@@ -30,7 +30,7 @@ SUFFIX="$INPUT.$SEED"
 ND=$(echo "$INPUT" | grep -o "^[0-9]*")
 NPTS=$(echo "$INPUT" | grep -o "[0-9]*$")
 
-createDirectories $OUTDIR
+createDirectories $OUTDIR $SUFFIX
 tpzrun $PIN_ARGS -- ./ex1d $TOPAZ_ARGS @ $ND $NPTS out.txt  > log.txt
 ./disp_out.py out.txt
 updateDirectories $OUTDIR $SUFFIX

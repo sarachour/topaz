@@ -13,7 +13,6 @@ void AbsScarRegionDetector::log(){
 	int tid = DetectorLogInfo::getTaskId();
 	int rank = DetectorLogInfo::getRank();
 	int iid = DetectorLogInfo::getIID();
-	
 	for(int v=0; v < this->dim; v++){
 		int i=1;
 		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 

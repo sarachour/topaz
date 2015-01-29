@@ -26,7 +26,7 @@ int topaz_main(int argc, char **argv){
 		{
 			DISTS = sample_dists(DISTS, numdim, 2, pt);
 		}
-		abstract in(float pt) out(float v)
+		transform in(float pt) out(float v1, float v2)
 		{
 			v1 = pt[0];
 			v2 = pt[1];
