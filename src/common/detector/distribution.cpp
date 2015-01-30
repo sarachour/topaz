@@ -13,6 +13,7 @@ Distribution::~Distribution(){
 void Distribution::init(int amt){
 	this->d = amt; //dimensions in distribution
 	this->n = 0; //number of points
+	this->f = 1.0;
 	
 	this->mean = Vector::create(0.0,d);
 	this->sqsum = DSVector::create(0.0,d);
@@ -31,10 +32,10 @@ void K_update_sqsum(vector_t mean, vector_t v, ds_vector_t sqsum, float * weight
 	float WT_I = weights[1];
 	for(int i=0; i < v.n; i++){
 		if(v.d[i] >= mean.d[i]){
-			sqsum.pos[i] = weights[1]*sqsum.pos[i] + weights[0]*v.d[i]*v.d[i]; //square sum
+			sqsum.pos[i] = WT_I*sqsum.pos[i] + WT*v.d[i]*v.d[i]; //square sum
 		}
 		else{
-			sqsum.neg[i] = weights[1]*sqsum.pos[i] + weights[0]*v.d[i]*v.d[i]; //square sum
+			sqsum.neg[i] = WT_I*sqsum.pos[i] + WT*v.d[i]*v.d[i]; //square sum
 		}	
 	}
 }
@@ -66,11 +67,12 @@ float K_dist_sigma_norm(float sig, float diff, float dist){
 	return dist + pow(diff/sig,2);
 }
 float Distribution::dist(vector_t pt){
-	vector_t tmp = Vector::create(d);
-	Vector::foreach(K_dist_mean_diff,pt,this->mean,tmp);
-	float dist = DSVector::reduce(K_dist_sigma_norm,this->sigma,tmp,0);
-	Vector::dealloc(tmp);
-	
+	float dist = 0;
+	for(int i=0; i < pt.n; i++){
+		float diff = (pt.d[i] - this->mean.d[i]);
+		if(diff>0) dist += fabs(diff)/this->sigma.pos[i];
+		else dist += fabs(diff)/this->sigma.neg[i];
+	}
 	return sqrt(dist);
 }
 
@@ -82,9 +84,6 @@ float K_merge_weighted(float a, float b,float * args){
 	float ac = args[0];
 	float bc = args[1];
 	return a*ac + b*bc;
-}
-float K_merge_sigma(float ssq, float mn){
-	return sqrt(ssq - pow(mn,2));
 }
 void Distribution::merge(const Distribution& d){
 	float args[2];

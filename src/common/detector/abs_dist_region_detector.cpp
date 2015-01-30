@@ -13,14 +13,16 @@ AbsDistDetector::~AbsDistDetector(){
 }
 bool AbsDistDetector::test(){
 	vector_t pt = Vector::wrap(this->data, this->n);
-	
+	//automatically reject if bad.
+	for(int i=0; i < pt.n; i++){if(isBad(pt.d[i])) return false;}
 	float lowest_score = -1;
 	int best_dist = -1;
 	//for each distribution
 	for(int i=0; i < this->n_dists; i++){
 		float sc = this->dists[i].dist(pt);
 		float tsc = this->dists[i].thresh();
-		if(sc < tsc && (sc < lowest_score || best_dist == -1)){
+		printf("sc: %f, thresh: %f\n", sc,tsc);
+		if(!isBad(sc) && sc < tsc && (sc < lowest_score || best_dist == -1)){
 			best_dist = i;
 			lowest_score = sc;
 		}
@@ -40,6 +42,7 @@ bool AbsDistDetector::train(){
 	vector_t  pt = Vector::wrap(this->data, this->n);
 	vector_t ptk = Vector::wrap(this->data, this->n);
 	
+	//determine difference
 	float diff = sqrt(Vector::reduce(&red_mag_diff, pt, ptk, 0));
 	bool is_err = diff > EPS ? true : false;
 	

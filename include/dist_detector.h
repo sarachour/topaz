@@ -56,7 +56,6 @@ class Distribution {
 		ds_vector_t sigma; //standard deviation over
 		ds_vector_t sqsum;
 		vector_t mean;
-		vector_t tmp;
 		ControlSystem * ctrl_f; //factors to consider]
 		float p_pt;
 		float p_fp;

@@ -20,6 +20,7 @@ typedef enum TYPE_ID_ENUM{
 #define isNaN(f) (isnan(f))
 #define isInf(f) (f == INFINITY)
 #define isNegInf(f) (f==-INFINITY)
+#define isBad(f) (isNaN(f) || isInf(f) || isNegInf(f))
 
 #define CAST(expr, tid) (tid == FLOAT ? (float) (expr) : ( tid == DOUBLE ? (double) (expr) : ( tid == INT ? (int) (expr): (char) (expr))) )
 #define PCAST(expr, tid) (tid == FLOAT ? (float*) (expr) : ( tid == DOUBLE ? (double*) (expr) : ( tid == INT ? (int*) (expr): (char*) (expr))) )
