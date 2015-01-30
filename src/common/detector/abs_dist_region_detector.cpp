@@ -21,7 +21,6 @@ bool AbsDistDetector::test(){
 	for(int i=0; i < this->n_dists; i++){
 		float sc = this->dists[i].dist(pt);
 		float tsc = this->dists[i].thresh();
-		printf("sc: %f, thresh: %f\n", sc,tsc);
 		if(!isBad(sc) && sc < tsc && (sc < lowest_score || best_dist == -1)){
 			best_dist = i;
 			lowest_score = sc;
