@@ -20,39 +20,12 @@ class Vector{
 		static void foreach(float (*fun)(float,float), vector_t a, vector_t b, vector_t r);
 		static void foreach(float (*fun)(float,float,float*), vector_t a, vector_t b, vector_t r, float * args);
 		static float reduce(float (*fun)(float,float,float), vector_t a, vector_t b, float r);
+		static void print(vector_t d);
 		
 };
 
 
-/*
-class Vector {
-	private:
-		int n;
-		float * e; // only dealloc if not passed in.
-		float * ALLOC;
-	public:
-		Vector(float * e, int n);
-		Vector(int n);
-		Vector(float e, int n);
-		Vector(const Vector& v);
-		~Vector();
-		void set(int i, float f);
-		void set(float f);
-		float* get();
-		static Vector copy(const Vector v);
-		
-		Vector set(const Vector& v);
-		Vector add(const Vector v);
-		Vector sub(const Vector v);
-		Vector ediv(const Vector v);
-		Vector emul(const Vector v);
-		Vector emul(float f);
-		Vector epow(float f);
-		
-		float dot(const Vector v);
-		float mag();
-};
-*/
+
 typedef struct DS_VECTOR_T {
 	float * pos;
 	float * neg;
@@ -75,6 +48,7 @@ class DSVector {
 		static float reduce(float (*fun)(float,float,float), ds_vector_t a, vector_t b,float v);
 		static float reduce(float (*fun)(float,float,float), ds_vector_t a, ds_vector_t b, float v);
 		static float reduce(float (*fun)(float,float), ds_vector_t a, float v);
+		static void print(ds_vector_t a);
 };
 
 class Distribution {
@@ -82,6 +56,7 @@ class Distribution {
 		ds_vector_t sigma; //standard deviation over
 		ds_vector_t sqsum;
 		vector_t mean;
+		vector_t tmp;
 		ControlSystem * ctrl_f; //factors to consider]
 		float p_pt;
 		float p_fp;
@@ -110,6 +85,7 @@ class Distribution {
 		void update_ctrl();
 		
 		float thresh(){return f;}
+		void print();
 };
 
 class AbsDistDetector : public AbsDetector{

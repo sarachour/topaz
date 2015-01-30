@@ -1,5 +1,6 @@
 #include "dist_detector.h"
 #include "math.h"
+#include "stdio.h"
 
 Distribution::Distribution(){
 	
@@ -21,25 +22,37 @@ void Distribution::init(int amt){
 float K_update_mean(float mean, float v, float * args){
 	float WT = args[0];
 	float WT_I = args[1];
-	return WT_I*mean + WT*v;
+	float RES =  WT_I*mean + WT*v;
+	return RES;
 }
-float K_update_sqsum(float sqsum, float v, float * args){
-	float WT = args[0];
-	float WT_I = args[1];
-	return WT_I*sqsum + WT*v*v; //square sum
+
+void K_update_sqsum(vector_t mean, vector_t v, ds_vector_t sqsum, float * weights){
+	float WT = weights[0];
+	float WT_I = weights[1];
+	for(int i=0; i < v.n; i++){
+		if(v.d[i] >= mean.d[i]){
+			sqsum.pos[i] = weights[1]*sqsum.pos[i] + weights[0]*v.d[i]*v.d[i]; //square sum
+		}
+		else{
+			sqsum.neg[i] = weights[1]*sqsum.pos[i] + weights[0]*v.d[i]*v.d[i]; //square sum
+		}	
+	}
 }
-float K_update_sigma(float sqsum, float mean){
-	return sqrt(sqsum - pow(mean,2));
+void K_update_sigma(ds_vector_t sqsum, vector_t mean, ds_vector_t sigma){
+	for(int i=0; i < mean.n; i++){
+		float mi = mean.d[i]*mean.d[i];
+		sigma.pos[i] = sqrt(sqsum.pos[i] - mi);
+		sigma.neg[i] = sqrt(sqsum.neg[i] - mi);
+	}
 }
 void Distribution::update(vector_t pt){
 	float weights[2];
-	weights[0] = n < WINDOW_PTS ? 1.0/n : WT;
+	weights[0] = n < WINDOW_PTS ? 1.0/(n+1) : WT;
 	weights[1] = 1.0 - weights[0];
 	//update the running mean
 	Vector::foreach(K_update_mean, this->mean, pt, this->mean, weights);
-	DSVector::foreach(K_update_sqsum, this->sqsum, pt, this->sqsum, weights);
-	//update the running standard deviation
-	DSVector::foreach(K_update_sigma, this->sqsum, this->mean, this->sigma);
+	K_update_sqsum(this->mean, pt, this->sqsum, weights);
+	K_update_sigma(this->sqsum, this->mean, this->sigma);
 	n++;
 	
 }
@@ -79,9 +92,20 @@ void Distribution::merge(const Distribution& d){
 	args[1] = this->p_pt/(this->p_pt + d.p_pt);
 	Vector::foreach(K_merge_weighted, this->mean, d.mean,this->mean, args);
 	DSVector::foreach(K_merge_weighted, this->sqsum, d.sqsum,this->sqsum, args);
-	DSVector::foreach(K_merge_sigma,this->sqsum,this->mean,this->sigma);
+	K_update_sigma(this->sqsum, this->mean, this->sigma);
+	
 }
 
 void Distribution::update_ctrl(){
 	
+}
+void Distribution::print(){
+	printf("Mean:\n");
+	Vector::print(this->mean);
+	printf("SqSum:\n");
+	DSVector::print(this->sqsum);
+	printf("Sigma:\n");
+	DSVector::print(this->sigma);
+	printf("Stats:\n");
+	printf("nstd: %f, percent-pts: %f, percent-fp: %f\n", this->f, this->p_pt, this->p_fp);
 }

@@ -1,5 +1,5 @@
 #include "example_util.h"
-
+#include "stdio.h"
 void populate_dist(dist_t * d, int dim){
 	d->d = dim;
 	d->mean = new float[dim];
@@ -8,12 +8,19 @@ void populate_dist(dist_t * d, int dim){
 		d->mean[i] = rand_float(-1000,1000);
 		d->sigma[i] = rand_float(0,100);
 	}
+	printf("   mean: ");
+	for(int i=0; i < dim; i++) printf("%f\t", d->mean[i]);
+	printf("\n");
+	printf("   sigma: ");
+	for(int i=0; i < dim; i++) printf("%f\t", d->sigma[i]);
+	printf("\n");
 }
 void populate_dists(dist_set_t * d, int n, int dim){
 	seed_rand();
 	d->n = n;
 	d->d = new dist_t[n];
 	for(int i=0; i < n; i++){
+		printf("dist %d\n", i);
 		populate_dist(&d->d[i], dim);
 	}
 }

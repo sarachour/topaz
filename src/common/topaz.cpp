@@ -53,6 +53,9 @@ Topaz::Topaz(int argc, char ** argv){
 				else if(strcmp(argv[i], "c") == 0){
 					this->config.DETECTOR_TYPE = DETECTOR_TYPE_AUTOSCAR;
 				}
+				else if(strcmp(argv[i], "d") == 0){
+					this->config.DETECTOR_TYPE = DETECTOR_TYPE_DIST;
+				}
 				else
 					i--;
 			}
@@ -278,7 +281,6 @@ bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
 	}
 	va_end(arguments);
 	//checker.
-	
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_DET);
 	bool res= this->detector->run(tsk); //run train, test, etc
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_DET);

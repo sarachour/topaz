@@ -2,7 +2,7 @@
 #include "topaz.h"
 
 
-AbsDistDetector::AbsDistDetector(int n){
+AbsDistDetector::AbsDistDetector(int n) : AbsDetector(n){
 	this->dists = new Distribution[n];
 	this->n_dists = 0;
 	this->max_dists = n;
@@ -89,5 +89,8 @@ void AbsDistDetector::log(){
 	
 }
 void AbsDistDetector::print(){
-	
+	for(int i=0; i < this->n_dists; i++){
+		printf("## DETECTOR %d\n", i);
+		this->dists[i].print();
+	}
 }

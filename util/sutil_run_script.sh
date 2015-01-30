@@ -15,6 +15,7 @@ declare -A typemap
 
 typemap['scar']='s';
 typemap['solid']='x';
+typemap['dist']='d';
 typemap['autoscar']='c';
 
 if [[ $FLAGS == *g* ]]

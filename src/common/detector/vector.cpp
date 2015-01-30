@@ -1,5 +1,6 @@
 #include "dist_detector.h"
 #include "math.h"
+#include "stdio.h"
 
 vector_t Vector::create(int n){
 	vector_t v;
@@ -61,6 +62,14 @@ float Vector::reduce(float (*fun)(float,float,float), vector_t a, vector_t b, fl
 		return r;
 }
 
+void Vector::print(vector_t d){
+	for(int i=0; i < d.n; i++){
+		printf("\t%f", d.d[i]);
+	}
+	printf("\n");
+}
+
+
 ds_vector_t DSVector::create(int n){
 	ds_vector_t v;
 	v.n = n;
@@ -112,8 +121,10 @@ void DSVector::dealloc(ds_vector_t v){
 
 void DSVector::foreach(float (*fun)(float,float), ds_vector_t a, vector_t b, ds_vector_t e){
 	for(int i=0; i < a.n; i++){
-		if(b.d[i] >= 0) e.pos[i] = fun(a.pos[i], b.d[i]);
-		else e.neg[i] = fun(a.neg[i], b.d[i]);
+		if(b.d[i] >= 0) 
+			e.pos[i] = fun(a.pos[i], b.d[i]);
+		else 
+			e.neg[i] = fun(a.neg[i], b.d[i]);
 	}
 }
 
@@ -181,3 +192,13 @@ float DSVector::reduce(float (*fun)(float,float), ds_vector_t a, float v){
 	return v;
 }
 
+void DSVector::print(ds_vector_t d){
+	for(int i=0; i < d.n; i++){
+		printf("\t%f", d.pos[i]);
+	}
+	printf("\n");
+	for(int i=0; i < d.n; i++){
+		printf("\t%f", d.neg[i]);
+	}
+	printf("\n");
+}
