@@ -88,7 +88,35 @@ bool AbsDistDetector::train(){
 }
 
 void AbsDistDetector::log(){
-	
+	DetectorLogInfo * l = Topaz::topaz->getDLog();
+	bool isaccepted = DetectorLogInfo::getAccepted();
+	bool iscorr = this->compare();
+	int tid = DetectorLogInfo::getTaskId();
+	int rank = DetectorLogInfo::getRank();
+	int iid = DetectorLogInfo::getIID();
+	char name[255];
+	for(int v=0; v < this->n; v++){
+		int i=1;
+		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 
+		for(int d=0; d < this->n_dists; d++){
+			sprintf(name, "%d.npts", d);
+			l->set(i,name,this->dists[d].get_npts()); i++;
+			sprintf(name, "%d.pdist", d);
+			l->set(i,name,this->dists[d].get_prob_dist()); i++;
+			sprintf(name, "%d.pfp", d);
+			l->set(i,name,this->dists[d].get_prob_false_positive()); i++;
+			sprintf(name, "%d.nstd", d);
+			l->set(i,name,this->dists[d].get_nstd_to_acc()); i++;
+			sprintf(name, "%d.targfp", d);
+			l->set(i,name,this->dists[d].get_target_fp_rate()); i++;
+			sprintf(name, "%d.mean", d);
+			l->set(i,name,this->dists[d].get_mean().d[v]); i++;
+			sprintf(name, "%d.sigma.pos", d);
+			l->set(i,name,this->dists[d].get_sigma().pos[v]); i++;
+			sprintf(name, "%d.sigma.neg", d);
+			l->set(i,name,this->dists[d].get_sigma().neg[v]); i++;
+		}
+	}
 }
 void AbsDistDetector::print(){
 	for(int i=0; i < this->n_dists; i++){

@@ -108,3 +108,6 @@ void Distribution::print(){
 	printf("Stats:\n");
 	printf("nstd: %f, percent-pts: %f, percent-fp: %f\n", this->f, this->p_pt, this->p_fp);
 }
+
+
+

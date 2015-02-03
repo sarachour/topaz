@@ -67,8 +67,17 @@ class Distribution {
 		float f; // number of standard deviations to consider.
 		float targ_fp;
 	public:
+		
 		Distribution();
 		~Distribution();
+		vector_t get_mean(){return mean;}
+		ds_vector_t get_sigma(){return sigma;}
+		int get_npts(){return n;}
+		float get_prob_dist(){return p_pt;}
+		float get_prob_false_positive(){return p_fp;}
+		float get_nstd_to_acc(){return f;}
+		float get_target_fp_rate(){return targ_fp;}
+		
 		//standard distribution functions
 		void init(int n);
 		void update(vector_t pt); //update the mean, stddev appropriately
