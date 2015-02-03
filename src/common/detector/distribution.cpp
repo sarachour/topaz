@@ -42,8 +42,8 @@ void K_update_sqsum(vector_t mean, vector_t v, ds_vector_t sqsum, float * weight
 void K_update_sigma(ds_vector_t sqsum, vector_t mean, ds_vector_t sigma){
 	for(int i=0; i < mean.n; i++){
 		float mi = mean.d[i]*mean.d[i];
-		sigma.pos[i] = sqrt(sqsum.pos[i] - mi);
-		sigma.neg[i] = sqrt(sqsum.neg[i] - mi);
+		sigma.pos[i] = sqrt(fabs(sqsum.pos[i] - mi));
+		sigma.neg[i] = sqrt(fabs(sqsum.neg[i] - mi));
 	}
 }
 void Distribution::update(vector_t pt){
