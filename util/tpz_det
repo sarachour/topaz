@@ -80,7 +80,7 @@ def plot_data(pts,name):
 		plt.clf();
 		plt.plot(px,py,"xg",alpha=0.4);
 		plt.plot(ex,ey,"^r",alpha=0.4);
-		plt.savefig(prefix+'.'+str(i)+".png");
+		plt.savefig(prefix+'-'+str(i)+".png");
 	
 if(len(sys.argv) < 3):
 	print "logname graph-prefix task-id"

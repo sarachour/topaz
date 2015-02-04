@@ -96,8 +96,9 @@ void AbsDistDetector::log(){
 	int iid = DetectorLogInfo::getIID();
 	char name[255];
 	for(int v=0; v < this->n; v++){
-		int i=1;
+		int i=0;
 		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 
+		l->set(0,"n-dists",this->n_dists); i++;
 		for(int d=0; d < this->n_dists; d++){
 			sprintf(name, "%d.npts", d);
 			l->set(i,name,this->dists[d].get_npts()); i++;
