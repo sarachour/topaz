@@ -1,7 +1,7 @@
 ROOT=$(TOPAZ_ROOT)
 INCLUDE=-I$(ROOT)/include
 COPTS=-Wall -fPIC -O3
-CC=mpic++
+CC=g++
 LIB=$(ROOT)/lib
 COMMON=$(ROOT)/src/common
 COMMON_TASK=$(COMMON)/task
@@ -14,6 +14,7 @@ COMMON_UTIL=$(COMMON)/util
 
 DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON)/topaz_pack.o \
+		$(COMMON)/topaz_bulletin.o \
 		$(COMMON_EMUL)/pin_util.o \
 		$(COMMON_TASK)/task.o \
 		$(COMMON_TASK)/task_spec.o \

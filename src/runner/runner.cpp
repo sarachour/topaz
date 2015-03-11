@@ -3,21 +3,11 @@
 
 #include "stdio.h"
 #include "string.h"
-#include "mpi.h"
 
 #include "pin_util.h"
 
 int main(int argc, char ** argv){
-	int ret = 0;
-	MPI_Init(&argc, &argv);
 	
-	int argstp = 0;
-	for(int i=0; i < argc; i++){
-		if(strcmp(argv[i], "@") == 0){
-			argstp = i;
-			goto BREAK1;
-		}
-	}
 BREAK1:
 	Topaz::topaz = new Topaz(argstp,  argv);
 	int rank;

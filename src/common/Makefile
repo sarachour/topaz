@@ -3,7 +3,7 @@ INCLUDE=-I$(ROOT)/include
 COPTS=-Wall -fPIC -O3
 CC=mpic++
 
-all:  topaz.o topaz_pack.o subdirs
+all:  topaz.o topaz_pack.o bulletin.o subdirs
 
 subdirs:
 	cd task; make
