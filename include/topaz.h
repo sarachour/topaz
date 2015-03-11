@@ -6,6 +6,7 @@
 #include "scheduler.h"
 #include "logger.h"
 #include "pin_util.h"
+#include "bulletin.h"
 
 typedef enum DETECTOR_TYPE_T{
 	DETECTOR_TYPE_SOLID=0,

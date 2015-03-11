@@ -1,20 +1,33 @@
 #ifndef BULLETIN_H
 #define BULLETIN_H
+
+#include "stdio.h"
+#include "stdint.h"
+#include "util.h"
+
+
 /*
  * Shared Memory - allows for communication between tasks. 
  */
 class SharedMemory {
-	void * ptr;
+	typedef struct {
+		uint8_t id;
+		uint32_t size;
+	} shared_memory_entry_t;
+	uint8_t * ptr;
 	uint32_t offset;
 	uint32_t size;
 	uint32_t remainder;
+	int fd;
 	public:
-		SharedMemory(int size);
+		SharedMemory(const char * name, int size);
 		~SharedMemory();
-		allocate(int id, int size);
+		uint8_t * allocate(int id, uint32_t size);
+		uint8_t * get(int id, uint32_t& size);
 };
 //A circular buffer
-class CircularBuffer<T> {
+template <class T>
+class CircularBuffer {
 	typedef struct {
 		int h;
 		int t;
@@ -25,25 +38,27 @@ class CircularBuffer<T> {
 	T * data;
 	public:
 		CircularBuffer(int n);
-		size();
-		load(uint32_t * base);
-		create(SharedMemory& s);
-		create();
-		write(T v);
+		int size();
+		void load(void * base);
+		void create(void * base);
+		void create();
+		void write(T v);
 		T read();
 };
-class Buffer<T> {
+
+template <class T>
+class Buffer {
 	public:
 		Buffer(int n);
-		size();
-		load(uint32_t * base);
-		void create(SharedMemory & s);
+		int size();
+		void load(void * base);
+		void create(void * base);
 		void create();
 		void write(T * v);
 		T * get();
 		void copy(T * dest);
 	
-}
+};
 //A table with a particular structure. special memory mapped structure.
 class Table {
 	  typedef struct {
@@ -64,11 +79,11 @@ class Table {
 	public:
 	  Table(int rows, int cols);
 	  ~Table();
-	  define(int rowid, int col, int size); //definitions up top.
-	  size();
-	  load(uint32_t * base);
-	  create(SharedMemory& s); //creates a table
-	  create(); //mallocs a table
+	  void define(int rowid, int col, int size); //definitions up top.
+	  int size();
+	  void load(void * base);
+	  void create(void * base); //creates a table
+	  void create(); //mallocs a table
 	  void set(int i, int j, void * val);
 	  void* get(int i, int j); // get a table entry
 	  void copy(int i, int j, void * dest);
@@ -82,14 +97,22 @@ class Table {
  */
 class JobManager {
 	private:
+		typedef enum {
+			PENDING,
+			RUNNING,
+			DONE,
+			EMPTY=0
+		} job_status_t;
+		
 		typedef struct {
+			job_status_t status;
 			int jid; //job id
 			int tid; //task id
 		} job_info_t;
 		
 		void * base;
 		CircularBuffer<uint8_t> queue;
-		Table const_data; // const data is stored here, and the reference is used.
+		Buffer<void> * const_data; // const data is stored here, and the reference is used.
 		Table jobs; //jobs with hashes
 		
 	public:
@@ -130,6 +153,7 @@ class TaskSpecManager {
 		Table tasks;
 	
 	public:
-	
-}
+		TaskSpecManager();
+};
+
 #endif

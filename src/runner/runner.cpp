@@ -2,16 +2,31 @@
 #include "runner.h"
 
 #include "stdio.h"
-#include "string.h"
+#include "stdlib.h"
+#include "unistd.h"
 
 #include "pin_util.h"
 
 int main(int argc, char ** argv){
+	int npages = 5;
+	SharedMemory shared_buffer("shared.dat", 4*1024*npages);
+	Buffer<int> test(1);
 	
-BREAK1:
+	pid_t pid = fork();
+	if(pid == -1){
+		panic("fork failed");
+	}
+	else if(pid == 0){
+		printf("hello from the child process\n");
+		
+	}
+	else {
+		printf("hello from the parent process\n");
+		
+	}
+/*
 	Topaz::topaz = new Topaz(argstp,  argv);
 	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank); // rank is place index
 	pin_bind_model(rank);
 	argc -= argstp;
 	argv += argstp;
@@ -24,5 +39,6 @@ BREAK1:
 	
 	MPI_Finalize();
 	return ret;
-	
+*/
+
 }

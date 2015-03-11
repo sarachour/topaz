@@ -8,6 +8,7 @@ typedef void (*fxnptr)(Task *, Task *);
 typedef bool (*lrnptr)(Task *, Task *);
 
 float rand_norm();
+void panic(const char * message);
 
 typedef enum TYPE_ID_ENUM{
 	FLOAT=0,

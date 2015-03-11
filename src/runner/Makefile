@@ -14,7 +14,7 @@ COMMON_UTIL=$(COMMON)/util
 
 DEPOBJS=$(COMMON)/topaz.o \
 		$(COMMON)/topaz_pack.o \
-		$(COMMON)/topaz_bulletin.o \
+		$(COMMON)/bulletin.o \
 		$(COMMON_EMUL)/pin_util.o \
 		$(COMMON_TASK)/task.o \
 		$(COMMON_TASK)/task_spec.o \

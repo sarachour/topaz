@@ -4,7 +4,8 @@
 
 #include "stdlib.h"
 #include "stdio.h"
-#include "mpi.h"
+#include "string.h"
+
 #include "pin_util.h"
 
 #include <setjmp.h>
@@ -36,7 +37,6 @@ void segfault_sigaction(int signal, siginfo_t * si, void * arg){
 int worker_routine(int argc, char ** argv){
 	int ret = 0;
 	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	
 	topaz_init(argc, argv);
 	topaz_worker(argc, argv);
