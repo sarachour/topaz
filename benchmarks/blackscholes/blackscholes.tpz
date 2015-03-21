@@ -69,20 +69,23 @@ int nThreads;
 // See Hull, Section 11.8, P.243-244
 #define inv_sqrt_2xPI 0.39894228040143270286
 
-
 fptype CNDF ( fptype InputX ) 
 {
     int sign;
-
-    fptype OutputX;
-    fptype xInput;
-    fptype xNPrimeofX;
-    fptype expValues;
-    fptype xK2;
-    fptype xK2_2, xK2_3;
-    fptype xK2_4, xK2_5;
-    fptype xLocal, xLocal_1;
-    fptype xLocal_2, xLocal_3;
+    FPUREL(InputX);
+    FPDEF(OutputX); 
+    FPDEF(xInput);
+    FPDEF(xNPrimeofX);
+    FPDEF(expValues);
+    FPDEF(xK2);
+    FPDEF(xK2_2);
+    FPDEF(xK2_3);
+    FPDEF(xK2_4);
+    FPDEF(xK2_5);
+    FPDEF(xLocal);
+    FPDEF(xLocal_1);
+    FPDEF(xLocal_2);
+    FPDEF(xLocal_3);
 
     // Check for negative value of InputX
     if (InputX < 0.0) {
@@ -137,29 +140,35 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
                             fptype strike, fptype rate, fptype volatility,
                             fptype time, int otype, float timet )
 {
-    fptype OptionPrice;
+	FPUREL(sptprice);
+	FPUREL(strike);
+	FPUREL(rate);
+	FPUREL(volatility);
+	FPUREL(time);
+	
+    FPDEF(OptionPrice);
 
     // local private working variables for the calculation
-    fptype xStockPrice;
-    fptype xStrikePrice;
-    fptype xRiskFreeRate;
-    fptype xVolatility;
-    fptype xTime;
-    fptype xSqrtTime;
+    FPDEF(xStockPrice);
+    FPDEF(xStrikePrice);
+    FPDEF(xRiskFreeRate);
+    FPDEF(xVolatility);
+    FPDEF(xTime);
+    FPDEF(xSqrtTime);
 
-    fptype logValues;
-    fptype xLogTerm;
-    fptype xD1; 
-    fptype xD2;
-    fptype xPowerTerm;
-    fptype xDen;
-    fptype d1;
-    fptype d2;
-    fptype FutureValueX;
-    fptype NofXd1;
-    fptype NofXd2;
-    fptype NegNofXd1;
-    fptype NegNofXd2;    
+    FPDEF(logValues);
+    FPDEF(xLogTerm);
+    FPDEF(xD1); 
+    FPDEF(xD2);
+    FPDEF(xPowerTerm);
+    FPDEF(xDen);
+    FPDEF(d1);
+    FPDEF(d2);
+    FPDEF(FutureValueX);
+    FPDEF(NofXd1);
+    FPDEF(NofXd2);
+    FPDEF(NegNofXd1);
+    FPDEF(NegNofXd2);    
     
     xStockPrice = sptprice;
     xStrikePrice = strike;

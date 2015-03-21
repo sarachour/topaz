@@ -1,13 +1,14 @@
-ROOT=../..
+ROOT=$(TOPAZ_ROOT)
 INCLUDE=$(ROOT)/include
 LIB=$(ROOT)/lib
 CC=mpic++
+
 all: rand.o dist.o
 	
 %.topaz.c: %.tpz
 	tpzcc $<
 
-%.o: %.c $(INCLUDE)/topaz.h
+%.o: %.cpp $(INCLUDE)/topaz.h
 	$(CC) -O3 -I$(INCLUDE) -o $@ -c $<
 	
 clean:

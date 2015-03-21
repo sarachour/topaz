@@ -11,5 +11,6 @@ int central_routine(int argc, char ** argv){
 	Topaz::topaz->getTimers()->stop(MAIN_TIMER); // start computation timer
 	topaz_finish(argc, argv);
 	Topaz::topaz->finalize();
+	printf("+++ Main Exiting...\n");
 	return ret;
 }

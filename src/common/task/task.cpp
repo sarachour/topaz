@@ -3,6 +3,8 @@
 #include "stdio.h"
 #include "topaz.h"
 #include "logger.h"
+#include "pin_util.h"
+
 
 Task::Task(){
 	this->parcel.id = 0;
@@ -32,7 +34,9 @@ void Task::update(int id, int inst, int rank, int size, bool has_failed, bool is
 		}
 		this->size = size;
 		this->parcel.data = new char[this->header_size + this->size];
-		
+		if(!Topaz::topaz->isMain()){
+			pin_mark_urel((this->parcel.data + this->header_size), this->size);
+		}
 	}
 	
 }

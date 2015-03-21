@@ -262,7 +262,11 @@ void Topaz::finalize(){
 		printf("++ Worker...Finalizing\n");
 		
 	}
-	if(!this->isMain()) exit(0);
+	if(!this->isMain()){
+		printf("++ Worker...Exiting\n");
+		exit(0);
+	}
+	else printf("++ Main...Continuing\n");
 	
 }
 
@@ -318,7 +322,9 @@ void Topaz::execute(){
 		switch(code){
 			//shutdown request
 			case TRIGGER_SHUTDOWN:
+				printf("[WORKER] Triggering Finalize...\n");
 				this->finalize();
+				printf("[WORKER] Shutting down...\n");
 				break;
 		}
 	}
