@@ -84,3 +84,33 @@ void RealTimerInfo::print(){
 	}
 	
 }
+
+RealCommunicationInfo::RealCommunicationInfo(const char * filename){
+	file = fopen(filename, "w");
+	fprintf(file, "taskset\ttask\tsent\trecvd\n");
+	taskset = -1;
+	task = -1;
+	sent = 0;
+	recvd = 0;
+}
+
+void RealCommunicationInfo::write_line(){
+	fprintf(file,"%d\t%d\t%d\t%d\n", taskset, task, sent, recvd);
+}
+RealCommunicationInfo::~RealCommunicationInfo(){
+	fclose(file);
+}
+void RealCommunicationInfo::set_taskset(int id, int i){
+	if(taskset >= 0) this->write_line();
+	taskset = id;
+	task = i;
+	sent = 0;
+	recvd = 0;
+}
+void RealCommunicationInfo::send(int amt){
+	sent += amt;
+	
+}
+void RealCommunicationInfo::recv(int amt){
+	recvd += amt;
+}

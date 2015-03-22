@@ -72,6 +72,7 @@ typedef struct DET_LOG_NODE_T {
 } ldetector_node_t;
 
 
+
 class TimerInfo {
 	public:
 	virtual void start(int idx) = 0;
@@ -82,6 +83,8 @@ class TimerInfo {
 	virtual void stop_active()=0;
 	virtual void start_active()=0;
 };
+
+
 
 class RealTimerInfo : public TimerInfo{
 	#define N_TIMERS 10
@@ -292,5 +295,39 @@ class RealDetectorLogInfo : public DetectorLogInfo {
 	void set(int idx, const char * prop, double value);
 	void stop();
 	void print();
+};
+
+
+
+class CommunicationInfo {
+	public:
+		CommunicationInfo(){}
+		virtual void set_taskset(int id, int i)=0;
+		virtual void send(int amt)=0;
+		virtual void recv(int amt)=0;
+};
+
+class DummyCommunicationInfo : public CommunicationInfo {
+	public:
+		DummyCommunicationInfo(){}
+		~DummyCommunicationInfo(){}
+		void set_taskset(int id, int i){}
+		void send(int amt){}
+		void recv(int amt){}
+};
+
+class RealCommunicationInfo : public CommunicationInfo {
+		FILE * file;
+		int taskset;
+		int task;
+		int sent;
+		int recvd;
+		void write_line();
+	public:
+		RealCommunicationInfo(const char * filename);
+		~RealCommunicationInfo();
+		void set_taskset(int id, int i);
+		void send(int amt);
+		void recv(int amt);
 };
 #endif

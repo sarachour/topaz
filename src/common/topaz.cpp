@@ -88,10 +88,13 @@ Topaz::Topaz(int argc, char ** argv){
 		char name[128];
 		sprintf(name, "timer.%d.out", rank);
 		this->timer = new RealTimerInfo(name);
+		sprintf(name, "comm.%d.out", rank);
+		this->comm = new RealCommunicationInfo(name);
 	}
-	else
+	else {
 		this->timer = new DummyTimerInfo();
-	
+		this->comm = new DummyCommunicationInfo();
+	}
 	this->timer->stop_active();
 	this->timer->start(TOPAZ_TIMER);
 	
@@ -138,6 +141,8 @@ Topaz::~Topaz(){
 	delete this->scheduler;
 	delete this->input_task;
 	delete this->output_task;
+	delete this->timer;
+	delete this->comm;
 	if(this->config.GODMODE_ENABLED){
 		delete this->log;
 	}
@@ -334,8 +339,13 @@ void Topaz::execute(){
 
 bool Topaz::send(){
 	Topaz::topaz->getTimers()->stop_active();
+	
+	//set metadata for this communication
+	
 	if(this->isMain()){
 		Task * task = this->input_task;
+		this->comm->set_taskset(task->getId(), task->getRank());
+		
 		int mach = this->scheduler->schedule(task);
 		//update emulator with last recieved message
 		if(mach == this->machines->getMain().getId()){
@@ -350,6 +360,7 @@ bool Topaz::send(){
 	}
 	else{
 		Task * task = this->output_task;
+		this->comm->set_taskset(task->getId(), task->getRank());
 		this->machines->sendTo(this->machines->getMain().getId(), task);
 	}
 	Topaz::topaz->getTimers()->start_active();

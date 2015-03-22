@@ -39,7 +39,7 @@ fi
 if [[ $OP == *none* ]]
 then
 	
-	TAGS="$MACHINE.none"
+	TAGS="$MACHINE.none$TAGS"
 fi
 
 if [[ $OP == *reexec* ]]

@@ -32,6 +32,9 @@ class AbsDetectorManager;
 
 class Topaz {
   private:
+	typedef enum ERROR_CODES {
+		TRIGGER_SHUTDOWN,
+	} error_code_t;
 	MachineNetwork * machines;
 	Scheduler * scheduler;
 	//DetectorManager * detector;
@@ -39,9 +42,7 @@ class Topaz {
 	LogInfo * log;
 	TimerInfo * timer;
 	DetectorLogInfo * logdetector;
-	typedef enum ERROR_CODES {
-		TRIGGER_SHUTDOWN,
-	} error_code_t;
+	CommunicationInfo * comm;
 	//EMUL
 	bool isLocalExecute;
 	void packAllTaskData(bool doit);
@@ -82,6 +83,9 @@ class Topaz {
 	}
 	TimerInfo * getTimers(){
 		return this->timer;
+	}
+	CommunicationInfo * getCLog(){
+		return comm;
 	}
 	bool send(TASK_HANDLE taskid, int rank, ...);
 	bool send();

@@ -9,8 +9,12 @@ Machine::Machine(){
 }
 void Machine::sendTo(Task * t){
 	Topaz::topaz->getTimers()->stop_active();
+	
+	Topaz::topaz->getCLog()->send(t->getEffectiveSize());
+	
 	Topaz::topaz->getTimers()->start(COMM_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_DATA_TIMER);
+	
 	MPI_Send(t->getData(), t->getEffectiveSize() /*count*/, MPI_CHAR, 
 			  this->id /*dest*/, TASK_TAG/*tag*/, MPI_COMM_WORLD);
 	Topaz::topaz->getTimers()->stop(COMM_DATA_TIMER);
@@ -20,6 +24,9 @@ void Machine::sendTo(Task * t){
 void Machine::recieveFrom(Task * t){
 	MPI_Status status;
 	Topaz::topaz->getTimers()->stop_active();
+	//receive data
+	Topaz::topaz->getCLog()->recv(t->getMaxSize());
+	
 	Topaz::topaz->getTimers()->start(COMM_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_DATA_TIMER);
 	MPI_Recv(t->getData(), t->getMaxSize(), MPI_CHAR,
