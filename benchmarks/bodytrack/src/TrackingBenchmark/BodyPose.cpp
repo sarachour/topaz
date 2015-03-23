@@ -17,7 +17,7 @@
 #if defined(HAVE_CONFIG_H)
 # include "config.h"
 #endif
-
+#include "pin_util.H"
 #include <fstream>
 #include <iostream>
 #include "BodyPose.h"
@@ -28,8 +28,10 @@ using namespace std;
 //set all pose values
 void BodyPose::Set(float *angle_values,int n)
 {	mAngles.resize(n);
-	for(int i=0;i<n;i++)
+	for(int i=0;i<n;i++){
 		mAngles[i] = angle_values[i];
+		FPUREL(mAngles[i]);
+	}
 }
 
 // returns true if all body pose angles are between min and max values
@@ -89,11 +91,17 @@ bool PoseParams::Initialize(string fname)
 	{	cout << "Unable to open Pose Parameter file : " << fname << endl;
 		return false;
 	}
-	for(int i=0; i<N_ANGLES; i++)
+	for(int i=0; i<N_ANGLES; i++){
 		f >> stdAngle[i];
-	for(int i=0; i<N_ANGLES; i++)
+		FPUREL(stdAngle[i]);
+	}
+	for(int i=0; i<N_ANGLES; i++){
 		f >> minAngles[i];
-	for(int i=0; i<N_ANGLES; i++)
+		FPUREL(minAngles[i]);
+	}
+	for(int i=0; i<N_ANGLES; i++){
 		f >> maxAngles[i];
+		FPUREL(maxAngles[i]);
+	}
 	return true;
 }

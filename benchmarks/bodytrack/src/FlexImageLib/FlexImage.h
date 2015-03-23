@@ -20,7 +20,7 @@
 #if defined(HAVE_CONFIG_H)
 # include "config.h"
 #endif
-
+#include "pin_util.H"
 #include <string>
 #include "stdio.h"
 #include "FlexDefs.h"

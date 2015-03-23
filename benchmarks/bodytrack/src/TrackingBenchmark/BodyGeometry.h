@@ -28,6 +28,7 @@
 #include "BodyPose.h"
 #include "DMatrix.h"
 #include "SmallVectors.h"
+#include "pin_util.h"
 
 #define N_PARTS 10
 #define N_LENGTHS 18
@@ -46,7 +47,12 @@ public:
 	float limbs[N_PARTS][4];									//Radius of each body part
 	float lengths[N_LENGTHS];									//Length of each body parts								
 	
-	BodyParameters(){};
+	BodyParameters(){
+		for(int i=0; i < N_PARTS; i++){
+		//	FPNUREL(limbs[N_PARTS],4);
+		}
+		//FPNUREL(lengths,N_LENGTHS);
+	};
 	~BodyParameters(){};
 	
 	//Load the body shape parameters from a file
@@ -112,11 +118,16 @@ public:
 	float bottom, top, length;									//bottom,top radius and length of the cylinder
 	DMatrixf pose;										//3D pose of the cylinder
 	
-	KTCylinder(){};
+	KTCylinder(){
+		//FPUREL(bottom); FPUREL(top); FPUREL(length);
+	};
 	~KTCylinder(){};
 	
 	//Construct a cylinder given top and bottom radii, and length
-	KTCylinder(float b, float t, float l) {top = t; bottom = b; length = l; };
+	KTCylinder(float b, float t, float l) {
+		top = t; bottom = b; length = l; 
+		//FPUREL(bottom); FPUREL(top); FPUREL(length);
+	};
 	
 	//Set cylinder values given top and bottom radii, and length
 	void Set(float b, float t, float l) {top = t; bottom = b; length = l; };

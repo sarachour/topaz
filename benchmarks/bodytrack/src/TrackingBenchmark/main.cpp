@@ -121,6 +121,7 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 	{
 		gparticle = &particles[i][0]; 
 		mModel->SetupPose (particles[i], m_ncams, &valid, part_proj ); 
+		printf ("pose %d\n" , i ); 
 		//printf("particle %d\n", i);
  
 		Topaz::topaz->send (0 , i , (float*)part_proj , valid , (float*)mdl_prim , (char*)img_prim , m_ncams , m_nbits , m_width , m_height ); 

@@ -31,8 +31,16 @@
 class Point{
 public:
 	float x,y;
-	Point(){};
-	Point(float vx, float vy){x = vx; y=vy;};
+	Point(){
+		FPUREL(x);
+		FPUREL(y);
+	};
+	Point(float vx, float vy){
+		x = vx; 
+		y=vy;
+		FPUREL(x);
+		FPUREL(y);
+	};
 	~Point(){};
 	inline void Set(float vx, float vy){x = vx; y=vy;};
 	std::vector<float> toPrimitive();

@@ -35,9 +35,9 @@ SUFFIX="$INPUT.$SEED"
 #sutil_run_script.sh run_bs.sh 16K 1 reexec:t=scar,b=5,p=0.10 heavy-dram d
 
 createDirectories $OUTDIR
-tpzrun $PIN_ARGS -- src/TrackingBenchmark/bodytrack $TOPAZ_ARGS @ inputs/sequence$INPUT 4 $NFRAMES 4000 5 0 0 1 > log.txt
-mv inputs/sequence$SEQID/*.bmp .
-mv inputs/sequence$SEQID/poses.txt .
-./diff_outputs.py output/perfect.none*/poses.$SEQID.*.txt poses.txt > err.txt
+tpzrun $PIN_ARGS -- src/TrackingBenchmark/bodytrack $TOPAZ_ARGS @ inputs/sequenceB_$INPUT 4 $NFRAMES 4000 5 0 0 1 > log.txt
+mv inputs/sequenceB_$INPUT/*.bmp .
+mv inputs/sequenceB_$INPUT/poses.txt .
+./diff_outputs.py output/perfect.none*/poses.$INPUT.*.txt poses.txt > err.txt
 updateDirectories $OUTDIR $SUFFIX
 

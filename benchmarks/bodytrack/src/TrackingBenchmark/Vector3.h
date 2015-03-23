@@ -35,11 +35,21 @@ class Vector3 {
 public:
 	T x, y, z;
 	///constructors
-	Vector3() {};
-	Vector3(const T xv, const T yv, const T zv)	{ x = xv;  y = yv; z = zv; };
-	Vector3(const Vector3 &v)	{ x = v.x; y = v.y; z = v.z; };		//copy constructor
+	Vector3() {
+		UNKUREL(x,T); UNKUREL(y,T); UNKUREL(z,T);
+	};
+	Vector3(const T xv, const T yv, const T zv)	{ 
+		x = xv;  y = yv; z = zv; 
+		UNKUREL(x,T); UNKUREL(y,T); UNKUREL(z,T);
+	};
+	Vector3(const Vector3 &v)	{ 
+		x = v.x; y = v.y; z = v.z; 
+		UNKUREL(x,T); UNKUREL(y,T); UNKUREL(z,T);
+	};		//copy constructor
 
-	~Vector3() {};
+	~Vector3() {
+		
+	};
 
 	///basic vector operations
 

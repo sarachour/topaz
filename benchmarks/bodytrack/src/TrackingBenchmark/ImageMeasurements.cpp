@@ -43,6 +43,8 @@ inline double mag_rel(Point * p){
 //accumulate error at a given edge sample point (round to nearest integral point)
 inline void SampleEdgePointTask(float xf, float yf, FlexImage8u * EdgeMap, int * error, int * samplePoints)
 {
+	FPUREL(xf);
+	FPUREL(yf);
 	int x = int(xf + 0.5f), y = int(yf + 0.5f);
 	if((x >= 0) && (x < EdgeMap->Width()) && (y >= 0) && (y < EdgeMap->Height())) //check image bounds
 	{	int e = 255 - (*EdgeMap)(x,y);												//get value from image map and compute difference
@@ -71,17 +73,23 @@ void ImageMeasurements::EdgeErrorTask(ProjectedCylinder * ProjCyl, FlexImage8u *
 	if(n1 > MAX_ITERS) n1 = MAX_ITERS;
 	if(n2 > MAX_ITERS) n2 = MAX_ITERS;
 	float delta = 0;
+	float x;
+	float y;
+	FPUREL(x);
+	FPUREL(y);
 	//printf("loop %d %d (%f,%f) (%f,%f)\n", n1, n2, s1.x, s1.y, s2.x, s2.y);
 	for(int i = 0; i < n1; i++)												//generate sample points along each side of cylinder projection
-	{	float x = p1.x + delta * s1.x;
-		float y = p1.y + delta * s1.y;
+	{	
+		x = p1.x + delta * s1.x;
+		y = p1.y + delta * s1.y;
 		SampleEdgePointTask(x, y, EdgeMap, &ErrorSSD, samplePoints);				//accumulate error at computed edge points on side 1
   		delta += d1;
 	}
 	delta = 0;
 	for(int i = 0; i < n2; i++)
-	{	float x = p2.x + delta * s2.x;
-		float y = p2.y + delta * s2.y;
+	{	
+		x = p2.x + delta * s2.x;
+		y = p2.y + delta * s2.y;
 		SampleEdgePointTask(x, y, EdgeMap, &ErrorSSD, samplePoints);				//accumulate error at comptued edge points on side 2
 		delta += d2;
 	}
@@ -93,6 +101,9 @@ float ImageMeasurements::ImageErrorEdgeTask(FlexImage8u * ImageMaps, MultiCamera
 {
 	int samples = 0;
 	float error = 0;
+	IUREL(samples);
+	IUREL(error);
+	
 	for(int i = 0; i < nimgmaps; i++)							//for each camera, compute the edge map error term
 	{	
 		int nParts = (*ProjBodies)(i).Size();

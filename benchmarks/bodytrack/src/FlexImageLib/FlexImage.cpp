@@ -22,6 +22,7 @@
 #include <iomanip>
 #include "FlexImage.h"
 #include "FlexDataExchange.h"
+#include "pin_util.h"
 
 using namespace std;
 
@@ -257,6 +258,7 @@ void FlexImage<T,C>::Allocate()
 	//Allocate a new FlexImageStore to own pixel data and copy parameters
 	mStore = new FlexImageStore<T,C>(mSize.width, mSize.height);
 	mData = mStore->Data();
+	
 	mStepBytes = mStore->StepBytes();
 	mBpp = sizeof(T) * C;
 	mStatus = FlexStsNoError;

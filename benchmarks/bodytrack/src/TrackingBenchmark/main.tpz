@@ -107,6 +107,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 			before {
 				gparticle = &particles[i][0];
 				mModel->SetupPose(particles[i], m_ncams, &valid, part_proj);
+				printf("pose %d\n", i);
 				//printf("particle %d\n", i);
 			}
 			compute in (

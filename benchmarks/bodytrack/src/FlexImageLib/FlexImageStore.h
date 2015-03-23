@@ -30,6 +30,8 @@
 #endif
 
 #include "FlexDefs.h"
+#include "pin_util.h"
+
 
 template <class T, int C>
 class FlexImageStore { 
@@ -143,7 +145,11 @@ T *FlexImageStore<T,C>::FlexMalloc(int widthPixels, int heightPixels, int &StepB
 {
 	StepBytes = widthPixels * C * sizeof(T);			//calculate bytes per image line
 	StepBytes = int((StepBytes - 1) / 4) * 4 + 4;		//enforce multiples of 4
-	return (T *)malloc(size_t(StepBytes * heightPixels));
+	T* ptr = (T *)malloc(size_t(StepBytes * heightPixels));
+	
+	UNKNUREL2(ptr, StepBytes * heightPixels);
+	
+	return ptr;
 }
 
 #endif
