@@ -4,6 +4,8 @@ NTIME=$3
 RANDIDX=$4
 MACHINE=$5
 FLAGS=$6
+
+
 IN1="LWI5.$NMOL.$NTIME"
 IN2="random.in.$RANDIDX"
 
