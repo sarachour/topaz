@@ -35,7 +35,7 @@ SUFFIX="$INPUT.$SEED"
 #sutil_run_script.sh run_bs.sh 16K 1 reexec:t=scar,b=5,p=0.10 heavy-dram d
 
 createDirectories $OUTDIR
-tpzrun $PIN_ARGS  -- src/streamcluster $TOPAZ_ARGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$INPUT clust.txt 1 > log.txt
+tpzrun $PIN_ARGS  -- src/streamcluster $TOPAZ_ARGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$INPUT.txt clust.txt 1 > log.txt
 ./visualize.py inputs/$INPUT.txt clust.txt
 ./eval_output.py inputs/$FILENAME.txt clust.txt > output/$outdir/err..txt
 updateDirectories $OUTDIR $SUFFIX
