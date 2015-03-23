@@ -416,7 +416,6 @@ bool Topaz::receive(){
 		this->output_task->startUnpack();
 		
 		if(this->output_task->hasFailed()){
-			printf("detected failure...reexecuting and refreshing data.\n");
 			this->reexecute_failed(id, &ts);
 			this->packAllTaskData(true);
 			this->timer->stop(TOPAZ_TIMER);

@@ -6,6 +6,8 @@
 #include <fstream>
 #include "barnes.h"
 
+#include "pin_util.H"
+
 void node_cons(node_t * n){
 	n->type = 0; 
 	n->mass = 0.0; 
@@ -109,7 +111,12 @@ void body_fastgravsub(body_t * cbody, node_t * proc, double *ai, double pdrsq, d
   double drsq;
   double drabs, inc, mor3;
   double tmpv[NDIM];
-
+  DBLUREL(drsq);
+  DBLUREL(mor3);
+  DBLUREL(inc);
+  DBLUREL(drabs);
+  DBLNUREL(tmpv,NDIM);
+	
   drsq = pdrsq + epssq;
   drabs = sqrt(drsq);
   inc = proc->mass / drabs;
@@ -127,7 +134,10 @@ void body_fastgravsub(body_t * cbody, node_t * proc, double *ai, double pdrsq, d
 void body_gravsub(body_t * cbody, node_t * curr, double epsSq){
   double phii;
   double ai[NDIM];
-
+  //DBLUREL(phii);
+  //DBLUREL(epsSq);
+  //DBLNUREL(ai,NDIM);
+  
   phii = body_computeInter(cbody,curr,epsSq,ai);
   updatePhi(phii, cbody);
   
@@ -167,6 +177,9 @@ double body_subdiv(node_ref cbody, node_ref child, double *res, nbody_t * nb) {
   node_t * cbody_dat = __NODE(cbody, nb);
   node_t * child_dat = __NODE(child, nb);
   drsq = 0.0;
+  //DBLUREL(d);
+  //DBLUREL(drsq);
+  
   for (i = 0; i < NDIM; i++) {
     d = child_dat->pos.val[i]-cbody_dat->pos.val[i];
     drsq += d*d;
@@ -178,6 +191,12 @@ double body_subdiv(node_ref cbody, node_ref child, double *res, nbody_t * nb) {
 void body_walksub(node_ref cbody, node_ref head, double tolsq, double dsq, double epssq, nbody_t * nb){
 	double drsq;
 	double ai[NDIM];
+	//DBLUREL(drsq);
+	//DBLUREL(tolsq);
+	//DBLUREL(dsq);
+	//DBLUREL(epssq);
+	//DBLNUREL(ai,NDIM);
+	
 	body_t * cbody_data = bodyset_get(&nb->bodies, cbody); 
 	drsq = body_subdiv(cbody, head,ai, nb);
 	if((tolsq * drsq) < dsq){

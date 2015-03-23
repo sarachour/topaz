@@ -14,7 +14,6 @@ sigjmp_buf sig_escape;
 void main_loop(){
 	while(1){
 			if(sigsetjmp(sig_escape, 1)){
-				printf("SEGFAULT CAUGHT: continuing execution\n");
 				Topaz::topaz->output_task->setFailed();
 				Topaz::topaz->output_task->startPack();
 			}
