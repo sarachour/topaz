@@ -28,5 +28,5 @@ SUFFIX="$INPUT.$SEED"
 
 createDirectories $OUTDIR
 tpzrun $PIN_ARGS -- ./t.blackscholes $TOPAZ_ARGS @ 1 inputs/$INPUT_FILE price.txt  > log.txt
-./diff_output.py output/perfect.none*/price.*.txt price.txt > err.txt
+./diff_output.py output/perfect.none*/price.$INPUT*.txt price.txt > err.txt
 updateDirectories $OUTDIR $SUFFIX

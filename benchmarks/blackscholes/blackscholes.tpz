@@ -71,7 +71,7 @@ int nThreads;
 
 fptype CNDF ( fptype InputX ) 
 {
-    int sign;
+    IDEF(sign);
     FPUREL(InputX);
     FPDEF(OutputX); 
     FPDEF(xInput);
@@ -97,7 +97,8 @@ fptype CNDF ( fptype InputX )
     xInput = InputX;
  
     // Compute NPrimeX term common to both four & six decimal accuracy calcs
-    float tmp = -0.5f * InputX * InputX;
+    FPDEF(tmp);
+    tmp = -0.5f * InputX * InputX;
     expValues = t_exp(tmp);
     xNPrimeofX = expValues;
     xNPrimeofX = xNPrimeofX * inv_sqrt_2xPI;
@@ -145,6 +146,8 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
 	FPUREL(rate);
 	FPUREL(volatility);
 	FPUREL(time);
+	IUREL(otype);
+	FPUREL(timet);
 	
     FPDEF(OptionPrice);
 
@@ -230,11 +233,6 @@ int BlkSchlsEqEuroNoDiv() {
 			int ttimet = 0;
 			for(int q=0; q < NELEMS; q++){
 				float r1 = BlkSchlsEqEuroNoDiv_SINGLE(tsptprice[q], tstrike[q], trate[q], tvolatility[q],ttime[q],totype[q],ttimet);
-				//float r2 = BlkSchlsEqEuroNoDiv_SINGLE(tsptprice[q], tstrike[q], trate[q], tvolatility[q],ttime[q],totype[q],ttimet);
-				//float r3  = BlkSchlsEqEuroNoDiv_SINGLE(tsptprice[q], tstrike[q], trate[q], tvolatility[q],ttime[q],totype[q],ttimet);
-				//if(r1 != r2) tfprice[q] = r3;
-				//else if(r1 != r3) tfprice[q] = r2;
-				//else tfprice[q] = r1;
 				tfprice[q] = r1;
 			}
 		}

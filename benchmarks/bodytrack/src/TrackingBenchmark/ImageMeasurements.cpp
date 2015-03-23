@@ -77,6 +77,8 @@ void ImageMeasurements::EdgeErrorTask(ProjectedCylinder * ProjCyl, FlexImage8u *
 	float y;
 	FPUREL(x);
 	FPUREL(y);
+	FPUREL(delta);
+	IUREL(ErrorSSD);
 	//printf("loop %d %d (%f,%f) (%f,%f)\n", n1, n2, s1.x, s1.y, s2.x, s2.y);
 	for(int i = 0; i < n1; i++)												//generate sample points along each side of cylinder projection
 	{	
@@ -191,13 +193,15 @@ void ImageMeasurements::InsideErrorTask(ProjectedCylinder *ProjCyl, BinaryImage 
 	Point e1, e2;
 	if(n1 > MAX_ITERS) n1 = MAX_ITERS;
 	if(n2 > MAX_ITERS) n2 = MAX_ITERS;
+	float delta2;
+	FPUREL(delta1); FPUREL(delta2); FPUREL(d1); FPUREL(d2);
 	//printf("loop %d %d (%f,%f) (%f,%f)\n", n1, n2, s1.x, s1.y, s2.x, s2.y);
 	for(int i = 0; i < n1; i++)												//generate sample points along each side of cylinder projection
 	{   e1.Set(p1.x + delta1 * s1.x, p1.y + delta1 * s1.y);
 		e2.Set(p2.x + delta1 * s2.x, p2.y + delta1 * s2.y);
 		m.Set(e2.x - e1.x, e2.y - e1.y);									//get vector between edge points
 		delta1 += d1;
-		float delta2 = 0;
+		delta2 = 0;
 		for(int j = 0; j < n2; j++)											//generate interior samples
 		{	
 			SampleInsidePointTask(e1.x + delta2 * m.x, e1.y + delta2 * m.y, FGmap, error, samplePoints);
@@ -211,6 +215,8 @@ float ImageMeasurements::ImageErrorInsideTask(BinaryImage *ImageMaps, MultiCamer
 {
 	int samples = 0;
 	int error = 0;
+	IUREL(samples);
+	IUREL(error);
 	for(int i = 0; i < nbodies; i++)							//for each camera, compute the edge map error term
 	{	
 		int nParts = (*ProjBodies)(i).Size();
@@ -227,7 +233,8 @@ inline void SampleInsidePoint(float xf, float yf, const BinaryImage &FGmap, int 
 {
 	int x = int(xf + 0.5f), y = int(yf + 0.5f);
 	if((x >= 0) && (x < FGmap.Width()) && (y >= 0) && (y < FGmap.Height())) //check image bounds
-	{	int e = 1 - FGmap(x,y);												//get value from image map and compute difference
+	{	
+		int e = 1 - FGmap(x,y);												//get value from image map and compute difference
 		error += e;															//sum squared error values (since err = {1,0} same as sum of errors)
 		samplePoints++;														//count points sampled
 	}
@@ -246,15 +253,18 @@ void ImageMeasurements::InsideError(const ProjectedCylinder &ProjCyl, const Bina
 	float d1 = 1.0f / n1++;													//get fraction of side lengths per sample
 	float d2 = 1.0f / n2;
 	float delta1 = 0;
+	float delta2;
 	Point e1, e2;
 	for(int i = 0; i < n1; i++)												//generate sample points along each side of cylinder projection
-	{   e1.Set(p1.x + delta1 * s1.x, p1.y + delta1 * s1.y);
+	{   
+		e1.Set(p1.x + delta1 * s1.x, p1.y + delta1 * s1.y);
 		e2.Set(p2.x + delta1 * s2.x, p2.y + delta1 * s2.y);
 		m.Set(e2.x - e1.x, e2.y - e1.y);									//get vector between edge points
 		delta1 += d1;
-		float delta2 = 0;
+		delta2 = 0;
 		for(int j = 0; j < n2; j++)											//generate interior samples
-		{	SampleInsidePoint(e1.x + delta2 * m.x, e1.y + delta2 * m.y, FGmap, error, samplePoints);
+		{	
+			SampleInsidePoint(e1.x + delta2 * m.x, e1.y + delta2 * m.y, FGmap, error, samplePoints);
 			delta2 += d2;
 		}
 	}
@@ -265,6 +275,7 @@ float ImageMeasurements::ImageErrorEdge(std::vector<FlexImage8u> &ImageMaps, Mul
 {
 	int samples = 0;
 	float error = 0;
+	
 	for(int i = 0; i < (int)ImageMaps.size(); i++)							//for each camera, compute the edge map error term
 	{	int nParts = ProjBodies(i).Size();
 		for(int j = 0; j < nParts; j++)										//accumulate edge error for each body part, counting samples
@@ -281,6 +292,7 @@ float ImageMeasurements::ImageErrorInside(std::vector<BinaryImage> &ImageMaps, M
 {
 	int samples = 0;
 	int error = 0;
+	
 	for(int i = 0; i < (int)ImageMaps.size(); i++)							//for each camera, compute the edge map error term
 	{	int nParts = ProjBodies(i).Size();
 		
