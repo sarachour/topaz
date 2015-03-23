@@ -162,6 +162,10 @@ void h2o::intra_poteng(vector *v){
   double LocPot, DTS, R1, R2, RX, COS, DT, DR1, DR2, DR1S, DR2S, DRP;
   double t1[3], t2[3], t3[3], t4[3], h1[3], Ox[3], h2[3], VM[3];
   double tmp[3];
+  DBLUREL(LocPot); DBLUREL(DTS); DBLUREL(R1); DBLUREL(R2); DBLUREL(RX); DBLUREL(COS);
+  DBLUREL(DT); DBLUREL(DR1); DBLUREL(DR2); DBLUREL(DR1S); DBLUREL(DR2S); DBLUREL(DRP);
+  DBLNUREL(t1,3); DBLNUREL(t2,3); DBLNUREL(t3,3); DBLNUREL(t4,3);
+  DBLNUREL(h1,3); DBLNUREL(Ox,3); DBLNUREL(h2,3); DBLNUREL(VM,3);
 
   tvecClr(tmp);
   LocPot = 0.0;
@@ -288,7 +292,13 @@ void h2o::intraf(){
   double DT, DTS, DR1, DR1S, DR2, DR2S, R1S, R2S, F1, F2, F3;
   double vr1[3], vr2[3], dt1[3], dt3[3], dr11[3], dr23[3];
   double s[3], v1[3], v2[3], v3[3], h1[3], Ox[3], h2[3];
-
+  DBLUREL(DT); DBLUREL(DTS); DBLUREL(DR1); DBLUREL(DR1S); DBLUREL(DR2); DBLUREL(DR2S);
+  DBLUREL(R1S); DBLUREL(R2S); DBLUREL(F1); DBLUREL(F2); DBLUREL(F3);
+  DBLNUREL(vr1,3); DBLNUREL(vr2,3); DBLNUREL(dt1,3); DBLNUREL(dt3,3);
+  DBLNUREL(dr11,3); DBLNUREL(dr23,3); DBLNUREL(s,3); DBLNUREL(v1,3);
+  DBLNUREL(v2,3); DBLNUREL(v3,3); DBLNUREL(h1,3); DBLNUREL(Ox,3);
+  DBLNUREL(h2,3); 
+  
   SUM=0.0;
   R1=0.0;
   R2=0.0;
@@ -1032,6 +1042,11 @@ void ensemble_CSHIFT2(skratch_pad *p1, skratch_pad *p2, double L[3][15], double 
 
   // ---  XDIR ---
   double vm1,vm2,h1pos1,h1pos2,h2pos1,h2pos2,opos1,opos2;
+  DBLUREL(vm1); DBLUREL(vm2); 
+  DBLUREL(h1pos1); DBLUREL(h1pos2);
+  DBLUREL(h2pos1); DBLUREL(h2pos2);
+  DBLUREL(opos1); DBLUREL(opos2);
+  
   vm1 = p1->VM.val[0];
   vm2 = p2->VM.val[0];
   L[0][0] = vm1-vm2;
@@ -1137,7 +1152,15 @@ double ensemble_interf2_aux(skratch_pad *p1, skratch_pad *p2, double Res1[3][3],
   double gCUT2, gREF1, gREF2, gREF4;
   double loc_vir;
   double S[2];
+  
+  DBLUREL(G110); DBLUREL(G23); DBLUREL(G45); DBLUREL(TT1); DBLUREL(TT); DBLUREL(FTEMP);
+  DBLUREL(gCUT2); DBLUREL(gREF1); DBLUREL(gREF2); DBLUREL(gREF4);
+  DBLNUREL(S,2); DBLNUREL(CL[0],15); DBLNUREL(CL[1],15); DBLNUREL(CL[2],15);
+  DBLNUREL(RS,15); DBLNUREL(FF,15); DBLNUREL(RL,15); DBLNUREL(GG,15);
+  DBLNUREL(Res1[0],3); DBLNUREL(Res1[1],3); DBLNUREL(Res1[2],3);
+  DBLNUREL(Res2[0],3); DBLNUREL(Res2[1],3); DBLNUREL(Res2[2],3);
 
+  
   S[0] = parms->BOXH;
   S[1] = parms->BOXL;
   gCUT2 = parms->CUT2;

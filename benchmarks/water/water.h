@@ -2,7 +2,7 @@
 #define WATER_H
 
 #include "stdio.h"
-
+#include "pin_util.h"
 #define AUTOICHUNKSIZE 1
 #define AUTOJCHUNKSIZE 1
 
@@ -113,6 +113,7 @@ public:
     for (int i = 0; i < NDIM; i++) { 
       val[i] = 0.0;
     }
+    DBLNUREL(val,NDIM);
   }
   ~vector(){}
 void vecPrint() { printf("(%6.4f %6.4f %6.4f) ",val[0],val[1],val[2]); }
@@ -183,7 +184,10 @@ inline void vector::vecScale(double s){
 class acc_double {
   double val;
 public:
-  acc_double()			{ val = 0.0; }
+  acc_double()			{ 
+	  val = 0.0; 
+      DBLUREL(val);
+  }
   ~acc_double()			{ }
   double readval()		{ return val; }
   void writeval(double d)	{ val = d; }
