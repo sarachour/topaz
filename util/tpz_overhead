@@ -109,7 +109,7 @@ def analyze_overhead(m,mc,w,wc):
 	print "Serialization Overhead (Ser:Task)",ser_overhead 
 		
 def avg(key,m,w,mc,wc):
-	n = (mc[key] + wc[key]);
+	n = (mc['task'] + wc['task']);
 	if n == 0:
 		return 0;
 	return (m[key] + w[key])/n;
