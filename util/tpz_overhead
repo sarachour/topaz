@@ -78,28 +78,7 @@ def read_comm_profile(path):
 	result["sent"] = float(sent_val)/n;
 	result["recvd"] = float(recv_val)/n;
 	return result;
-	
-def analyze_detail(name,m):
-	m_t = m['main'] + m['topaz'] + m['task']+m['topaz-transform']+m['topaz-detect']
-	# + m['send']+m['serialize'];
-	m_top = m['topaz']+m['topaz-transform']+m['topaz-detect']
-	
-	p_m = (m['main'])/m_t*100.0;
-	p_t = (m_top)/m_t*100.0;
-	p_ta = (m['task'])/m_t*100.0;
-	p_c = (m['send'])/m_t*100.0;
-	p_s = (m['serialize']/m_t*100.0);
-	p_trans = (m['topaz-transform'])/m_top*100.0;
-	p_det =  (m['topaz-detect'])/m_top*100.0;
-	print "# ",name," Machine"
-	print "	Percent Main: ", p_m
-	print "	Percent Topaz: ", p_t
-	print "		+ Abstract Output: ",p_trans
-	print "		+ Detect: ",p_det
-	print "		+ Other: ",(100-p_det-p_trans)
-	print "	Percent Task: ", p_ta
-	#print "	Percent Communication:", p_c
-	#print "	Percent Serialization:", p_s
+
 def analyze_overhead(m,mc,w,wc):
 	#print "	#Main"
 	print wc
@@ -112,8 +91,12 @@ def avg(key,m,w,mc,wc):
 	n = (mc['task'] + wc['task']);
 	if n == 0:
 		return 0;
-	return (m[key] + w[key])/n;
-	
+	return (w[key])/n;
+
+def cum(key,m,w,mc,wc):
+	return w[key];
+
+
 def ratio(v,base):
 	return str(float(v)/base) + ":" + str(1) + "    ("+str(v)+","+str(base)+")";
 	
@@ -124,7 +107,25 @@ def analyze(d, c):
 	t_m = d[0]['data']['timers']; t_w = d[1]['data']['timers']
 	t_mc = d[0]['data']['cnts']; t_wc = d[1]['data']['cnts']
 	c_m = c[0]['data']; c_w = c[1]['data'];
-	
+	cum_task = cum('task',t_m,t_w,t_mc,t_wc);
+	cum_reexec = cum('task',t_m,{'task':0},t_mc,{'task':0})
+	cum_detect = cum('topaz-detect',t_m,t_w,t_mc,t_wc);
+	cum_transform = cum('topaz-transform',t_m,t_w,t_mc,t_wc);
+	cum_topaz = cum('topaz',t_m,t_w,t_mc,t_wc);
+	cum_main = cum('main',t_m,t_w,t_mc,t_wc);
+	cum_sent = c_m['sent']
+	cum_recv = c_w['sent']
+	print "### Totals"
+	print "Task: "+str(cum_task)
+	print "Reexec: "+str(cum_reexec)
+	print "Detect: "+str(cum_detect)
+	print "Transform: "+str(cum_transform)
+	print "Topaz: "+str(cum_topaz)
+	print "Main: "+str(cum_main)
+	print "cum Input Data (bytes): "+str(cum_sent)
+	print "cum Output Data (bytes): "+str(cum_recv)
+	print ""
+	print ""
 	avg_task = avg('task',t_m,t_w,t_mc,t_wc);
 	avg_reexec = avg('task',t_m,{'task':0},t_mc,{'task':0})
 	avg_detect = avg('topaz-detect',t_m,t_w,t_mc,t_wc);
@@ -144,14 +145,21 @@ def analyze(d, c):
 	print "Avg Output Data (bytes): "+str(avg_recv)
 	print ""
 	print ""
-	print "### Ratios (:Task Instruction)"
+	print "### Average Ratios (:Task Instruction)"
 	print "Reexec: "+ratio(avg_reexec, avg_task)
 	print "Detect: "+ratio(avg_detect, avg_task)	
 	print "Transform: "+ratio(avg_transform, avg_task)
 	print "Topaz: "+ratio(avg_topaz, avg_task)
 	print "Main: "+ratio(avg_main, avg_task)
 	print "Data (bytes/inst): "+ratio(avg_sent + avg_recv, avg_task)
-
+	print ""
+	print "###Total Ratios (:Task Instruction)"
+	print "Reexec: "+ratio(cum_reexec, cum_task)
+	print "Detect: "+ratio(cum_detect, cum_task)	
+	print "Transform: "+ratio(cum_transform, cum_task)
+	print "Topaz: "+ratio(cum_topaz, cum_task)
+	print "Main: "+ratio(cum_main, cum_task)
+	print "Data (bytes/inst): "+ratio(cum_sent + cum_recv, cum_task)
 	
 	
 def read():
