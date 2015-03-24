@@ -163,10 +163,12 @@ def analyze(d, c):
 	print ""
 	print "### OTHER"
 	overhead_topaz = cum_topaz / (cum_main+cum_task);
-	overhead_det = (cum_detect + cum_transform+cum_reexec) / (cum_main+cum_task);
+	overhead_det = (cum_detect + cum_transform) / (cum_main+cum_task);
+	overhead_reexec = (cum_reexec) / (cum_main+cum_task);
 	
-	print "Topaz Overhead: "+overhead_det
-	print "Detect Overhead: "+overhead_det	
+	print "Topaz Overhead: "+str(overhead_topaz)
+	print "Detect Overhead: "+str(overhead_det)
+	print "Reexec Overhead: "+str(overhead_reexec)
 	
 def read():
 	timers_list = {};

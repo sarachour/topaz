@@ -30,7 +30,7 @@ void BodyPose::Set(float *angle_values,int n)
 {	mAngles.resize(n);
 	for(int i=0;i<n;i++){
 		mAngles[i] = angle_values[i];
-		FPUREL(mAngles[i]);
+		//FPUREL(mAngles[i]);
 	}
 }
 
@@ -93,15 +93,12 @@ bool PoseParams::Initialize(string fname)
 	}
 	for(int i=0; i<N_ANGLES; i++){
 		f >> stdAngle[i];
-		FPUREL(stdAngle[i]);
 	}
 	for(int i=0; i<N_ANGLES; i++){
 		f >> minAngles[i];
-		FPUREL(minAngles[i]);
 	}
 	for(int i=0; i<N_ANGLES; i++){
 		f >> maxAngles[i];
-		FPUREL(maxAngles[i]);
 	}
 	return true;
 }

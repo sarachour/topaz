@@ -69,9 +69,7 @@ public:
 	DMatrix(float d1, float d2, float d3)
 	{	
 		Clear();
-		FPNUREL(data[0],4);
-		FPNUREL(data[1],4);
-		FPNUREL(data[2],4);
+		//FPNUREL(data[0],4);FPNUREL(data[1],4);FPNUREL(data[2],4);
 		data[0][0] = d1; data[1][1] = d2; data[2][2] = d3;
 	}
 

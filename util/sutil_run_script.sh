@@ -64,7 +64,9 @@ if [[ "$TAGS" -eq "" ]]; then
 	TAGS="none"
 fi 
 
-for num in $(head $TOPAZ_ROOT/util/rands.txt -n $NRANDS);
+
+#for num in $(head $TOPAZ_ROOT/util/rands.txt -n $NRANDS);
+for num in $(cat $TOPAZ_ROOT/util/rands.txt | tail -n+$NRANDS| head -n 1);
 do
 	echo "PIN-ARGS : $PIN_ARGS"
 	echo "TOPAZ-ARGS : $TOPAZ_ARGS"

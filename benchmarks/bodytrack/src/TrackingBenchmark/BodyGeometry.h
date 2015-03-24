@@ -48,10 +48,7 @@ public:
 	float lengths[N_LENGTHS];									//Length of each body parts								
 	
 	BodyParameters(){
-		for(int i=0; i < N_PARTS; i++){
-		//	FPNUREL(limbs[N_PARTS],4);
-		}
-		//FPNUREL(lengths,N_LENGTHS);
+		
 	};
 	~BodyParameters(){};
 	
@@ -84,11 +81,13 @@ public:
 		for(int i=0; i < N_PARTS; i++){
 			for(int j=0; j < 4; j++){
 				limbs[i][j] = src[k];
+				//FPUREL(limbs[i][j]);
 				k++;
 			}
 		}
 		for(int i=0; i < N_LENGTHS; i++){
 			lengths[i] = src[k];
+			//FPUREL(lengths[i]);
 			k++;
 		}
 		src += k;
@@ -125,12 +124,19 @@ public:
 	
 	//Construct a cylinder given top and bottom radii, and length
 	KTCylinder(float b, float t, float l) {
-		top = t; bottom = b; length = l; 
-		//FPUREL(bottom); FPUREL(top); FPUREL(length);
+		top = t; 
+		bottom = b; 
+		length = l; 
 	};
 	
 	//Set cylinder values given top and bottom radii, and length
-	void Set(float b, float t, float l) {top = t; bottom = b; length = l; };
+	void Set(float b, float t, float l) {
+		top = t; 
+		bottom = b; 
+		length = l; 
+		
+		//FPUREL(bottom); FPUREL(top); FPUREL(length);
+	};
 	//TODO
 	//TODO
 	int getPrimitiveSize(){
@@ -152,6 +158,9 @@ public:
 		bottom = src[0];
 		top = src[1];
 		length = src[2];
+		
+		//FPUREL(bottom); FPUREL(top); FPUREL(length);
+		
 		src += 3;
 		src = pose.setPrimitive(src);
 		return src;

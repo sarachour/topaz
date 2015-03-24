@@ -121,7 +121,6 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 	{
 		gparticle = &particles[i][0]; 
 		mModel->SetupPose (particles[i], m_ncams, &valid, part_proj ); 
-		printf ("pose %d\n" , i ); 
 		//printf("particle %d\n", i);
  
 		Topaz::topaz->send (0 , i , (float*)part_proj , valid , (float*)mdl_prim , (char*)img_prim , m_ncams , m_nbits , m_width , m_height ); 
@@ -167,6 +166,7 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
  if (i == 0 || mWeights[i] > best )//find highest likelihood particle
  {best = mWeights[i]; 
 			mBestParticle = i; 
+			printf ("weight: %f\n" , mWeights[i] ); 
 		}
 	}
 	mWeights *= fpType (1.0 )/ total; 

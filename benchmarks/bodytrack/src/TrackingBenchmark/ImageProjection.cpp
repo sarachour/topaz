@@ -28,24 +28,28 @@
 // Project a single 3D point onto a single camera
 inline void ProjectPoints(Vector3f &pt_3D, Point &pt_2D, Camera &camera)
 {	
+	float inv_Z, r2, r4, r6, a1, a2, a3, cdist;
+	//FPUREL(inv_Z); FPUREL(r2); FPUREL(r4); FPUREL(r6);
+	//FPUREL(a1); FPUREL(a2); FPUREL(a3); FPUREL(cdist);
+	
 	Vector3f X2 = camera.mc_ext * pt_3D;
-	float inv_Z = 1.00f /X2.z;
+	inv_Z = 1.00f /X2.z;
 	Point pt(inv_Z * X2.x,inv_Z * X2.y);
 
-	float r2 = (pt.x * pt.x) + (pt.y * pt.y);
-	float r4 = r2 * r2;
-	float r6 = r4 * r2;
-	float cdist = 1.00f + camera.kc[0] * r2 + camera.kc[1] * r4 + camera.kc[4] * r6;
-	Point pt2(cdist * pt.x,cdist * pt.y);
+	r2 = (pt.x() * pt.x()) + (pt.y() * pt.y());
+	r4 = r2 * r2;
+	r6 = r4 * r2;
+	cdist = 1.00f + camera.kc[0] * r2 + camera.kc[1] * r4 + camera.kc[4] * r6;
+	Point pt2(cdist * pt.x(),cdist * pt.y());
 
-	float a1 = 2 * pt.x * pt.y;
-	float a2 = r2 + 2 * (pt.x * pt.x);
-	float a3 = r2 + 2 * (pt.y * pt.y);
+	a1 = 2 * pt.x() * pt.y();
+	a2 = r2 + 2 * (pt.x() * pt.x());
+	a3 = r2 + 2 * (pt.y() * pt.y());
 
-	Point pt3(pt2.x + camera.kc[2] * a1 + camera.kc[2] * a2 , pt2.y + camera.kc[2] * a3 + camera.kc[2] * a1);
-	Point pt4(pt3.x + camera.alpha_c * pt3.y, pt3.y);
+	Point pt3(pt2.x() + camera.kc[2] * a1 + camera.kc[2] * a2 , pt2.y() + camera.kc[2] * a3 + camera.kc[2] * a1);
+	Point pt4(pt3.x() + camera.alpha_c * pt3.y(), pt3.y());
 
-	pt_2D.Set(camera.fc.x * pt4.x + camera.cc.x , camera.fc.y * pt4.y + camera.cc.y);
+	pt_2D.Set(camera.fc.x() * pt4.x() + camera.cc.x() , camera.fc.y() * pt4.y() + camera.cc.y());
 }
 
 // Project a cylinder onto a single camera

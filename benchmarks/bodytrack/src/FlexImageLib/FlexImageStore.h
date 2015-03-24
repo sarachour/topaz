@@ -147,7 +147,7 @@ T *FlexImageStore<T,C>::FlexMalloc(int widthPixels, int heightPixels, int &StepB
 	StepBytes = int((StepBytes - 1) / 4) * 4 + 4;		//enforce multiples of 4
 	T* ptr = (T *)malloc(size_t(StepBytes * heightPixels));
 	
-	UNKNUREL2(ptr, StepBytes * heightPixels);
+	//UNKNUREL2(ptr, StepBytes * heightPixels);
 	
 	return ptr;
 }

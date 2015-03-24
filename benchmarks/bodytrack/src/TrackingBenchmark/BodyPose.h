@@ -26,7 +26,7 @@
 
 #include <string>
 #include <vector>
-
+#include "pin_util.h"
 
 #define N_ANGLES 31
 
@@ -74,16 +74,19 @@ public:
 		stdAngle.resize(N_ANGLES);
 		for(int i=0; i < N_ANGLES; i++){
 			stdAngle[i] = src[i];
+			//FPUREL(stdAngle[i]);
 		}
 		src += N_ANGLES;
 		minAngles.resize(N_ANGLES);
 		for(int i=0; i < N_ANGLES; i++){
 			minAngles[i] = src[i];
+			//FPUREL(minAngles[i]);
 		}
 		src += N_ANGLES;
 		maxAngles.resize(N_ANGLES);
 		for(int i=0; i < N_ANGLES; i++){
 			maxAngles[i] = src[i];
+			//FPUREL(maxAngles[i]);
 		}
 		src += N_ANGLES;
 		return src;
@@ -144,6 +147,7 @@ public:
 		mAngles.resize(N_ANGLES);
 		for(int i=0; i < N_ANGLES; i++){
 			mAngles[i] = src[i];
+			//FPUREL(mAngles[i]);
 		}
 		src += N_ANGLES;
 		return src;
