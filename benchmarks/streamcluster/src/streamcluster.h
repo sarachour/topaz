@@ -142,7 +142,7 @@ int size_flt_primitive_pts(Points& p);
 int size_int_primitive_pts(Points& p);
 float* to_flt_primitive(Points& p, float * f);
 int* to_int_primitive(Points& p, int * f);
-float* from_primitives(Points& p, float * f, int * l);
+float* from_primitives(Points& p, float * f, int * l, bool& okay);
 void free_points(Points& p);
 float dist(Point p1, Point p2, int dim);
 

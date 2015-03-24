@@ -5,6 +5,9 @@ import math
 name1 = sys.argv[1]
 name2 = sys.argv[2]
 
+if len(sys.argv) < 3:
+	print("USAGE: pts clust")
+	sys.exit(1)
 fpts = open(name1, 'r');
 fclust = open(name2, 'r');
 # find closest cluster for each point.
