@@ -115,11 +115,15 @@ float TrackingModel::LogLikelihood(float * v, int n, bool * valid)
 	MultiCameraProjectedBody *projections = &mProjections;
 	ImageMeasurements *measurements = &mImageMeasurements;
 	//printf("made it into loglik\n");
+	printf("TR SET\n");
 	pose->Set(v, n);															//set pose angles and translation
 	*valid = false;
-
+	
+	printf("TR VALID\n");
 	if(!pose->ValidTask(&pose->Params()))										//test for a valid pose (reject impossible body angles)
 		return -1;
+	
+	printf("TR COMP\n");
 	body->ComputeGeometryTask(pose, &body->Parameters());		
 	if(!body->Valid())														//test for valid geometry (reject poses with intersecting body parts)
 		return -1;
@@ -154,7 +158,7 @@ float TrackingModel::LogLikelihoodMain(vector<float> & v, bool & valid)
 	float err = measurements.ImageErrorEdge(mEdgeMaps, projections);		//compute cylinder edge map term
 	err += measurements.ImageErrorInside(mFGMaps, projections);				//compute silhouette term
 	valid = true;
-	return -err;
+	return -err; // negative score
 }
 
 
@@ -253,10 +257,10 @@ bool TrackingModel::OutputBMP(const std::vector<float> &pose, int frame)
 				color = yellow;
 			else if(i == 9 || i == 0)
 				color = magenta;
-			FlexLine(dstImage, (int)c.mPts[0].x / 2, (int)c.mPts[0].y / 2, (int)c.mPts[1].x / 2, (int)c.mPts[1].y / 2, color);
-			FlexLine(dstImage, (int)c.mPts[1].x / 2, (int)c.mPts[1].y / 2, (int)c.mPts[2].x / 2, (int)c.mPts[2].y / 2, color);
-			FlexLine(dstImage, (int)c.mPts[2].x / 2, (int)c.mPts[2].y / 2, (int)c.mPts[3].x / 2, (int)c.mPts[3].y / 2, color);
-			FlexLine(dstImage, (int)c.mPts[3].x / 2, (int)c.mPts[3].y / 2, (int)c.mPts[0].x / 2, (int)c.mPts[0].y / 2, color);
+			FlexLine(dstImage, (int)c.mPts[0].x() / 2, (int)c.mPts[0].y() / 2, (int)c.mPts[1].x() / 2, (int)c.mPts[1].y() / 2, color);
+			FlexLine(dstImage, (int)c.mPts[1].x() / 2, (int)c.mPts[1].y() / 2, (int)c.mPts[2].x() / 2, (int)c.mPts[2].y() / 2, color);
+			FlexLine(dstImage, (int)c.mPts[2].x() / 2, (int)c.mPts[2].y() / 2, (int)c.mPts[3].x() / 2, (int)c.mPts[3].y() / 2, color);
+			FlexLine(dstImage, (int)c.mPts[3].x() / 2, (int)c.mPts[3].y() / 2, (int)c.mPts[0].x() / 2, (int)c.mPts[0].y() / 2, color);
 		}
 	}
 	string outFname = mPath + "Result" + str(frame, 4) + ".bmp";

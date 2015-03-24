@@ -30,19 +30,22 @@
 
 class Point{
 public:
-	float x,y;
+	float d[2];
 	Point(){
-		FPUREL(x);
-		FPUREL(y);
+		//FPUREL(d[0]);FPUREL(d[1]);
 	};
+	float x() const{return d[0];}
+	float y() const{return d[1];}
 	Point(float vx, float vy){
-		x = vx; 
-		y=vy;
-		FPUREL(x);
-		FPUREL(y);
+		d[0] = vx; 
+		d[1]=vy;
+		//FPUREL(d[0]); FPUREL(d[1]);
 	};
 	~Point(){};
-	inline void Set(float vx, float vy){x = vx; y=vy;};
+	inline void Set(float vx, float vy){
+		d[0] = vx; d[1]=vy;
+		//FPUREL(d[0]); FPUREL(d[1]);
+	};
 	std::vector<float> toPrimitive();
 	int getPrimitiveLength();
 	
@@ -50,19 +53,20 @@ public:
 		return 2;
 	};
 	float * getPrimitive(float * dest){
-		dest[0] = x;
-		dest[1] = y;
+		dest[0] = d[0];
+		dest[1] = d[1];
 		dest+=2;
 		return dest;
 	}
 	float * setPrimitive(float * src){
-		x = src[0];
-		y = src[1];
+		d[0] = src[0];
+		d[1] = src[1];
 		src+=2;
+		//FPUREL(d[0]);FPUREL(d[1]);
 		return src;
 	}
 	void print(){
-		printf("%f,%f\n", x,y);
+		printf("%f,%f\n", d[0],d[1]);
 	}
 };
 
@@ -129,13 +133,16 @@ public:
 		
 		int k=0;
 		alpha_c = src[k]; k++;
+		//FPUREL(alpha_c);
 		for(int i=0; i < 5; i++){
 			kc[i] = src[k];
+			//FPUREL(kc[i]);
 			k++;
 		}
 		for(int i=0; i < 3; i++){
 			for(int j=0; j < 3; j++){
 				Rc_ext[i][j] = src[k];
+				//FPUREL(Rc_ext[i][j]);
 				k++;
 			}
 		}

@@ -46,6 +46,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	const DMOrder ANGLE_DECOMPOSITION_ORDER = ZXY;
 
 	//create the torso conic cylinder and transform
+	//printf("conic\n");
 	DMatrixf globalTpelvis(angles->get(0), angles->get(1), angles->get(2), ANGLE_DECOMPOSITION_ORDER);					//create torso transform given euler angles and translation
 	globalTpelvis.SetTranslation(angles->get(3), angles->get(4), angles->get(5));
 	mCylinders[0].Set(params->limbs[0][0], params->limbs[0][1], params->lengths[0]);						//set the torso conic cylinder values
@@ -53,6 +54,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[0].pose, params->limbs[0][2], params->limbs[0][3], 1);								//scale transform by limb parameters
 
 	//create left thigh using geometric transformations from the torso and model parameters
+	//printf("pelv\n");
 	DMatrixf globalTlpelvis = (globalTpelvis * DMatrixf(YRot180));
 	PreTranslate(globalTlpelvis, 0, params->lengths[1], 0);
 	DMatrixf lthighTlpelvis(angles->get(6), angles->get(7), angles->get(8), ANGLE_DECOMPOSITION_ORDER);
@@ -62,6 +64,8 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[1].pose, params->limbs[1][2], params->limbs[1][3], 1);
 
 	//create left lower leg cascading from the left thigh transform and model parameters
+	
+	//printf("thigh\n");
 	PreTranslate(globalTlthigh, 0, 0, params->lengths[2]);
 	DMatrixf ltibiaTlthigh(0, angles->get(9), 0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTltibia = globalTlthigh * Inverse(ltibiaTlthigh);
@@ -70,6 +74,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[2].pose, params->limbs[2][2], params->limbs[2][3], 1); 
 
 	//create right thigh
+	//printf("rthigh\n");
 	DMatrixf globalTrpelvis = (globalTpelvis * DMatrixf(YRot180));
 	PreTranslate(globalTrpelvis, 0, -params->lengths[5], 0);
 	DMatrixf rthighTrpelvis(angles->get(10),angles->get(11),angles->get(12),ANGLE_DECOMPOSITION_ORDER);
@@ -79,6 +84,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[3].pose, params->limbs[3][2], params->limbs[3][3], 1);
 
 	//create left lower leg
+	//printf("lleg\n");
 	PreTranslate(globalTrthigh, 0, 0, params->lengths[6]);
 	DMatrixf rtibiaTrthigh(0, angles->get(13), 0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTrtibia = globalTrthigh * Inverse(rtibiaTrthigh);
@@ -91,6 +97,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	PreTranslate(globalTthorax, 0, 0, -params->lengths[0]);
 	
 	//create left upper arm
+	//printf("luarm\n");
 	DMatrixf lclavicleTlthorax(angles->get(14), angles->get(15), 0.0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTlclavicle = (globalTthorax * DMatrixf(XRot90)) * Inverse(lclavicleTlthorax);
 	PreTranslate(globalTlclavicle, 0, 0, -params->lengths[9]);
@@ -102,6 +109,7 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[5].pose, params->limbs[5][2], params->limbs[5][3], 1);
 	
 	//create left lower arm
+	//printf("llarm\n");
 	PreTranslate(globalTlshoulder, 0, 0, -params->lengths[10]);
 	DMatrixf lelbowTlshoulder(0.0, angles->get(19), 0.0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTlelbow = globalTlshoulder * Inverse(lelbowTlshoulder);
@@ -110,6 +118,8 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[6].pose, params->limbs[6][2], params->limbs[6][3], 1);
 	
 	//create right upper arm
+	
+	//printf("ruarm\n");
 	DMatrixf rclavicleTrthorax(angles->get(20), angles->get(21), 0.0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTrclavicle = globalTthorax * DMatrixf(XRot270) * Inverse(rclavicleTrthorax);
 	PreTranslate(globalTrclavicle, 0, 0, -params->lengths[13]);
@@ -120,6 +130,8 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[7].pose, params->limbs[7][2], params->limbs[7][3], 1);
 	
 	//create right lower arm
+	
+	//printf("rlarm\n");
 	PreTranslate(globalTrshoulder, 0, 0, -params->lengths[14]);
 	DMatrixf relbowTrshoulder(0.0, angles->get(25), 0.0, ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalTrelbow = globalTrshoulder * Inverse(relbowTrshoulder);
@@ -128,11 +140,16 @@ void BodyGeometry::ComputeGeometryTask(BodyPose * angles, BodyParameters * param
 	Scale(mCylinders[8].pose, params->limbs[8][2], params->limbs[8][3], 1);
 
 	//create head
+	
+	//printf("head\n");
 	DMatrixf headTthorax(angles->get(28), angles->get(29), angles->get(30), ANGLE_DECOMPOSITION_ORDER);
 	DMatrixf globalThead = (globalTthorax * DMatrixf(XRot180)) * Inverse(headTthorax);
 	mCylinders[9].Set(params->limbs[9][0], params->limbs[9][1], params->lengths[17]);
 	mCylinders[9].pose = globalThead;
 	Scale(mCylinders[9].pose, params->limbs[9][2], params->limbs[9][3], 1);
+	
+	
+	//printf("-----------\n");
 
 }
 //Create the geometric representation of the kinematic tree model given a body pose (angles and translation)
