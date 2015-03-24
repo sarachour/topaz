@@ -94,7 +94,7 @@ def avg(key,m,w,mc,wc):
 	return (w[key])/n;
 
 def cum(key,m,w,mc,wc):
-	return w[key];
+	return m[key] + w[key];
 
 
 def ratio(v,base):
@@ -160,7 +160,13 @@ def analyze(d, c):
 	print "Topaz: "+ratio(cum_topaz, cum_task)
 	print "Main: "+ratio(cum_main, cum_task)
 	print "Data (bytes/inst): "+ratio(cum_sent + cum_recv, cum_task)
+	print ""
+	print "### OTHER"
+	overhead_topaz = cum_topaz / (cum_main+cum_task);
+	overhead_det = (cum_detect + cum_transform+cum_reexec) / (cum_main+cum_task);
 	
+	print "Topaz Overhead: "+overhead_det
+	print "Detect Overhead: "+overhead_det	
 	
 def read():
 	timers_list = {};
