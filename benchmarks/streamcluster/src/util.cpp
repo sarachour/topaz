@@ -8,6 +8,7 @@
 #include <math.h>
 #include <sys/resource.h>
 #include <limits.h>
+#include "pin_util.h"
 
 #ifdef ENABLE_THREADS
 #include <pthread.h>
@@ -63,6 +64,7 @@ float* from_flt_primitive(Point& p, int dim, float * f){
     }
     return f;
 }
+
 int * from_int_primitive(Point& p, int * l){
     p.assign = *l; l++;
     return l;
@@ -76,7 +78,7 @@ int size_flt_primitive_pts(Points& p){
     return (size_flt_primitive_pt(p.dim)*p.num + 0);
 }
 int size_int_primitive_pts(Points& p){
-    return (size_int_primitive_pt()*p.num+2);
+    return (size_int_primitive_pt()*p.num+4);
 }
 float* to_flt_primitive(Points& p, float * f){
     for(int i=0; i < p.num; i++){
@@ -84,17 +86,40 @@ float* to_flt_primitive(Points& p, float * f){
     }
     return f;
 }
+
+int checksum(int var){
+	int res=0;
+	for(int i=0; i < 32; i++){
+		res+=(0b1<<i)>>i;
+	}
+	return res;
+}
 int* to_int_primitive(Points& p, int * f){
     *f = p.num; f++;
+    *f = p.num; f++;
+    *f = p.dim; f++;
     *f = p.dim; f++;
     for(int i=0; i < p.num; i++){
         f = to_int_primitive(p.p[i], f);
     }
     return f;
 }
-float* from_primitives(Points& p, float * f, int * l){
-    p.num = *l; l++;
-    p.dim = *l; l++;
+
+float* from_primitives(Points& p, float * f, int * l, bool& okay){
+    int lver,dver;
+    okay = true;
+    p.num = (*l); l+=1;
+    lver = *l; l+=1;
+    
+    p.dim = (*l); l+=1;
+    dver = *l; l+=1;
+    
+    if((p.num) != lver){
+		okay = false; return f;
+	}
+    if((p.dim) != dver){
+		okay = false; return f;
+	}
     p.p = new Point[p.num];
     for(int i=0; i < p.num; i++){
         f = from_flt_primitive(p.p[i], p.dim, f);
@@ -381,7 +406,6 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     long size = points->num;
     
     
-    
     double myhiz = 0;
     for (long kk=0;kk < size; kk++ ) {
         myhiz += dist(points->p[kk], points->p[0],
@@ -426,7 +450,6 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     /* this creates more consistancy between FL runs */
     /* helps to guarantee correct # of centers at the end */
     
-    
     numfeasible = selectfeasible_fast(points,&feasible,kmin);
     for( int i = 0; i< points->num; i++ ) {
         is_center[points->p[i].assign]= true;
@@ -463,6 +486,7 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
         
         /* if k is good, return the result */
         /* if we're stuck, just give up and return what we have */
+        printf("%d max=%d min=%d, (%f,%f)\n", kmax, kmin, hiz,loz);
         if (((k <= kmax)&&(k >= kmin))||((loz >= (0.999)*hiz)) )
         {
             break;
@@ -685,7 +709,7 @@ long chunksize, long centersize, char* outfile )
             fprintf(stderr, "error reading data!\n");
             exit(1);
         }
-        
+        printf("main:copy\n");
         points.num = numRead;
         for( int i = 0; i < points.num; i++ ) {
             points.p[i].weight = 1.0;
@@ -698,9 +722,11 @@ long chunksize, long centersize, char* outfile )
         //fprintf(stderr,"center_table = 0x%08x\n",(int)center_table);
         //fprintf(stderr,"is_center = 0x%08x\n",(int)is_center);
         
+        printf("main:localsearch\n");
         localSearch(&points,kmin, kmax,&kfinal); // parallel
         //fprintf(stderr,"finish local search\n");
         
+        printf("main:copy\n");
         contcenters(&points); /* sequential */
         if( kfinal + centers.num > centersize ) {
             //here we don't handle the situation where # of centers gets too large.
@@ -708,6 +734,8 @@ long chunksize, long centersize, char* outfile )
             exit(1);
             //break;
         }
+        
+        printf("main:copy centers\n");
         copycenters(&points, &centers, centerIDs, IDoffset); /* sequential */
         IDoffset += numRead;
         printf(">	%d centers:\n", centers.num);
