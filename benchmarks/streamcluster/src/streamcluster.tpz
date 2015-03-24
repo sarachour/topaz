@@ -388,6 +388,7 @@ int topaz_main(int argc, char **argv)
     long kmin, kmax, n, chunksize, clustersize;
     int dim;
     
+    printf("--- starting --- \n");
     #ifdef PARSEC_VERSION
     #define __PARSEC_STRING(x) #x
     #define __PARSEC_XSTRING(x) __PARSEC_STRING(x)
@@ -446,5 +447,6 @@ int topaz_main(int argc, char **argv)
     __parsec_bench_end();
     #endif
     
+    printf("--- starting --- \n");
     return 0;
 }
