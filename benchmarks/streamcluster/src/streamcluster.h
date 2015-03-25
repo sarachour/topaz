@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <fstream>
 
+
+#define chkbnd(x,n)  {if(x < 0) x = 0; else if(x>=n) x = n-1;}
+
 #define MAXNAMESIZE 1024 // max filename length
 #define SEED 1
 /* increase this to reduce probability of random error */
@@ -131,8 +134,8 @@ int size_flt_primitive_pt(int dim);
 int size_int_primitive_pt();
 float* to_flt_primitive(Point& p, int dim, float * f);
 int * to_int_primitive(Point& p, int * l);
-float* from_flt_primitive(Point& p, int dim, float * f);
-int * from_int_primitive(Point& p, int * l);
+int from_flt_primitive(Point& p, int dim, float * f);
+int from_int_primitive(Point& p, int * l);
 
 /*
 * POINT LIST SERIALIZATION FUNCTION

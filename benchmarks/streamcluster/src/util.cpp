@@ -55,20 +55,7 @@ int * to_int_primitive(Point& p, int * l){
     *l = p.assign; l++;
     return l;
 }
-float* from_flt_primitive(Point& p, int dim, float * f){
-    p.weight = *f; f++;
-    p.cost = *f; f++;
-    p.coord = new float[dim]; //allocate point
-    for(int i=0; i < dim; i++){
-        p.coord[i] = *f; f++;
-    }
-    return f;
-}
 
-int * from_int_primitive(Point& p, int * l){
-    p.assign = *l; l++;
-    return l;
-}
 
 /*
 * POINT LIST SERIALIZATION FUNCTION
@@ -104,28 +91,54 @@ int* to_int_primitive(Points& p, int * f){
     }
     return f;
 }
+int from_flt_primitive(Point& p, int dim, float * f){
+    p.weight = f[0]; 
+    p.cost = f[1];
+	chkbnd(dim,2);
+    p.coord = new float[dim]; //allocate point
+    for(int i=0; i < dim; i++){
+        p.coord[i] = f[i+2];
+    }
+    return dim+2;
+}
 
+int from_int_primitive(Point& p, int * l){
+    p.assign = l[0];
+    return 1;
+}
 float* from_primitives(Points& p, float * f, int * l, bool& okay){
     int lver,dver;
     okay = true;
-    p.num = (*l); l+=1;
-    lver = *l; l+=1;
+    p.num = l[0];
+    lver = l[1];
     
-    p.dim = (*l); l+=1;
-    dver = *l; l+=1;
-    
+    p.dim = l[2];
+    dver = l[3];
+    //printf("q\n");
     if((p.num) != lver){
 		okay = false; return f;
 	}
     if((p.dim) != dver){
 		okay = false; return f;
 	}
+	//printf("r\n");
+	chkbnd(p.num,2000);
     p.p = new Point[p.num];
+    //printf("mm\n");
+	int fmax = size_flt_primitive_pts(p);
+	int lmax = size_int_primitive_pts(p);
+    int li=4;
+    int fi=0;
+    //printf("m\n");
     for(int i=0; i < p.num; i++){
-        f = from_flt_primitive(p.p[i], p.dim, f);
-        l = from_int_primitive(p.p[i], l);
+		chkbnd(i,p.num);
+		chkbnd(fi,fmax);
+        fi += from_flt_primitive(p.p[i], p.dim, &f[fi]);
+		chkbnd(li,lmax);
+        li += from_int_primitive(p.p[i], &l[li]);
     }
-    return f;
+    //printf("q\n");
+    return &f[fi];
 }
 
 void free_points(Points& p){
@@ -459,6 +472,7 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     while(1) {
         /* first get a rough estimate on the FL solution */
         lastcost = cost;
+        printf("pfl\n");
         cost = pFL(points, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.1);
         
         /* if number of centers seems good, try a more accurate FL */
@@ -493,6 +507,7 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
         }
         
     }
+    printf("done\n");
     //clean up...
     free(feasible);
     *kfinal = k;

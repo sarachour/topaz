@@ -37,6 +37,6 @@ SUFFIX="$INPUT.$SEED"
 createDirectories $OUTDIR
 tpzrun $PIN_ARGS  -- src/streamcluster $TOPAZ_ARGS @ $MINCLUST $MAXCLUST $CHUNKSIZE $CLUSTERSIZE inputs/$INPUT.txt clust.txt 1 &> log.txt
 ./visualize.py inputs/$INPUT.txt clust.txt
-./eval_output.py inputs/$FILENAME.txt clust.txt > err.txt
+./eval_output.py inputs/$INPUT.txt clust.txt > err.txt
 updateDirectories $OUTDIR $SUFFIX
 

@@ -51,8 +51,6 @@ points */
 /*
 *  we should also compute the error between the points and the centers.
 */
-#define chkbnd(x,n)  {if(x < 0) x = 0; else if(x>=n) x = n-1;}
-#define ERR_GAIN 0
 double pgain(long x, Points *points, double z, long int *numcenters)
 {
     //my block
@@ -330,6 +328,9 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
 		//intshuffle(feasible, numfeasible);
         //taskset
         taskset pfl(i=0; i < iter; i+=1){
+			before{
+				printf("task\n");
+			}
             compute in(
 				int tx = feasible[i%numfeasible],
 				int tk = k[0], 
@@ -357,6 +358,9 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
 					pFL_helper(zpts,(bool *) t_iscent, t_centtbl, swcostdelta, swidx, tk, tz, tx,
 					&nsw, &ogain, &ok, (bool*)o_iscent, o_centtbl);
 				}
+				else
+					free_points(zpts);
+					
             }
             transform in(int foo) 
 				out(float t_gain)
