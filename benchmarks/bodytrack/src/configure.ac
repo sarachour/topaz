@@ -23,7 +23,7 @@ AC_HEADER_TIME
 AC_C_CONST
 AC_C_INLINE
 
-TOPAZ_ROOT="/mnt/hgfs/sachour/Documents/git/research/topaz"
+TOPAZ_ROOT=$(TOPAZ_ROOT)
 TOPAZ_INCLUDE=$TOPAZ_ROOT/include
 TOPAZ_LIB=$TOPAZ_ROOT/lib
 
@@ -43,7 +43,7 @@ CXXFLAGS="$CXXFLAGS -Wall -I$TOPAZ_INCLUDE"
 # Never warn about unknown pragmas
 CXXFLAGS="$CXXFLAGS -Wno-unknown-pragmas"
 
-LDFLAGS="$LDFLAGS -L$TOPAZ_LIB -ltopaz -lglpk"
+LDFLAGS="$LDFLAGS -L$TOPAZ_LIB -ltopaz"
 # Make sure VPATH is always defined
 #if test "x$VPATH" == "x"; then
 #  VPATH="."

@@ -5,7 +5,7 @@ CC=mpic++
 all: t.water water.topaz.c
 
 t.water: water.topaz.o water_util.o extfcts.o stat.o 
-	$(CC)  -L$(LIB)   -ltopaz -lglpk extfcts.o stat.o water_util.o water.topaz.o  -o t.water 
+	$(CC)  -L$(LIB)   -ltopaz extfcts.o stat.o water_util.o water.topaz.o  -o t.water 
 	
 %.o: %.cpp
 	$(CC) $(INCLUDE) -O3 -o $@ -c $<
