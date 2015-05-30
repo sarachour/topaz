@@ -5,7 +5,7 @@
 #include "logger.h"
 
 #include "pin_util.h"
-
+#include "string.h"
 #include "mpi.h"
 #include "stdio.h"
 #include "stdlib.h"
