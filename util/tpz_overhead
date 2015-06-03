@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 if(len(sys.argv) < 2):
-	print "tpz_enrgy path"
+	print "tpz_overhead path"
 	exit(1);
  
 path = sys.argv[1];
@@ -169,6 +169,13 @@ def analyze(d, c):
 	print "Topaz Overhead: "+str(overhead_topaz)
 	print "Detect Overhead: "+str(overhead_det)
 	print "Reexec Overhead: "+str(overhead_reexec)
+	
+	sram_savings = 0.8
+	dram_savings = 0.33
+	frac_dram = 0.4
+	frac_energy_consump = 0.7009
+	
+	
 	
 def read():
 	timers_list = {};

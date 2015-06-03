@@ -308,7 +308,8 @@ int topaz_main(int argc, char **argv)
     nThreads = atoi(argv[1]);
     char *inputFile = argv[2];
     char *outputFile = argv[3];
-
+	
+	printf("Input File: %s\n", inputFile);
     //Read input data from file
     file = fopen(inputFile, "r");
     if(file == NULL) {
@@ -351,7 +352,7 @@ int topaz_main(int argc, char **argv)
     }
 
     printf("Num of Options: %d\n", numOptions);
-    printf("Num of Runs: %d\n", NUM_RUNS);
+    printf("Num of Runs: %d\n", AUTO_NUM_RUNS);
 
 		#define PAD 256
 		#define LINESIZE 64
@@ -378,8 +379,11 @@ int topaz_main(int argc, char **argv)
     printf("Size of data: %ld\n", numOptions * (sizeof(OptionData) + sizeof(int)));
 
     //serial version
-    for(i=0; i < AUTO_NUM_RUNS; i++)
+    for(i=0; i < AUTO_NUM_RUNS; i++){
+			printf("iteration %d\n",i);
 			BlkSchlsEqEuroNoDiv();
+			printf("done\n");
+	}
 
 		printf("writing to file\n");
     //Write prices to output file
