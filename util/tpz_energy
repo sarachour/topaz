@@ -1,0 +1,146 @@
+#!/usr/bin/python
+
+import sys
+import re
+
+
+	
+def read_time_from_profile(path):
+	m = open(path+"/insmix.0.txt",'r');
+	w = open(path+"/insmix.1.txt",'r');
+
+	nominal = 0.0
+	outdet = 0.0
+	worker = 0.0
+	for line in m:
+		try:
+			a = re.match('TIMER\[([0-9]+)\]	([0-9\.]*)', line)
+			typ = int(a.group(1));
+			amt = float(a.group(2));
+			
+			if(typ == 2 or typ == 3):
+				continue
+				
+			outdet += amt
+			
+			if(typ != 6 and typ != 7 and typ != 4):
+				nominal += amt
+		except:
+			continue
+	
+	for line in w:
+		try:
+			a = re.match('TIMER\[([0-9]+)\]	([0-9\.]*)', line)
+			typ = int(a.group(1));
+			amt = float(a.group(2));
+			
+			if(typ == 2 or typ == 3):
+				continue
+			
+			worker += amt
+			
+		except:
+			continue
+	
+	data = {};
+	data["worker"] = worker
+	data["nominal"] = nominal + worker
+	data["outdet"] = outdet + worker
+	
+	print data
+	return data
+	
+def read_profile(path):
+	m = open(path+"/insmix.0.txt",'r');
+	w = open(path+"/insmix.1.txt",'r');
+	
+	L1_LINES = -1;
+	L2_LINES = -1;
+	
+	L1_ACCS = -1;
+	L2_ACCS = -1;
+	
+	for line in w:
+		try:
+			m = re.match('Percent Approximate Lines: ([0-9\.]*)%', line)
+			
+			frac = float(m.group(1))
+			if(L1_LINES < 0):
+				L1_LINES = frac
+			else:
+				L2_LINES = frac
+			
+				
+		except:
+			try:
+				m = re.match('Percent Approximate Accesses: ([0-9\.]*)%', line)
+				
+				frac = float(m.group(1))
+				if(L1_ACCS < 0):
+					L1_ACCS = frac
+				else:
+					L2_ACCS = frac
+			except:
+				continue
+	
+	data = {};
+	data['l1'] = {};
+	data['l2'] = {};
+	data['l1']['lines'] = L1_LINES;
+	data['l1']['accs'] = L1_ACCS
+	data['l2']['lines'] = L2_LINES;
+	data['l2']['accs'] = L2_ACCS
+	
+	print data
+	return data
+	
+	#for line in w:
+	#	print line
+			
+def analyze(hwstats, timerstats):
+	SRAM_SAV = 0.8;
+	DRAM_SAV = 0.33;
+	
+	FRAC_DRAM_NOREF = 0.40;
+	
+	DRAM_SYS_CONS = 0.7009
+	SRAM_SYS_CONS = 0.2996
+	
+	L1I_SIZE = 16
+	L1I_ASSOC = 4
+	L1I_LINE = 16
+	
+	L1D_SIZE = 16
+	L1D_ASSOC = 4
+	L1D_LINE = 16
+	
+	L2_SIZE = 64
+	L2_ASSOC = 4
+	L2_LINE = 16
+	
+	
+	
+	L1D_APPROX = hwstats["l1"]["accs"]/100.0;
+	L2_APPROX = hwstats["l2"]["accs"]/100.0;
+	
+	HIERARCHY_SAV = (L1D_APPROX*L1D_SIZE+L2_APPROX*L2_SIZE)/(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
+	MAX_HIERARCHY_SAV = float(L1D_SIZE+L2_SIZE)/float(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
+	
+	print(str(HIERARCHY_SAV)+","+str(MAX_HIERARCHY_SAV));
+	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
+	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV*SRAM_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
+	OUTDET_SAV = timerstats["nominal"]/timerstats["outdet"]*NOMINAL_SAV
+	
+	
+	print "Maximum Savings: "+str(MAX_SAV*100)
+	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
+	print "With Outdet Savings: "+str(OUTDET_SAV*100)
+	
+if len(sys.argv) < 2:
+	print "USAGE: tpz_energy2 hw_stats_dir"
+
+hw_stats_path = sys.argv[1]
+tim = read_time_from_profile(hw_stats_path)
+hw = read_profile(hw_stats_path)
+
+analyze(hw,tim)
