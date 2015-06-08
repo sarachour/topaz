@@ -4,7 +4,60 @@ import sys
 import re
 
 
+#	0: "topaz",
+#	1: "main",
+#	2: "comm",
+#	3: "send",
+#	4: "task",
+#	5: "serialize",
+#	6: "topaz-transform",
+#	7: "topaz-detect"
 	
+def read_timer(path):
+	m = open(path+"/timer.0.out",'r');
+	w = open(path+"/timer.1.out",'r');
+	
+	nominal = 0.0
+	outdet = 0.0
+	worker = 0.0
+	for line in m:
+		try:
+			args = line.split("\t");
+			typ = int(args[0]);
+			amt = float(args[1]);
+			
+			if(typ == 2 or typ == 3):
+				continue
+				
+			outdet += amt
+			
+			if(typ != 6 and typ != 7 and typ != 4):
+				nominal += amt
+		except:
+			continue
+	
+	for line in w:
+		try:
+			args = line.split("\t");
+			typ = int(args[0]);
+			amt = float(args[1]);
+			
+			if(typ == 2 or typ == 3):
+				continue
+			
+			worker += amt
+			
+		except:
+			continue
+	
+	data = {};
+	data["worker"] = worker
+	data["nominal"] = nominal
+	data["outdet"] = outdet
+	
+	print data
+	return data
+
 def read_time_from_profile(path):
 	m = open(path+"/insmix.0.txt",'r');
 	w = open(path+"/insmix.1.txt",'r');
@@ -136,10 +189,12 @@ def analyze(hwstats, timerstats):
 	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
 	print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	
-if len(sys.argv) < 2:
-	print "USAGE: tpz_energy2 hw_stats_dir"
+if len(sys.argv) < 3:
+	print "USAGE: tpz_energy2 hw_stats_dir timer_dir"
 
 hw_stats_path = sys.argv[1]
+timer_path = sys.argv[2];
+#tim = read_timer(timer_path)
 tim = read_time_from_profile(hw_stats_path)
 hw = read_profile(hw_stats_path)
 

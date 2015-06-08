@@ -32,9 +32,9 @@ function updateDirectories {
 
 OUTDIR=$TAGS
 SUFFIX="$INPUT.$SEED"
-
-#sutil_run_script.sh run_body.sh 1 4 none iact-med-dynamic
-#sutil_run_script.sh run_body.sh 1 4 reexec:t=scar,b=5,p=0.10 iact-med-dynamic d
+#sutil_run_script.sh run_body.sh 1 4 none iact-med-static
+#sutil_run_script.sh run_body.sh 1 6 none iact-med-dynamic
+#sutil_run_script.sh run_body.sh 1 6 reexec:t=scar,b=5,p=0.10 iact-med-dynamic d
 
 createDirectories $OUTDIR
 tpzrun $PIN_ARGS -- src/TrackingBenchmark/bodytrack $TOPAZ_ARGS @ inputs/sequenceB_$INPUT 4 $NFRAMES $NPOSES 5 0 0 1 > log.txt
