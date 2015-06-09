@@ -6,8 +6,8 @@ TAGS=$3
 INPUT=$4
 SEED=$5
 
-MINCLUST=7; #2 for tiny, 3 for small, 5 for med, 7 for large
-MAXCLUST=7; #5 for all but med:10, large 12
+MINCLUST=7; # 2 for tiny, 3 for small, 5 for med, 7 for large
+MAXCLUST=7; # 5 for all but med:10, large 12
 CHUNKSIZE=1000;
 CLUSTERSIZE=1000;
 
