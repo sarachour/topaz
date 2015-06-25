@@ -22,7 +22,6 @@
 #include <iomanip>
 #include "FlexImage.h"
 #include "FlexDataExchange.h"
-#include "pin_util.h"
 
 using namespace std;
 
