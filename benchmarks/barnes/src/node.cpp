@@ -6,7 +6,7 @@
 #include <fstream>
 #include "barnes.h"
 
-#include "pin_util.H"
+#include "pin_util.h"
 
 void node_cons(node_t * n){
 	n->type = 0; 
