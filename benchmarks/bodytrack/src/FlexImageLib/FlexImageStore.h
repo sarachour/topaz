@@ -30,7 +30,6 @@
 #endif
 
 #include "FlexDefs.h"
-#include "pin_util.h"
 
 
 template <class T, int C>
