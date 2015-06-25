@@ -17,7 +17,7 @@
 #if defined(HAVE_CONFIG_H)
 # include "config.h"
 #endif
-#include "pin_util.H"
+#include "pin_util.h"
 #include <fstream>
 #include <iostream>
 #include "BodyPose.h"

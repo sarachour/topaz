@@ -22,7 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include "BodyGeometry.h"
-#include "pin_util.H"
+#include "pin_util.h"
 
 
 using namespace std;
