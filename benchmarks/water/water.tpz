@@ -38,7 +38,7 @@
 #include <sys/param.h>
 #include "water.h"
 #include "relax_lib.h"
-#include "pin_util.H"
+#include "pin_util.h"
 //taskify INTERF first : INTERF/interFLoop1->interFLoop2->interF2
 
 float fastabs(float f){
