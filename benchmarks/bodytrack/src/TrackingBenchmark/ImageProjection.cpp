@@ -23,7 +23,7 @@
 #include "CameraModel.h"
 #include "relax_lib.h"
 #include <vector>
-#include "pin_util.H"
+#include "pin_util.h"
 
 // Project a single 3D point onto a single camera
 inline void ProjectPoints(Vector3f &pt_3D, Point &pt_2D, Camera &camera)
