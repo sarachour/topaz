@@ -19407,7 +19407,7 @@ _ACEOF
 esac
 
 
-TOPAZ_ROOT="/home/user/TOPAZ"
+TOPAZ_ROOT="/home/user/topaz/TOPAZ"
 TOPAZ_INCLUDE=$TOPAZ_ROOT/include
 TOPAZ_LIB=$TOPAZ_ROOT/lib
 
