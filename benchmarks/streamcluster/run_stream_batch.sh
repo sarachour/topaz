@@ -17,7 +17,7 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Barnes Started" sarachour@gmail.com  < tmp.txt
+mutt -s "Streamcluster Started" sarachour@gmail.com  < tmp.txt
 
 for i in $(seq $STARTSEED $NSEEDS);
 do
@@ -42,4 +42,4 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Barnes Finished" sarachour@gmail.com  < tmp.txt
+mutt -s "Streamcluster Finished" sarachour@gmail.com  < tmp.txt
