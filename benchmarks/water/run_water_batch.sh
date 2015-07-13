@@ -8,7 +8,14 @@ STARTSEED=1
 NSEEDS=3
 #STARTSEED=4
 #NSEEDS=10
-FLAGS=t
+FLAGS=
+
+echo "water has started executing." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Water Started" sarachour@gmail.com  < tmp.txt
 
 for i in $(seq $STARTSEED $NSEEDS);
 do
@@ -25,3 +32,10 @@ sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.04 iact-med-$TY
 
 
 done
+
+echo "water is finished executing." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Water Finished" sarachour@gmail.com  < tmp.txt
