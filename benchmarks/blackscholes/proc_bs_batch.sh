@@ -53,11 +53,10 @@ do
 		if [ ! -f "energy.txt" ];
 		then 
 			hwdir=$(echo $ldfolder | sed "s/timers/profile/g")
-			echo "detected no detector file... working...."
+			echo "no energy file... working...."
 			tpz_energy ../$hwdir . > energy.txt
 		fi
-		cat energy.txt
-		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
