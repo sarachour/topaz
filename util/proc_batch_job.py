@@ -65,70 +65,86 @@ def e_pr(v):
 	print v
 	return  plot["ltime"][5][v]
 
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Block Size vs Percent Error (Quality)")
+	indep = [1,2,3,4]
+	data= map(lambda x : q_bs(x+1),indep)
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("bs.png")
+except KeyError:
+	print "Failed to produce qual bs plot. continuing"
+	
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Target Probability vs Percent Error (Quality)")
+	indep = [0,0.01,0.02,0.04]
+	data= map(lambda x : q_pr(x),indep)
+	avg = map(lambda x : 100*x["median"],data) 
+	lw = map(lambda x : 100*x["low"],data) 
+	hi = map(lambda x : 100*x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("qual-prob.png")
+except KeyError:
+	print "Failed to produce qual bs plot. continuing"
 
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Block Size vs Percent Error (Quality)")
-indep = [1,2,3,4]
-data= map(lambda x : q_bs(x+1),indep)
-avg = map(lambda x : x["median"],data) 
-lw = map(lambda x : x["low"],data) 
-hi = map(lambda x : x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("bs.png")
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Block Size vs Percent Errors Detected (Detector)")
+	indep = [1,2,3,4]
+	data= map(lambda x : d_bs(x+1),indep)
+	avg = map(lambda x : 100-x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("det-bs.png")
+except KeyError:
+	print "Failed to produce det bs plot. continuing"
 
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Target Probability vs Percent Error (Quality)")
-indep = [0,0.01,0.02,0.04]
-data= map(lambda x : q_pr(x),indep)
-avg = map(lambda x : 100*x["median"],data) 
-lw = map(lambda x : 100*x["low"],data) 
-hi = map(lambda x : 100*x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("qual-prob.png")
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Target Probability vs Percent Errors Detected (Detector)")
+	indep = [0,0.01,0.02,0.04]
+	data= map(lambda x : d_pr(x),indep)
+	avg = map(lambda x : 100-x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("det-prob.png")
+except KeyError:
+	print "Failed to produce det bs plot. continuing"
 
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Block Size vs Percent Errors Detected (Detector)")
-indep = [1,2,3,4]
-data= map(lambda x : d_bs(x+1),indep)
-avg = map(lambda x : 100-x["median"],data) 
-lw = map(lambda x : x["low"],data) 
-hi = map(lambda x : x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("det-bs.png")
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Block Size vs Energy Savings (Energy)")
+	indep = [1,2,3,4]
+	data= map(lambda x : e_bs(x+1),indep)
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("energy-bs.png")
+except KeyError:
+	print "Failed to produce det bs plot. continuing"
 
-
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Target Probability vs Percent Errors Detected (Detector)")
-indep = [0,0.01,0.02,0.04]
-data= map(lambda x : d_pr(x),indep)
-avg = map(lambda x : 100-x["median"],data) 
-lw = map(lambda x : x["low"],data) 
-hi = map(lambda x : x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("det-prob.png")
-
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Block Size vs Energy Savings (Energy)")
-indep = [1,2,3,4]
-data= map(lambda x : e_bs(x+1),indep)
-avg = map(lambda x : x["median"],data) 
-lw = map(lambda x : x["low"],data) 
-hi = map(lambda x : x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("energy-bs.png")
-
-plt.figure()
-plt.margins(0.05, 0.05)
-plt.title("Target Probability vs Energy Savings (Energy)")
-indep = [0,0.01,0.02,0.04]
-data= map(lambda x : e_pr(x),indep)
-avg = map(lambda x : x["median"],data) 
-lw = map(lambda x : x["low"],data) 
-hi = map(lambda x : x["high"],data) 
-plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("energy-prob.png")
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Target Probability vs Energy Savings (Energy)")
+	indep = [0,0.01,0.02,0.04]
+	data= map(lambda x : e_pr(x),indep)
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("energy-prob.png")
+except KeyError:
+	print "Failed to produce det bs plot. continuing"
