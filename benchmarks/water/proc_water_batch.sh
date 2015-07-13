@@ -30,7 +30,6 @@ do
 	for ldfolder in  `ls output/$folder/ | grep "data"`
 	do
 		cd output/$folder/$ldfolder
-		echo $ldfolder
 		if [ ! -f "interf.det.txt" ];
 		then 
 			echo "detected no interf file... working...."
@@ -45,7 +44,6 @@ do
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
-	echo "$PROB,$BS,$KIND$RATES"
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
   fi
   
@@ -54,4 +52,4 @@ do
   
 done
 cat summary.txt
-#./proc_water_batch.py
+./proc_water_batch.py

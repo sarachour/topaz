@@ -51,11 +51,17 @@ def q_bs(v):
 def q_pr(v):
 	return  plot["normal"][5][v]
 
+def d_bs(v):
+	return plot["ldet"][v][0.01] 
+	
+def d_pr(v):
+	print v
+	return  plot["ldet"][5][v]
 
 
 plt.figure()
 plt.margins(0.05, 0.05)
-plt.title("Block Size vs Percent Error")
+plt.title("Block Size vs Percent Error (Quality)")
 indep = [1,2,3,4]
 data= map(lambda x : q_bs(x+1),indep)
 avg = map(lambda x : x["median"],data) 
@@ -66,11 +72,35 @@ plt.savefig("bs.png")
 
 plt.figure()
 plt.margins(0.05, 0.05)
-plt.title("Target Probability vs Percent Error")
+plt.title("Target Probability vs Percent Error (Quality)")
 indep = [0,0.01,0.02,0.04]
 data= map(lambda x : q_pr(x),indep)
-avg = map(lambda x : x["median"],data) 
+avg = map(lambda x : 100*x["median"],data) 
+lw = map(lambda x : 100*x["low"],data) 
+hi = map(lambda x : 100*x["high"],data) 
+plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+plt.savefig("targ-prob.png")
+
+plt.figure()
+plt.margins(0.05, 0.05)
+plt.title("Block Size vs Percent Errors Detected (Detector)")
+indep = [1,2,3,4]
+data= map(lambda x : d_bs(x+1),indep)
+avg = map(lambda x : 100-x["median"],data) 
 lw = map(lambda x : x["low"],data) 
 hi = map(lambda x : x["high"],data) 
 plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-plt.savefig("targ-prob.png")
+plt.savefig("bs-det.png")
+
+
+plt.figure()
+plt.margins(0.05, 0.05)
+plt.title("Target Probability vs Percent Errors Detected (Detector)")
+indep = [0,0.01,0.02,0.04]
+data= map(lambda x : d_pr(x),indep)
+avg = map(lambda x : 100-x["median"],data) 
+lw = map(lambda x : x["low"],data) 
+hi = map(lambda x : x["high"],data) 
+plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+plt.savefig("prob-det.png")
+
