@@ -10,6 +10,14 @@ STARTSEED=1
 NSEEDS=3
 FLAGS=d
 
+echo "blacscholes is beginning execution." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Water Started" sachour@mit.edu < tmp.txt
+
+
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
@@ -28,7 +36,7 @@ sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.04 iact-med
 done
 
 
-echo "water is finished executing." > tmp.txt
+echo "blacscholes is finished executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt

@@ -12,6 +12,13 @@ SCRIPT=run_body
 
 FLAGS=
 
+echo "bodytrack has started execution." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Bodytrack Started" sachour@mit.edu < tmp.txt
+
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
