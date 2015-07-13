@@ -58,6 +58,13 @@ def d_pr(v):
 	print v
 	return  plot["ldet"][5][v]
 
+def e_bs(v):
+	return plot["ltime"][v][0.01] 
+	
+def e_pr(v):
+	print v
+	return  plot["ltime"][5][v]
+
 
 plt.figure()
 plt.margins(0.05, 0.05)
@@ -104,3 +111,24 @@ hi = map(lambda x : x["high"],data)
 plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 plt.savefig("prob-det.png")
 
+plt.figure()
+plt.margins(0.05, 0.05)
+plt.title("Block Size vs Energy Savings (Energy)")
+indep = [1,2,3,4]
+data= map(lambda x : e_bs(x+1),indep)
+avg = map(lambda x : x["median"],data) 
+lw = map(lambda x : x["low"],data) 
+hi = map(lambda x : x["high"],data) 
+plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+plt.savefig("bs-energy.png")
+
+plt.figure()
+plt.margins(0.05, 0.05)
+plt.title("Target Probability vs Energy Savings (Energy)")
+indep = [0,0.01,0.02,0.04]
+data= map(lambda x : e_pr(x),indep)
+avg = map(lambda x : x["median"],data) 
+lw = map(lambda x : x["low"],data) 
+hi = map(lambda x : x["high"],data) 
+plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+plt.savefig("prob-det.png")
