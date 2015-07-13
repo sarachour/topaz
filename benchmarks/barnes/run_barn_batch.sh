@@ -12,6 +12,13 @@ SCRIPT=run_barn
 
 FLAGS=
 
+echo "barnes has started executing." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Barnes Started" sarachour@gmail.com  < tmp.txt
+
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
@@ -35,4 +42,4 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Barnes Finished" sachour@mit.edu < tmp.txt
+mutt -s "Barnes Finished" sarachour@gmail.com  < tmp.txt
