@@ -15,7 +15,7 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Water Started" sachour@mit.edu < tmp.txt
+mutt -s "Blackscholes Started" sachour@mit.edu < tmp.txt
 
 
 for i in $(seq $STARTSEED $NSEEDS);
@@ -41,4 +41,4 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Water Finished" sachour@mit.edu < tmp.txt
+mutt -s "Blackscholes Finished" sachour@mit.edu < tmp.txt
