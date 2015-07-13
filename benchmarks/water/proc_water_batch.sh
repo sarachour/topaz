@@ -2,6 +2,8 @@
 
 SUMMARY="summary.txt"
 
+cdir=$PWD
+rm $SUMMARY
 echo "target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
 for folder in `ls output | grep iact`
 do
@@ -21,10 +23,35 @@ do
 	echo "$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
   fi
   
+  if [ "$KIND" = "ldet" ];
+  then 
+	RATES=""
+	KIND="ldet"
+	for ldfolder in  `ls output/$folder/ | grep "data"`
+	do
+		cd output/$folder/$ldfolder
+		echo $ldfolder
+		if [ ! -f "interf.det.txt" ];
+		then 
+			echo "detected no interf file... working...."
+			tpz_det ldet.out interf 0 > interf.det.txt
+		fi
+		if [ ! -f "poteng.det.txt" ];
+		then 
+			echo "detected no poteng file... working...."
+			tpz_det ldet.out poteng 1 > poteng.det.txt
+		fi
+		RATE=$(cat interf.det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATES=$RATES","$RATE
+		cd $cdir
+	done
+	echo "$PROB,$BS,$KIND$RATES"
+	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+  fi
   
   #echo $folder
   #echo $PROB $BS kind=$KIND
   
 done
-
-./proc_water_batch.py
+cat summary.txt
+#./proc_water_batch.py

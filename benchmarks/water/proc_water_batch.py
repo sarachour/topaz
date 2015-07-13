@@ -54,6 +54,7 @@ def q_pr(v):
 
 
 plt.figure()
+plt.margins(0.05, 0.05)
 plt.title("Block Size vs Percent Error")
 indep = [1,2,3,4]
 data= map(lambda x : q_bs(x+1),indep)
@@ -64,6 +65,7 @@ plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 plt.savefig("bs.png")
 
 plt.figure()
+plt.margins(0.05, 0.05)
 plt.title("Target Probability vs Percent Error")
 indep = [0,0.01,0.02,0.04]
 data= map(lambda x : q_pr(x),indep)
