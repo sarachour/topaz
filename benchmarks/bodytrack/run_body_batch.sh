@@ -28,3 +28,10 @@ sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-me
 
 
 done
+
+echo "bodytrack is finished executing." > tmp.txt
+echo "flags used: $FLAGS" >> tmp.txt
+echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+echo "input: $INP" >> tmp.txt
+
+mutt -s "Bodytrack Finished" sachour@mit.edu < tmp.txt
