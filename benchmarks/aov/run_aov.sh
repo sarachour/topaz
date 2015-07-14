@@ -21,9 +21,11 @@ fi
 
 if [ "$CATEGORY" = "correct" ];
 then
+	echo "Running: CORRECT"
 	rm -rf src/output/*
 	cp -r output/correct/* src/output/
-	cd src; make clean; make && sutil_run_script.sh run_bs.sh $INPUT $SEED none perfect &> /dev/null
+	cd src; make clean &> /dev/null; 
+		make &> /dev/null && sutil_run_script.sh run_bs.sh $INPUT $SEED none perfect &> /dev/null
 	cd $CDIR
 	cp -r src/output/* output/correct/
 	exit 0;
@@ -46,9 +48,9 @@ rm -rf src/output/*
 cp -r $ODIR/* src/output/
 cp -r output/correct/* src/output/
 
-echo sutil_run_script.sh run_bs.sh $INPUT $SEED $TOPAZ_ARGS $PIN_ARGS $TAGS;
-
-cd src; make clean; make &&
-	sutil_run_script.sh run_bs.sh $INPUT $SEED $TOPAZ_ARGS $PIN_ARGS $TAGS &> /dev/null;
+echo "Running: AOV $CATEGORY $KIND"
+ 
+cd src; make clean &> /dev/null; make &> /dev/null &&
+	sutil_run_script.sh run_bs.sh $INPUT $SEED $TOPAZ_ARGS $PIN_ARGS $TAGS &> /dev/null  || exit 1;
 cd $CDIR
 cp -r src/output/* $ODIR/

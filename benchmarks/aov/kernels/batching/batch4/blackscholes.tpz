@@ -237,9 +237,9 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float r1, float r2){
-			int i=0;
-			r1 = (tfprice[i]+tfprice[i+1]+tfprice[i+2]+tfprice[i+3])/4.0; i+=4;
-			r2 = (tfprice[i]+tfprice[i+1]+tfprice[i+2]+tfprice[i+3])/4.0; 
+			int j=0;
+			r1 = (tfprice[j]+tfprice[j+1]+tfprice[j+2]+tfprice[j+3])/4.0; j+=4;
+			r2 = (tfprice[j]+tfprice[j+1]+tfprice[j+2]+tfprice[j+3])/4.0; 
 		}
 		combine {
 			float priceDelta;

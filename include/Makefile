@@ -1,17 +1,10 @@
-ROOT=$(TOPAZ_ROOT)
-INCLUDE=-I$(ROOT)/include
-COPTS=-Wall -fPIC
-CC=mpic++
+CC=g++
 
-all:  topaz.o subdirs
+all: pin_util.o
 
-subdirs:
-	cd task; make
 
 %.o: %.cpp
-	$(CC) $(COPTS) $(INCLUDE) -o $@ -c $< 
+	$(CC) $(COPTS) -o $@ -c $< 
 	
 clean:
-	rm *.o
-	cd task; make clean
-
+	rm -f *.o

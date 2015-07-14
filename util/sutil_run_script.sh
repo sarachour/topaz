@@ -81,6 +81,6 @@ do
 	sleep 2
 	echo "#### Starting Run ####"
 
- ./$CHILD_SCRIPT "$PIN_ARGS" "$TOPAZ_ARGS" "$TAGS" $INPUT $num
+ ./$CHILD_SCRIPT "$PIN_ARGS" "$TOPAZ_ARGS" "$TAGS" $INPUT $num 
 done
 mplayer $TOPAZ_ROOT/util/chime.mp3
