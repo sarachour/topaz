@@ -8,7 +8,7 @@ BLOCKSIZE=5
 #NSEEDS=3
 STARTSEED=1
 NSEEDS=3
-FLAGS=d
+FLAGS=t
 
 echo "blacscholes is beginning execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
