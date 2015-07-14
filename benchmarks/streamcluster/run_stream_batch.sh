@@ -6,11 +6,11 @@ PROB=0.01
 BLOCKSIZE=5
 #STARTSEED=1
 #NSEEDS=3
-STARTSEED=1
-NSEEDS=8
+STARTSEED=7
+NSEEDS=10
 SCRIPT=run_stream
 
-FLAGS=
+FLAGS=d
 
 echo "streamcluster has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
