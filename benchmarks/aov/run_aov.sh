@@ -19,10 +19,16 @@ then
 	mkdir -p output/correct
 fi
 
+if [ -f src/output ]; 
+then
+	rm -rf src/output/*
+fi
+
+mkdir src/output
+
 if [ "$CATEGORY" = "correct" ];
 then
 	echo "Running: CORRECT"
-	rm -rf src/output/*
 	cp kernels/correct/blackscholes.tpz src/blackscholes.tpz
 	cd src; make clean &> /dev/null; 
 		make &> /dev/null && sutil_run_script.sh run_bs.sh $INPUT $SEED none perfect &> /dev/null
@@ -44,7 +50,6 @@ fi
 
 #sutil_run_script.sh run_bs.sh 16K 1 reexec:t=scar,b=5,p=0.10 heavy-dram d
 cp $SRCDIR/blackscholes.tpz src/blackscholes.tpz
-rm -rf src/output/*
 cp -r $ODIR/* src/output/
 cp -r output/correct/* src/output/
 
