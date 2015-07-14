@@ -1,4 +1,4 @@
-INPUT=16
+INPUT=16K
 SEED=1
 TYP=heavy-static
 FLAGS=
