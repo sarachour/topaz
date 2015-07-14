@@ -1,6 +1,6 @@
 #include "logger.h"
 
-#define MAX_SIZE (300*1000000/(sizeof(timer_info_t)))
+#define MAX_SIZE (300*10000/(sizeof(timer_info_t)))
 RealTimerInfo::RealTimerInfo(const char * base){
 	this->file = fopen(base, "w");
 	this->ndumps = 0;

@@ -237,15 +237,15 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8){
-			int i=0;
-			r1 = tfprice[i]; i++;
-			r2 = tfprice[i]; i++;
-			r3 = tfprice[i]; i++;
-			r4 = tfprice[i]; i++;
-			r5 = tfprice[i]; i++;
-			r6 = tfprice[i]; i++;
-			r7 = tfprice[i]; i++;
-			r8 = tfprice[i]; i++;
+			int j=0;
+			r1 = tfprice[j]; j++;
+			r2 = tfprice[j]; j++;
+			r3 = tfprice[j]; j++;
+			r4 = tfprice[j]; j++;
+			r5 = tfprice[j]; j++;
+			r6 = tfprice[j]; j++;
+			r7 = tfprice[j]; j++;
+			r8 = tfprice[j]; j++;
 		}
 		combine {
 			float priceDelta;
