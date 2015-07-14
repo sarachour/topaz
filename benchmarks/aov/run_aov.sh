@@ -24,7 +24,6 @@ then
 	echo "Running: CORRECT"
 	rm -rf src/output/*
 	cp kernels/correct/blackscholes.tpz src/blackscholes.tpz
-	cp -r output/correct/* src/output/
 	cd src; make clean &> /dev/null; 
 		make &> /dev/null && sutil_run_script.sh run_bs.sh $INPUT $SEED none perfect &> /dev/null
 	cd $CDIR
