@@ -21,7 +21,7 @@ fi
 
 if [ -f src/output ]; 
 then
-	rm -rf src/output/*
+	rm -rf src/output
 fi
 
 mkdir src/output
