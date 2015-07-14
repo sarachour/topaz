@@ -216,7 +216,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
 //16: 69%
 //128: 71%
 //63% kernel
-#define NELEMS 1
+#define NELEMS 8
 int BlkSchlsEqEuroNoDiv() {
 	
 	//chunking using base 
@@ -236,8 +236,12 @@ int BlkSchlsEqEuroNoDiv() {
 				tfprice[q] = r1;
 			}
 		}
-		transform in(float tsptprice, float tfprice) out(float result){
-			result = tfprice[0];
+		transform in(float tsptprice, float tfprice) out(float r1, float r2, float r3, float r4){
+			int i=0;
+			r1 = (tfprice[i]+tfprice[i+1])/2.0; i+=2;
+			r2 = (tfprice[i]+tfprice[i+1])/2.0; i+=2;
+			r3 = (tfprice[i]+tfprice[i+1])/2.0; i+=2;
+			r4 = (tfprice[i]+tfprice[i+1])/2.0; i+=2;
 		}
 		combine {
 			float priceDelta;

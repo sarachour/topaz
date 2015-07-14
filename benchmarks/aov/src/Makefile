@@ -1,4 +1,4 @@
-ROOT=../..
+ROOT=../../../
 INCLUDE=$(ROOT)/include
 LIB=$(ROOT)/lib
 CC=mpic++
