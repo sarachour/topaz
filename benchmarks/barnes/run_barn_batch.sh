@@ -7,10 +7,10 @@ BLOCKSIZE=5
 #STARTSEED=1
 #NSEEDS=3
 STARTSEED=1
-NSEEDS=8
+NSEEDS=3
 SCRIPT=run_barn
 
-FLAGS=t
+FLAGS=d
 
 echo "barnes has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt

@@ -6,11 +6,11 @@ PROB=0.01
 BLOCKSIZE=5
 #STARTSEED=1
 #NSEEDS=3
-STARTSEED=1
+STARTSEED=6
 NSEEDS=8
 SCRIPT=run_body
 
-FLAGS=
+FLAGS=d
 
 echo "bodytrack has started execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
