@@ -10,7 +10,7 @@ STARTSEED=1
 NSEEDS=3
 SCRIPT=run_barn
 
-FLAGS=d
+FLAGS=t
 
 echo "barnes has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
