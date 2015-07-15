@@ -113,7 +113,7 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 			siz = r_siz;
 		}
 		combine {
-		    //printf("combine start\n");
+		    	if(i%50 == 0)printf("task %d completed\n",i);
 			body_t * body_ptr;
 			int ri;
 			for(ri =0; ri < r_siz; ri++){
@@ -142,7 +142,7 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 		body_t * body_ptr = bodyset_get(&n->bodies, bodyptr(q));
 		body_advance(body_ptr, hts, ts);
 	}
-	//printf("stop simulate\n");
+	printf("taskset completed\n");
 }
 
 void nbody_Simulate(nbody_t * n, double tol, double hts, double eps, double ts){
