@@ -64,6 +64,7 @@ do
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
+	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
 	
 	ERRORS=""
 	KIND="normal"
@@ -74,7 +75,6 @@ do
 	done
 	
 	echo "$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
-	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
   fi
   #echo $folder
   #echo $PROB $BS kind=$KIND
