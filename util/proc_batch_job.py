@@ -85,13 +85,27 @@ try:
 	plt.title("Target Probability vs Percent Error (Quality)")
 	indep = [0,0.01,0.02,0.04]
 	data= map(lambda x : q_pr(x),indep)
-	avg = map(lambda x : 100*x["median"],data) 
-	lw = map(lambda x : 100*x["low"],data) 
-	hi = map(lambda x : 100*x["high"],data) 
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
 	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 	plt.savefig("qual-prob.png")
 except KeyError:
-	print "Failed to produce qual bs plot. continuing"
+	print "Failed to produce qual prob plot. continuing"
+
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Macro Target Probability vs Percent Error (Quality)")
+	indep = [0,0.10,0.20,0.40,0.60,0.80,1.00]
+	data= map(lambda x : q_pr(x),indep)
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("macro qual-prob.png")
+except KeyError:
+	print "Failed to produce  macro qual prob plot. continuing"
 
 try:
 	plt.figure()
@@ -119,7 +133,7 @@ try:
 	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 	plt.savefig("det-prob.png")
 except KeyError:
-	print "Failed to produce det bs plot. continuing"
+	print "Failed to produce det prob plot. continuing"
 
 try:
 	plt.figure()
@@ -133,7 +147,7 @@ try:
 	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 	plt.savefig("energy-bs.png")
 except KeyError:
-	print "Failed to produce det bs plot. continuing"
+	print "Failed to produce energy bs plot. continuing"
 
 try:
 	plt.figure()
@@ -147,4 +161,18 @@ try:
 	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
 	plt.savefig("energy-prob.png")
 except KeyError:
-	print "Failed to produce det bs plot. continuing"
+	print "Failed to produce energy prob plot. continuing"
+
+try:
+	plt.figure()
+	plt.margins(0.05, 0.05)
+	plt.title("Macro Target Probability vs Energy Savings (Energy)")
+	indep = [0,0.10,0.20,0.40,0.60,0.80,1.00]
+	data= map(lambda x : e_pr(x),indep)
+	avg = map(lambda x : x["median"],data) 
+	lw = map(lambda x : x["low"],data) 
+	hi = map(lambda x : x["high"],data) 
+	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
+	plt.savefig("macro-energy-prob.png")
+except KeyError:
+	print "Failed to produce energy prob plot. continuing"

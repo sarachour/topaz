@@ -60,7 +60,18 @@ do
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
+	
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	
+	ERRORS=""
+	KIND="normal"
+	for efile in  `ls output/$folder/err*`
+	do
+		ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
+		ERRORS=$ERRORS","$ERROR
+	done
+	echo "$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
+	
   fi
   
   

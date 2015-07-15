@@ -60,7 +60,7 @@ do
 					hwdir=$(echo $ldfolder | sed s/timers/profile/g)
 					tpz_energy ../$hwdir . > energy.txt
 				fi
-				RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+				RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
 				RATES=$RATES","$RATE
 				cd $cdir
 			done
