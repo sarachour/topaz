@@ -2,149 +2,100 @@
 import matplotlib.pyplot as plt
 import numpy
 import scipy
+import sys
 
 filename="summary.txt"
 file=open(filename,"r")
 
 plot={}
 
+def make_path(d,elems, stub):
+	n = len(elems)
+	q = d;
+	for i in range(0,n-1):
+		e = elems[i]
+		if not (e in d):
+			d[e] = {}
+		d = d[e]
+	
+	d[elems[n-1]] = stub
+	
+	return q
+
+def get_path(d,elems):
+	n = len(elems)
+	for i in range(0,n):
+		e = elems[i]
+		d = d[e]
+	return d;
+	
 for line in file:
 	try:
 		fields=line.split(",");
-		
-		typ=fields[2]
-		bs=int(fields[1])
-		prob=float(fields[0])
+		category=fields[0];
+		kind=fields[1];
+		prob=float(fields[2])
+		bs=int(fields[3])
+		typ=fields[4]
 		data=[]
 		
-		
-		for i in range(3,len(fields)):
+		for i in range(5,len(fields)):
 			try:
 				data.append(float(fields[i]))
 			except ValueError:
 				print "continuing."
 			
-		print len(fields) - 3 
-		if not (typ in plot):
-			plot[typ]={}
 		
-		if not (bs in plot[typ]):
-			plot[typ][bs]={}
+		path = [category,typ,kind]
+		make_path(plot,path,{})
 		
-		if not (prob in plot[typ][bs]):
-			plot[typ][bs][prob]={}
-				
 		#stdev = scipy.std(data)
 		avg = numpy.percentile(data, 50)
-		plot[typ][bs][prob]["median"] =avg 
-		plot[typ][bs][prob]["low"] = avg-numpy.percentile(data, 25)
-		plot[typ][bs][prob]["high"] = numpy.percentile(data, 75)-avg
+		par = get_path(plot,path);
+		par["median"] =avg 
+		par["low"] = avg-numpy.percentile(data, 25)
+		par["high"] = numpy.percentile(data, 75)-avg
 		
 		
 	except ValueError:
 		print "skipped ",line
 
 
-def q_bs(v):
-	return plot["normal"][v][0.01] 
-	
-def q_pr(v):
-	return  plot["normal"][5][v]
-
-def d_bs(v):
-	return plot["ldet"][v][0.01] 
-	
-def d_pr(v):
-	print v
-	return  plot["ldet"][5][v]
-
-def e_bs(v):
-	return plot["ltime"][v][0.01] 
-	
-def e_pr(v):
-	print v
-	return  plot["ltime"][5][v]
-
-try:
+def plot_info(title,indep_data,filename,conv):
 	plt.figure()
 	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Percent Error (Quality)")
-	indep = [1,2,3,4]
-	data= map(lambda x : q_bs(x+1),indep)
+	plt.title(title)
+	indep = indep_data
+	data= map(lambda x : conv(x),indep)
 	avg = map(lambda x : x["median"],data) 
 	lw = map(lambda x : x["low"],data) 
 	hi = map(lambda x : x["high"],data) 
 	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("bs.png")
+	#plt.barplot(indep, avg)
+	plt.savefig(filename)
+	
+print plot
+
+try:
+	title="Effect of Different Normalization Algorithms on Quality"
+	conv = lambda x : get_path(plot,["batching","normal",x])
+	indep = ["naive","subtract","arbitrarge"]
+	filename="norm.png"
+	plot_info(title,indep,filename,conv);
 except KeyError:
-	print "Failed to produce qual bs plot. continuing"
+	print "Failed to produce aov normalization plot. continuing"
+
+sys.exit(0)
+	
 	
 try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Percent Error (Quality)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : q_pr(x),indep)
-	avg = map(lambda x : 100*x["median"],data) 
-	lw = map(lambda x : 100*x["low"],data) 
-	hi = map(lambda x : 100*x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("qual-prob.png")
+	title="Effect of Different Batch Sizes on Quality"
+	conv = lambda x : get_path(plot,["batching","normal",x])
+	indep = ["batch1","batch2","batch4","batch8"]
+	filename="batching.png"
+	plot_info(title,indep,filename,conv);
 except KeyError:
-	print "Failed to produce qual bs plot. continuing"
+	print "Failed to produce aov batching plot. continuing"
 
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Percent Errors Detected (Detector)")
-	indep = [1,2,3,4]
-	data= map(lambda x : d_bs(x+1),indep)
-	avg = map(lambda x : 100-x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("det-bs.png")
-except KeyError:
-	print "Failed to produce det bs plot. continuing"
-
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Percent Errors Detected (Detector)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : d_pr(x),indep)
-	avg = map(lambda x : 100-x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("det-prob.png")
-except KeyError:
-	print "Failed to produce det bs plot. continuing"
-
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Energy Savings (Energy)")
-	indep = [1,2,3,4]
-	data= map(lambda x : e_bs(x+1),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("energy-bs.png")
-except KeyError:
-	print "Failed to produce det bs plot. continuing"
-
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Energy Savings (Energy)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : e_pr(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("energy-prob.png")
-except KeyError:
-	print "Failed to produce det bs plot. continuing"
+sys.exit(0)
+	

@@ -21,8 +21,6 @@ do
 			KIND="normal"
 			for efile in  `ls $output/$folder/err*`
 			do
-				echo $efile
-				cat $efile
 				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				ERRORS=$ERRORS","$ERROR
@@ -73,4 +71,4 @@ do
 	done
 done
 
-#proc_batch_job.py
+./proc_aov_batch.py
