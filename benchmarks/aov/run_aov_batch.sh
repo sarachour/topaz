@@ -3,17 +3,18 @@ SEED=1
 TYP=heavy-static
 STARTSEED=2
 NSEEDS=3
-FLAGS=t
+FLAGS=
 
 #echo "aov batch is beginning execution." > tmp.txt
 #echo "flags $FLAGS" >> tmp.txt
 #mutt -s "AOV Started" sarachour@gmail.com < tmp.txt
 
-./run_aov.sh correct none $INPUT $SEED || exit 1
+#./run_aov.sh correct none $INPUT $SEED || exit 1
+echo "starting run"
 
 for SEED in $(seq $STARTSEED $NSEEDS);
 do
-
+	echo "seed $SEED"
 	./run_aov.sh normalization naive $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
 	./run_aov.sh normalization subtract $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
 	./run_aov.sh normalization arbitrarge $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
@@ -27,6 +28,11 @@ do
 	./run_aov.sh selection out $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
 	./run_aov.sh selection inout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
 	./run_aov.sh selection all $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection strikeout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection volout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection timeout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection rateout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection typeout $INPUT $SEED reexec:t=scar,b=5,p=0.01 iact-$TYP $FLAGS || exit 1
 
 done
 
