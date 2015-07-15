@@ -47,6 +47,25 @@ do
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
   fi
   
+  if [ "$KIND" = "ltime" ];
+  then 
+	RATES=""
+	KIND="ltime"
+	for ldfolder in  `ls output/$folder/ | grep "timers"`
+	do
+		cd output/$folder/$ldfolder
+		if [ ! -f "energy.txt" ];
+		then 
+			echo "detected no energy file... working...."
+			hwdir=$(echo $ldfolder | sed s/timers/profile/g)
+			tpz_energy ../$hwdir . > energy.txt
+		fi
+		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATES=$RATES","$RATE
+		cd $cdir
+	done
+	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+  fi
   #echo $folder
   #echo $PROB $BS kind=$KIND
   

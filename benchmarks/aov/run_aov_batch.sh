@@ -1,9 +1,9 @@
 INPUT=16K
 SEED=1
 TYP=heavy-static
-STARTSEED=2
-NSEEDS=3
-FLAGS=
+STARTSEED=1
+NSEEDS=1
+FLAGS=t
 
 #echo "aov batch is beginning execution." > tmp.txt
 #echo "flags $FLAGS" >> tmp.txt
