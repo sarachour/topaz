@@ -96,7 +96,7 @@ try:
 	title="Effect of Different Normalization Algorithms on Energy"
 	conv = lambda x : get_path(plot,["normalization","ltime",x])
 	indep = ["naive","subtract","arbitrarge"]
-	filename="norm.png"
+	filename="norm-energy.png"
 	plot_info(title,indep,filename,conv);
 except KeyError:
 	print "Failed to produce aov normalization energy plot. continuing"
@@ -116,7 +116,7 @@ try:
 	title="Effect of Different Batch Sizes on Quality"
 	conv = lambda x : get_path(plot,["batching","ltime",x])
 	indep = ["batch1","batch2","batch4","batch8"]
-	filename="batching.png"
+	filename="batching-energy.png"
 	plot_info(title,indep,filename,conv);
 except Exception:
 	print "Failed to produce aov batching energy plot. continuing"
@@ -126,7 +126,7 @@ try:
 	title="Effect of Different Input-Output Selections on Quality"
 	conv = lambda x : get_path(plot,["selection","normal",x])
 	indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
-	filename="batching.png"
+	filename="selection.png"
 	plot_info(title,indep,filename,conv);
 except Exception:
 	print "Failed to produce aov input-output plot. continuing"
@@ -135,7 +135,7 @@ try:
 	title="Effect of Different Input-Output Selections on Energy"
 	conv = lambda x : get_path(plot,["selection","ltime",x])
 	indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
-	filename="batching.png"
+	filename="selection-energy.png"
 	plot_info(title,indep,filename,conv);
 except Exception:
 	print "Failed to produce aov input-output energy plot. continuing"
