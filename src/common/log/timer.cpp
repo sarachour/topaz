@@ -54,7 +54,13 @@ void RealTimerInfo::start(int c){
 	this->active[c] = true;
 	pin_start_timer(c);
 }
-
+void RealTimerInfo::dump(){
+	this->stop_active();
+	this->print();
+	this->del_timers();
+	this->ndumps++;
+	this->start_active();
+}
 void RealTimerInfo::stop(int c){
 	if(this->TIMER_OFF || !this->active[c])
 		return;
@@ -65,11 +71,7 @@ void RealTimerInfo::stop(int c){
 	pt.idx = c;
 	pt.inst = p.inst;
 	if(this->TIMER_SIZE > MAX_SIZE){
-		this->stop_active();
-		this->print();
-		this->del_timers();
-		this->ndumps++;
-		this->start_active();
+		//this->dump();
 	}
 	this->add_timer(pt);
 }
@@ -100,6 +102,10 @@ void RealCommunicationInfo::write_line(){
 }
 RealCommunicationInfo::~RealCommunicationInfo(){
 	fclose(file);
+}
+void RealCommunicationInfo::dump(){
+	
+	
 }
 void RealCommunicationInfo::set_taskset(int id, int i){
 	if(taskset >= 0) this->write_line();

@@ -88,8 +88,8 @@ Topaz::Topaz(int argc, char ** argv){
 		char name[128];
 		sprintf(name, "timer.%d.out", rank);
 		this->timer = new RealTimerInfo(name);
-		sprintf(name, "comm.%d.out", rank);
-		this->comm = new RealCommunicationInfo(name);
+		//sprintf(name, "comm.%d.out", rank);
+		this->comm = new DummyCommunicationInfo();
 	}
 	else {
 		this->timer = new DummyTimerInfo();
@@ -333,6 +333,7 @@ void Topaz::execute(){
 				break;
 		}
 	}
+	
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER); // start whole computation timer
 	Topaz::topaz->getTimers()->start_active();
 }
@@ -354,14 +355,18 @@ bool Topaz::send(){
 		}
 		else{
 			this->packAllTaskData(false);
+			//printf("s: main send to\n");
 			this->machines->sendTo(mach, task);
 			this->isLocalExecute = false;
 		}
 	}
 	else{
+		//printf("s: worker send\n");
 		Task * task = this->output_task;
 		this->comm->set_taskset(task->getId(), task->getRank());
+		//printf("s: worker sending..\n");
 		this->machines->sendTo(this->machines->getMain().getId(), task);
+		//printf("s: worker sent..\n");
 	}
 	Topaz::topaz->getTimers()->start_active();
 	return true;
@@ -409,11 +414,15 @@ bool Topaz::receive(){
 	bool status = true;
 	
 	if(this->isMain()){		
+		//printf("r: main waiting for recieve..\n");
 		Task * task = this->output_task;
 		this->machines->receiveFrom(task);
+		Topaz::topaz->getTimers()->dump();
+		//printf("r: main recieved..\n");
 		//if(this->config.GODMODE_ENABLED) this->log->aug_clear();
 		
 		this->output_task->startUnpack();
+		
 		
 		if(this->output_task->hasFailed()){
 			this->reexecute_failed(id, &ts);
@@ -423,13 +432,16 @@ bool Topaz::receive(){
 			return true;
 		}
 		
+		//printf("r: main detect\n");
 		if(this->config.DETECTOR_ENABLED){
 			//handle the outliers
 			// outlier | is true error | inject
 			status = ts.test(this->input_task, this->output_task);
 			//outlier detector detects outlier, and we're not discarding.
 			if(status == false && !this->config.DISCARD_TASK){
+				//printf("r: main reexecuting\n");
 				this->reexecute(id, &ts);
+				//printf("r: main reexecuted\n");
 				this->packAllTaskData(true);
 				status = true;
 			}
@@ -439,11 +451,17 @@ bool Topaz::receive(){
 			}
 						
 		}
+		
+		//printf("r: main detected\n");
 	}
 	else{
+		//printf("r: worker receiving..\n");
 		Task * task = this->input_task;
 		this->machines->receiveFrom(this->machines->getMain().getId(), task);
+		Topaz::topaz->getTimers()->dump();
+		//printf("r: worker recieved.\n");
 	}
+	
 	this->timer->stop(TOPAZ_TIMER);
 	Topaz::topaz->getTimers()->start_active();
 	return status;

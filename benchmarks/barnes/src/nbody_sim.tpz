@@ -64,8 +64,11 @@ nbody_t * nb = NULL;
 
 void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
     //printf("start simulate\n");
-    
+    #define FREQ 50
 	taskset nbodysim(i=0; i < n->nbody; i+=CHUNKSIZE){
+		before {
+			if(i%FREQ == 0)printf("task %d started\n",i);
+		}
 		compute in(
 					int t_siz = n->nbody-i < CHUNKSIZE ? n->nbody-i : CHUNKSIZE,
 					double t_tol = tol,
@@ -113,7 +116,7 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 			siz = r_siz;
 		}
 		combine {
-		    	if(i%50 == 0)printf("task %d completed\n",i);
+		    	if(i%FREQ == 0)printf("task %d completed\n",i);
 			body_t * body_ptr;
 			int ri;
 			for(ri =0; ri < r_siz; ri++){

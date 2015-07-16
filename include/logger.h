@@ -75,6 +75,7 @@ typedef struct DET_LOG_NODE_T {
 
 class TimerInfo {
 	public:
+	virtual void dump() = 0;
 	virtual void start(int idx) = 0;
 	virtual void stop(int idx) = 0;
 	virtual void on() = 0;
@@ -107,6 +108,7 @@ class RealTimerInfo : public TimerInfo{
 	
 	
 	void init_timers(); 
+	void dump();
 	void add_timer(timer_info_t t);
 	timer_info_t * last_timer();
 	void del_timers();
@@ -142,7 +144,9 @@ class DummyTimerInfo : public TimerInfo {
 	void print(){
 		
 	}
-	
+	void dump(){
+		
+	}
 	void off(){
 		
 	}
@@ -311,6 +315,7 @@ class DummyCommunicationInfo : public CommunicationInfo {
 	public:
 		DummyCommunicationInfo(){}
 		~DummyCommunicationInfo(){}
+		void dump();
 		void set_taskset(int id, int i){}
 		void send(int amt){}
 		void recv(int amt){}
@@ -326,6 +331,7 @@ class RealCommunicationInfo : public CommunicationInfo {
 	public:
 		RealCommunicationInfo(const char * filename);
 		~RealCommunicationInfo();
+		void dump();
 		void set_taskset(int id, int i);
 		void send(int amt);
 		void recv(int amt);
