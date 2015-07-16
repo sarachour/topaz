@@ -32,7 +32,6 @@ def read_timer(path):
 				continue
 			
 			if(typ == 5):
-				ser += amt
 				continue
 				
 			outdet += amt
@@ -48,14 +47,15 @@ def read_timer(path):
 			typ = int(args[0]);
 			amt = float(args[1]);
 			
-			if(typ == 5):
-				ser += amt
-				continue
+			
 				
 			#remove serialization that pads the percentage
 			if(typ == 2 or typ == 3):
 				continue
 			
+			if(typ == 5):
+				continue
+				
 			worker += amt
 			
 		except:
@@ -205,8 +205,8 @@ if len(sys.argv) < 3:
 
 hw_stats_path = sys.argv[1]
 timer_path = sys.argv[2];
-#tim = read_timer(timer_path)
-tim = read_time_from_profile(hw_stats_path)
+tim = read_timer(timer_path)
+#tim = read_time_from_profile(hw_stats_path)
 hw = read_profile(hw_stats_path)
 
 analyze(hw,tim)

@@ -1,6 +1,6 @@
 #include "logger.h"
 
-#define MAX_SIZE (300*1000/(sizeof(timer_info_t)))
+#define MAX_SIZE (10*1000/(sizeof(timer_info_t)))
 
 RealTimerInfo::RealTimerInfo(const char * base){
 	this->file = fopen(base, "w");
@@ -56,11 +56,16 @@ void RealTimerInfo::start(int c){
 }
 void RealTimerInfo::dump(){
 	this->stop_active();
-//	this->print();
-//	this->del_timers();
-//	this->ndumps++;
+	this->print();
+	this->del_timers();
+	this->ndumps++;
 	this->start_active();
 }
+void print_timer(FILE * fp, timer_info_t d){
+	fprintf(fp, "%u\t%f\n", d.idx, d.inst);
+	
+}
+
 void RealTimerInfo::stop(int c){
 	if(this->TIMER_OFF || !this->active[c])
 		return;
@@ -70,14 +75,16 @@ void RealTimerInfo::stop(int c){
 	timer_info_t pt;
 	pt.idx = c;
 	pt.inst = p.inst;
+	//print_timer(this->file,pt);
+	
 	if(this->TIMER_SIZE > MAX_SIZE){
 		//this->dump();
 	}
-	//this->add_timer(pt);
+	this->add_timer(pt);
+	
 }
 void RealTimerInfo::print(){
 	FILE * fp = this->file;
-	float total = TIMER_SIZE;
 	timer_node_t * n = this->timers;
 	if(this->ndumps == 0) fprintf(fp, "INDEX\tINSTRUCTIONS\n");
 	while(n != NULL){

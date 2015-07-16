@@ -252,12 +252,13 @@ void Topaz::finalize(){
 			}
 		}
 	
+		printf("++ Writing Timer to Log\n");
+		Topaz::topaz->getTimers()->dump();
+		
 		if(this->config.GODMODE_ENABLED){
 			printf("++ Writing Statistics to Log\n");
 			this->log->print();
 		}
-		
-		//dump logs on client side
 		
 		this->input_task->update(-1, -1, TRIGGER_SHUTDOWN, 0);
 		this->input_task->startPack();
@@ -265,6 +266,8 @@ void Topaz::finalize(){
 		
 	}
 	else{
+		printf("++ Writing Worker Timer to Log\n");
+		Topaz::topaz->getTimers()->dump();
 		MPI_Finalize();
 		printf("++ Worker...Finalizing\n");
 		
@@ -329,8 +332,6 @@ void Topaz::execute(){
 		switch(code){
 			//shutdown request
 			case TRIGGER_SHUTDOWN:
-				printf("[WORKER] Dumping Timing Logs...\n");
-				Topaz::topaz->getTimers()->dump();
 				printf("[WORKER] Triggering Finalize...\n");
 				this->finalize();
 				printf("[WORKER] Shutting down...\n");
@@ -410,6 +411,7 @@ void Topaz::reexecute_log(int id, TaskSpec * ts){
 	this->output_task = incorr;
 	ts->log(true,this->input_task, incorr, this->output_task);
 }
+int nticks = 0;
 bool Topaz::receive(){
 	Topaz::topaz->getTimers()->stop_active();
 	this->timer->start(TOPAZ_TIMER);
@@ -421,6 +423,7 @@ bool Topaz::receive(){
 		//printf("r: main waiting for recieve..\n");
 		Task * task = this->output_task;
 		this->machines->receiveFrom(task);
+		//dump logs on client side
 		//printf("r: main recieved..\n");
 		//if(this->config.GODMODE_ENABLED) this->log->aug_clear();
 		
@@ -465,6 +468,8 @@ bool Topaz::receive(){
 	}
 	
 	this->timer->stop(TOPAZ_TIMER);
+	if(nticks % 10 == 0) Topaz::topaz->getTimers()->dump();
+	nticks++;
 	Topaz::topaz->getTimers()->start_active();
 	return status;
 }
