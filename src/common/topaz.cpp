@@ -87,7 +87,7 @@ Topaz::Topaz(int argc, char ** argv){
 	if(this->config.TIMERS_ENABLED){
 		char name[128];
 		sprintf(name, "timer.%d.out", rank);
-		this->timer = new RealTimerInfo(name);
+		this->timer = new DummyTimerInfo();
 		//sprintf(name, "comm.%d.out", rank);
 		this->comm = new DummyCommunicationInfo();
 	}
@@ -257,6 +257,9 @@ void Topaz::finalize(){
 			this->log->print();
 		}
 		
+		//dump logs on client side
+		Topaz::topaz->getTimers()->dump();
+		
 		this->input_task->update(-1, -1, TRIGGER_SHUTDOWN, 0);
 		this->input_task->startPack();
 		this->machines->sendTo(this->input_task);
@@ -419,8 +422,6 @@ bool Topaz::receive(){
 		//printf("r: main waiting for recieve..\n");
 		Task * task = this->output_task;
 		this->machines->receiveFrom(task);
-		//dump logs on client side
-		Topaz::topaz->getTimers()->dump();
 		//printf("r: main recieved..\n");
 		//if(this->config.GODMODE_ENABLED) this->log->aug_clear();
 		
