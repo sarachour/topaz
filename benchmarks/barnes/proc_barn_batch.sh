@@ -49,6 +49,7 @@ do
 	for ldfolder in  `ls output/$folder/ | grep "timers"`
 	do
 		cd output/$folder/$ldfolder
+		rm energy.txt
 		if [ ! -f "energy.txt" ];
 		then 
 			echo "detected no energy file... working...."

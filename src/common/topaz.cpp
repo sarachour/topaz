@@ -327,6 +327,8 @@ void Topaz::execute(){
 		switch(code){
 			//shutdown request
 			case TRIGGER_SHUTDOWN:
+				printf("[WORKER] Dumping Timing Logs...\n");
+				Topaz::topaz->getTimers()->dump();
 				printf("[WORKER] Triggering Finalize...\n");
 				this->finalize();
 				printf("[WORKER] Shutting down...\n");
@@ -417,6 +419,7 @@ bool Topaz::receive(){
 		//printf("r: main waiting for recieve..\n");
 		Task * task = this->output_task;
 		this->machines->receiveFrom(task);
+		//dump logs on client side
 		Topaz::topaz->getTimers()->dump();
 		//printf("r: main recieved..\n");
 		//if(this->config.GODMODE_ENABLED) this->log->aug_clear();
@@ -458,7 +461,6 @@ bool Topaz::receive(){
 		//printf("r: worker receiving..\n");
 		Task * task = this->input_task;
 		this->machines->receiveFrom(this->machines->getMain().getId(), task);
-		Topaz::topaz->getTimers()->dump();
 		//printf("r: worker recieved.\n");
 	}
 	
