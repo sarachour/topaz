@@ -8,6 +8,27 @@ file=open(filename,"r")
 
 plot={}
 
+def make_path(d,elems, stub):
+	n = len(elems)
+	q = d;
+	for i in range(0,n-1):
+		e = elems[i]
+		if not (e in d):
+			d[e] = {}
+		d = d[e]
+	
+	d[elems[n-1]] = stub
+	
+	return q
+
+def get_path(d,elems):
+	n = len(elems)
+	for i in range(0,n):
+		e = elems[i]
+		d = d[e]
+	return d;
+	
+
 for line in file:
 	try:
 		fields=line.split(",");
@@ -24,16 +45,7 @@ for line in file:
 			except ValueError:
 				print "continuing."
 			
-		print len(fields) - 3 
-		if not (typ in plot):
-			plot[typ]={}
-		
-		if not (bs in plot[typ]):
-			plot[typ][bs]={}
-		
-		if not (prob in plot[typ][bs]):
-			plot[typ][bs][prob]={}
-				
+		make_path(plot, [typ,bs,prob],{});
 		#stdev = scipy.std(data)
 		avg = numpy.percentile(data, 50)
 		plot[typ][bs][prob]["median"] =avg 
@@ -44,135 +56,136 @@ for line in file:
 	except ValueError:
 		print "skipped ",line
 
-
-def q_bs(v):
-	return plot["normal"][v][0.01] 
-	
-def q_pr(v):
-	return  plot["normal"][5][v]
-
-def d_bs(v):
-	return plot["ldet"][v][0.01] 
-	
-def d_pr(v):
-	print v
-	return  plot["ldet"][5][v]
-
-def e_bs(v):
-	return plot["ltime"][v][0.01] 
-	
-def e_pr(v):
-	print v
-	return  plot["ltime"][5][v]
-
-try:
+def plot_figure(filename, title, xaxis, yaxis, xvals, xticks, funx,funy):
 	plt.figure()
 	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Percent Error (Quality)")
-	indep = [1,2,3,4]
-	data= map(lambda x : q_bs(x+1),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("bs.png")
+	plt.title(title)
+	indep = xvals
+	indep_num = range(0,len(indep));
+	data= map(lambda x : funx(x),indep)
+	avg = map(lambda x : funy(x["median"]),data) 
+	lw = map(lambda x : (x["low"]),data) 
+	hi = map(lambda x : (x["high"]),data) 
+	
+	plt.errorbar(indep_num, avg, yerr=[lw,hi], fmt='o--')
+	plt.xlabel(xaxis)
+	plt.ylabel(yaxis)
+	plt.xticks(indep_num,xticks);
+	#plt.ylabel(indep)
+	#plt.barplot(indep, avg)
+	plt.savefig(filename)
+	
+def get(path):
+	get_path(plot,path);
+
+xvals = [1,2,3,4]
+xticks = xvals
+xlab = "Number of Blocks"
+xfun = lambda x : get(['normal',x+1,0.01])
+
+try:
+	title = "Block Size vs Percent Error (Quality)"
+	ylab = "Percent Errors"
+	yfun = lambda y : y
+	xfun = lambda x : get(['normal',5,x])
+	filename = "qual_bs.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
 except KeyError:
 	print "Failed to produce qual bs plot. continuing"
+
+try:
+	title = "Block Size vs Errors Detected (Detector)"
+	ylab = "Percent Errors Detected"
+	yfun = lambda y : 100-y
+	xfun = lambda x : get(['ldet',5,x])
+	filename = "det_bs.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+except KeyError:
+	print "Failed to produce det bs plot. continuing"
 	
 try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Percent Error (Quality)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : q_pr(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("qual-prob.png")
+	title = "Block Size vs Percent Energy Savings (Energ)"
+	ylab = "Percent Energy Savings"
+	yfun = lambda y : y
+	xfun = lambda x : get(['ltime',5,x])
+	filename = "en_bs.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+except KeyError:
+	print "Failed to produce en bs plot. continuing"
+	
+
+xvals = [0,0.01,0.02,0.04]
+xticks = xvals
+xlab = "Target Re-Execution Rate"
+xfun = lambda x : get(['normal',5,x])
+
+try:
+	title = "Target Re-Execution Rate vs Percent Error (Quality)"
+	ylab = "Percent Errors"
+	yfun = lambda y : y
+	xfun = lambda x : get(['normal',5,x])
+	filename = "qual_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+
 except KeyError:
 	print "Failed to produce qual prob plot. continuing"
 
 try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Macro Target Probability vs Percent Error (Quality)")
-	indep = [0,0.10,0.20,0.40,0.60,0.80,1.00]
-	data= map(lambda x : q_pr(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("macro qual-prob.png")
+	title = "Target Re-Execution Rate vs Percent Errors Detected (Detector)"
+	ylab = "Percent Errors Detected"
+	yfun = lambda y : 100-y
+	xfun = lambda x : get(['ldet',5,x])
+	filename = "det_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+
+except KeyError:
+	print "Failed to produce det prob plot. continuing"
+
+
+try:
+	title = "Target Re-Execution Rate vs Percent Energy Savings (Energy)"
+	ylab = "Percent Energy Savings"
+	yfun = lambda y : y
+	xfun = lambda x : get(['ltime',5,x])
+	filename = "en_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+
+except KeyError:
+	print "Failed to produce en prob plot. continuing"
+
+xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
+xticks = xvals
+xlab = "Target Re-Execution Rate"
+
+try:
+	title = "Target Probability vs Percent Error (Quality)"
+	ylab = "Percent Errors"
+	yfun = lambda y : y
+	xfun = lambda x : get(['normal',5,x])
+	filename = "qual_macro_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+
 except KeyError:
 	print "Failed to produce  macro qual prob plot. continuing"
 
 try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Percent Errors Detected (Detector)")
-	indep = [1,2,3,4]
-	data= map(lambda x : d_bs(x+1),indep)
-	avg = map(lambda x : 100-x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("det-bs.png")
+	title = "Target Probability vs Percent Errors Detected (Detect)"
+	ylab = "Percent Errors Detected"
+	yfun = lambda y : y
+	xfun = lambda x : get(['ldet',5,x])
+	filename = "det_macro_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
+
 except KeyError:
-	print "Failed to produce det bs plot. continuing"
+	print "Failed to produce  macro det prob plot. continuing"
 
 try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Percent Errors Detected (Detector)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : d_pr(x),indep)
-	avg = map(lambda x : 100-x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("det-prob.png")
-except KeyError:
-	print "Failed to produce det prob plot. continuing"
+	title = "Target Probability vs Percent Energy Savings (Energy)"
+	ylab = "Percent Energy Savings"
+	yfun = lambda y : y
+	xfun = lambda x : get(['ltime',5,x])
+	filename = "en_macro_prob.png"
+	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
 
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Block Size vs Energy Savings (Energy)")
-	indep = [1,2,3,4]
-	data= map(lambda x : e_bs(x+1),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("energy-bs.png")
 except KeyError:
-	print "Failed to produce energy bs plot. continuing"
-
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Target Probability vs Energy Savings (Energy)")
-	indep = [0,0.01,0.02,0.04]
-	data= map(lambda x : e_pr(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("energy-prob.png")
-except KeyError:
-	print "Failed to produce energy prob plot. continuing"
-
-try:
-	plt.figure()
-	plt.margins(0.05, 0.05)
-	plt.title("Macro Target Probability vs Energy Savings (Energy)")
-	indep = [0,0.10,0.20,0.40,0.60,0.80,1.00]
-	data= map(lambda x : e_pr(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
-	plt.errorbar(indep, avg, yerr=[lw,hi], fmt='o--')
-	plt.savefig("macro-energy-prob.png")
-except KeyError:
-	print "Failed to produce energy prob plot. continuing"
+	print "Failed to produce  macro en prob plot. continuing"

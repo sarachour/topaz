@@ -56,9 +56,9 @@ void RealTimerInfo::start(int c){
 }
 void RealTimerInfo::dump(){
 	this->stop_active();
-	this->print();
-	this->del_timers();
-	this->ndumps++;
+//	this->print();
+//	this->del_timers();
+//	this->ndumps++;
 	this->start_active();
 }
 void RealTimerInfo::stop(int c){
@@ -73,7 +73,7 @@ void RealTimerInfo::stop(int c){
 	if(this->TIMER_SIZE > MAX_SIZE){
 		//this->dump();
 	}
-	this->add_timer(pt);
+	//this->add_timer(pt);
 }
 void RealTimerInfo::print(){
 	FILE * fp = this->file;

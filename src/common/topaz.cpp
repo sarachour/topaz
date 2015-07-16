@@ -87,7 +87,7 @@ Topaz::Topaz(int argc, char ** argv){
 	if(this->config.TIMERS_ENABLED){
 		char name[128];
 		sprintf(name, "timer.%d.out", rank);
-		this->timer = new DummyTimerInfo();
+		this->timer = new RealTimerInfo(name);
 		//sprintf(name, "comm.%d.out", rank);
 		this->comm = new DummyCommunicationInfo();
 	}
@@ -258,7 +258,6 @@ void Topaz::finalize(){
 		}
 		
 		//dump logs on client side
-		Topaz::topaz->getTimers()->dump();
 		
 		this->input_task->update(-1, -1, TRIGGER_SHUTDOWN, 0);
 		this->input_task->startPack();
