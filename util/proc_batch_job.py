@@ -76,7 +76,7 @@ def plot_figure(filename, title, xaxis, yaxis, xvals, xticks, funx,funy):
 	plt.savefig(filename)
 	
 def get(path):
-	get_path(plot,path);
+	return get_path(plot,path);
 
 xvals = [1,2,3,4]
 xticks = xvals
