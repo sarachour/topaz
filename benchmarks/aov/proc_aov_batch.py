@@ -62,20 +62,20 @@ for line in file:
 		print "skipped ",line
 
 
-def plot_info(title,indep_data,filename,conv):
+def plot_info(title,indep_data,filename,xaxis,yaxis,ylabels,delta,conv):
 	plt.figure()
 	plt.margins(0.05, 0.05)
 	plt.title(title)
 	indep = indep_data
 	indep_num = range(0,len(indep_data));
 	data= map(lambda x : conv(x),indep)
-	avg = map(lambda x : x["median"],data) 
-	lw = map(lambda x : x["low"],data) 
-	hi = map(lambda x : x["high"],data) 
+	avg = map(lambda x : delta(x["median"]),data) 
+	lw = map(lambda x : (x["low"]),data) 
+	hi = map(lambda x : (x["high"]),data) 
 	
 	plt.errorbar(indep_num, avg, yerr=[lw,hi], fmt='o--')
-	plt.xlabel('xlabel')
-	plt.ylabel('ylabel')
+	plt.xlabel(xaxis)
+	plt.ylabel(yaxis)
 	plt.xticks(indep_num,indep);
 	#plt.ylabel(indep)
 	#plt.barplot(indep, avg)
@@ -83,61 +83,109 @@ def plot_info(title,indep_data,filename,conv):
 	
 print plot
 
+xaxis="Normalization Type"
+indep = ["naive","subtract","arbitrarge"]
+labels = ["price", "price-initial_price", "arbitrarge"]
 try:
 	title="Effect of Different Normalization Algorithms on Quality"
 	conv = lambda x : get_path(plot,["normalization","normal",x])
-	indep = ["naive","subtract","arbitrarge"]
 	filename="norm.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Percent Error"
+	fun = lambda x : x
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except KeyError:
 	print "Failed to produce aov normalization plot. continuing"
 
 try:
 	title="Effect of Different Normalization Algorithms on Energy"
 	conv = lambda x : get_path(plot,["normalization","ltime",x])
-	indep = ["naive","subtract","arbitrarge"]
 	filename="norm-energy.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Energy Savings"
+	fun = lambda x : x
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except KeyError:
 	print "Failed to produce aov normalization energy plot. continuing"
 
+try:
+	title="Effect of Different Normalization Algorithms on Error Detection"
+	conv = lambda x : get_path(plot,["normalization","ldet",x])
+	indep = ["naive","subtract","arbitrarge"]
+	filename="norm-detect.png"
+	xaxis="Normalization Type"
+	yaxis="Percent Errors Uncaught"
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
+except KeyError:
+	print "Failed to produce aov normalization error detection plot. continuing"
 
+
+	
+
+indep = ["batch1","batch2","batch4","batch8"]
+labels = ["1", "2", "3", "4"]
+xaxis="Number of Prices per AOV element"
 	
 try:
 	title="Effect of Different Batch Sizes on Quality"
 	conv = lambda x : get_path(plot,["batching","normal",x])
-	indep = ["batch1","batch2","batch4","batch8"]
 	filename="batching.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Percent Price Error"
+	fun = (lambda x : x)
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except Exception:
 	print "Failed to produce aov batching plot. continuing"
 
 try:
-	title="Effect of Different Batch Sizes on Quality"
+	title="Effect of Different Batch Sizes on Energy"
 	conv = lambda x : get_path(plot,["batching","ltime",x])
-	indep = ["batch1","batch2","batch4","batch8"]
 	filename="batching-energy.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Energy Savings"
+	fun = (lambda x : x)
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except Exception:
 	print "Failed to produce aov batching energy plot. continuing"
 
+try:
+	title="Effect of Different Batch Sizes on Error Detection"
+	conv = lambda x : get_path(plot,["batching","ldet",x])
+	filename="batching-detect.png"
+	yaxis="Percent Errors Detected"
+	fun = (lambda x : 100-x)
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
+except Exception:
+	print "Failed to produce aov batching detection plot. continuing"
+
 	
+indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
+labels = ["price", "initial price,price","rate,price", "strike,price","type,price","volatility,price","time,price","all"]		
+xaxis="Tuple Elements Selected"
 try:
 	title="Effect of Different Input-Output Selections on Quality"
 	conv = lambda x : get_path(plot,["selection","normal",x])
-	indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
 	filename="selection.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Percent Price Error"
+	fun = (lambda x : x);
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except Exception:
 	print "Failed to produce aov input-output plot. continuing"
 	
 try:
 	title="Effect of Different Input-Output Selections on Energy"
 	conv = lambda x : get_path(plot,["selection","ltime",x])
-	indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
 	filename="selection-energy.png"
-	plot_info(title,indep,filename,conv);
+	yaxis="Percent Energy Savings"
+	fun = (lambda x : x);
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
 except Exception:
 	print "Failed to produce aov input-output energy plot. continuing"
+
+try:
+	title="Effect of Different Input-Output Selections on Error Detection"
+	conv = lambda x : get_path(plot,["selection","ldet",x])
+	filename="selection-detect.png"
+	yaxis="Percent Errors Detected"
+	fun = (lambda x : 100-x);
+	plot_info(title,indep,filename,xaxis,yaxis,labels,fun,conv);
+except Exception:
+	print "Failed to produce aov input-output detection plot. continuing"
 
 
