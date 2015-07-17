@@ -1,6 +1,6 @@
 #include "logger.h"
 
-#define MAX_SIZE (10*1000/(sizeof(timer_info_t)))
+#define MAX_SIZE (300/(sizeof(timer_info_t)))
 
 RealTimerInfo::RealTimerInfo(const char * base){
 	this->file = fopen(base, "w");
@@ -29,6 +29,8 @@ void  RealTimerInfo::stop_active(){
 	}
 	if(this->n_stops <  N_HISTS-1){
 		this->n_stops++;
+	}
+	else {
 	}
 }
 void  RealTimerInfo::start_active(){

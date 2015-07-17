@@ -89,7 +89,7 @@ class TimerInfo {
 
 class RealTimerInfo : public TimerInfo{
 	#define N_TIMERS 10
-	#define N_HISTS 10
+	#define N_HISTS 20
 	struct TIMER_NODE_T;
 	typedef struct TIMER_NODE_T {
 		timer_info_t data;

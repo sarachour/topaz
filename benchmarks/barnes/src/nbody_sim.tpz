@@ -64,7 +64,7 @@ nbody_t * nb = NULL;
 
 void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
     //printf("start simulate\n");
-    #define FREQ 50
+    #define FREQ 1000
 	taskset nbodysim(i=0; i < n->nbody; i+=CHUNKSIZE){
 		before {
 			if(i%FREQ == 0)printf("task %d started\n",i);
