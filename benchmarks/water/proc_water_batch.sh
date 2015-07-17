@@ -54,13 +54,14 @@ do
 	for ldfolder in  `ls output/$folder/ | grep "timers"`
 	do
 		cd output/$folder/$ldfolder
+		#rm energy.txt
 		if [ ! -f "energy.txt" ];
 		then 
 			echo "detected no energy file... working...."
 			hwdir=$(echo $ldfolder | sed s/timers/profile/g)
 			tpz_energy ../$hwdir . > energy.txt
 		fi
-		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
