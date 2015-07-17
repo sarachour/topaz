@@ -22,7 +22,7 @@ RealTimerInfo::~RealTimerInfo(){
 void  RealTimerInfo::stop_active(){
 	int j = this->n_stops;
 	for(int i=0; i < N_TIMERS; i++){
-		this->stopped[j][i] |= this->active[i]; //stop any active timers.
+		this->stopped[j][i] = this->active[i]; //stop any active timers.
 		if(this->active[i]){
 			this->stop(i);
 		}
