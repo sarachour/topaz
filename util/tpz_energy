@@ -63,10 +63,10 @@ def read_timer(path):
 	
 	data = {};
 	data["worker"] = worker
-	#data["nominal"] = nominal+ser
-	#data["outdet"] = outdet+ser
-	data["nominal"] = nominal
-	data["outdet"] = outdet
+	data["nominal"] = nominal+ser
+	data["outdet"] = outdet+ser
+	#data["nominal"] = nominal
+	#data["outdet"] = outdet
 	
 	print data
 	return data
