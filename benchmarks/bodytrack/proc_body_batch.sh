@@ -62,7 +62,7 @@ do
 		cd $cdir
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
-  
+  fi
   #echo $folder
   #echo $PROB $BS kind=$KIND
   
