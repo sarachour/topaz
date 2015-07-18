@@ -17,6 +17,7 @@ do
 	for efile in  `ls output/$folder/err*`
 	do
 		ERROR=$(cat $efile | grep -E "avg-pct-err=[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
+		echo "$efile : $ERROR"
 		#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 		ERRORS=$ERRORS","$ERROR
 	done
