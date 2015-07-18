@@ -40,7 +40,8 @@ do
 			echo "detected no poteng file... working...."
 			tpz_det ldet.out poteng 1 > poteng.det.txt
 		fi
-		RATE=$(cat interf.det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
+		cp interf.det.txt det.txt
+		RATE=$(cat interf.det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
