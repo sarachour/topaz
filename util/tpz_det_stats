@@ -1,0 +1,82 @@
+#!/usr/bin/python
+import matplotlib.pyplot as plt
+
+import sys
+from os import listdir
+from os.path import isfile, join
+import random
+import math
+from numpy import array
+import subprocess
+
+total=0.0;
+true_accept=0.0;
+false_accept=0.0;
+true_reject=0.0;
+false_reject=0.0;
+
+
+regions = [];
+pts = {'data':{}};
+
+
+
+
+def pct(n,t):
+	if(t==0):
+		return "div-by-zero"
+	return str(round(n/t*100.0,5))+"%";
+
+def calc_length(s,line,n):
+	if(line.startswith(s+"\t")):
+		return n+1;
+	return n;
+
+
+	
+if(len(sys.argv) < 2):
+	print "logname task-id"
+	exit(1);
+
+ 
+log = sys.argv[1];
+sel_id = int(sys.argv[2]);
+
+flog = open(log);
+ssel_id = str(sel_id);
+header = flog.readline().split('\t');
+print header;
+
+cumerr = {};
+for line in flog:
+	try:
+		fields=line.split('\t')
+		id = int(fields[header.index("ID")]);
+		
+		if(id != sel_id):
+			continue;
+
+		oid=float(fields[header.index("OUT-ID")]);
+		cpt=float(fields[header.index("CORR-VAL")]);
+		ept=float(fields[header.index("VAL")]);
+		if not (oid in cumerr):
+			cumerr[oid] = {"total":0,"n":0};
+		err = abs(cpt - ept);
+		if (not math.isnan(err)) and (not math.isinf(err)):
+			cumerr[oid]["total"] += err;
+			cumerr[oid]["n"] += 1;
+	except ValueError:
+		print "skipping.."
+
+
+terr = 0
+tn = 0
+for oid in cumerr:
+	c = cumerr[oid]
+	terr += c["total"]
+	tn += c["n"]
+	err = c["total"]/c["n"]
+	print "ELEM",oid,err
+
+err = terr/tn
+print "TOTAL",err

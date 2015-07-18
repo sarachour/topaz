@@ -31,15 +31,23 @@ do
 	for ldfolder in  `ls output/$folder/ | grep "data"`
 	do
 		cd output/$folder/$ldfolder
+		QUALDIR=$(echo $folder | sed "s/.ldet//g")
+		QUALFILE=$(echo "$ldfolder.txt" | sed "s/data/err/g")
+		QUALPATH="../$QUALDIR/$QUALFILE"
+		
+		echo $QUALPATH
+		cat $QUALPATH
 		if [ ! -f "interf.det.txt" ];
 		then 
 			echo "detected no interf file... working...."
 			tpz_det ldet.out interf 0 > interf.det.txt
+			tpz_det_stat ldet.out 0 > interf.stat.txt
 		fi
 		if [ ! -f "poteng.det.txt" ];
 		then 
 			echo "detected no poteng file... working...."
 			tpz_det ldet.out poteng 1 > poteng.det.txt
+			tpz_det_stat ldet.out 1 > poteng.stat.txt
 		fi
 		cp interf.det.txt det.txt
 		RATE=$(cat interf.det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
