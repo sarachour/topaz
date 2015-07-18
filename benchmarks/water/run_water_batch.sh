@@ -8,7 +8,7 @@ STARTSEED=4
 NSEEDS=8
 #STARTSEED=4
 #NSEEDS=10
-FLAGS=d
+FLAGS=
 
 echo "water has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
@@ -30,10 +30,10 @@ do
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.02 iact-med-$TYP $FLAGS
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.04 iact-med-$TYP $FLAGS
 
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-med-$TYP $FLAGS
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.10 iact-med-$TYP $FLAGS
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.20 iact-med-$TYP $FLAGS
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.40 iact-med-$TYP $FLAGS
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-med-$TYP $FLAGS
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.10 iact-med-$TYP $FLAGS
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.20 iact-med-$TYP $FLAGS
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.40 iact-med-$TYP $FLAGS
 sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.60 iact-med-$TYP $FLAGS
 sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.80 iact-med-$TYP $FLAGS
 sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=1.00 iact-med-$TYP $FLAGS
