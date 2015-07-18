@@ -7,6 +7,7 @@ from os.path import isfile, join
 import random
 import math
 from numpy import array
+import numpy
 import subprocess
 
 total=0.0;
@@ -69,14 +70,13 @@ for line in flog:
 		print "skipping.."
 
 
-terr = 0
-tn = 0
+terr = []
 for oid in cumerr:
 	c = cumerr[oid]
-	terr += c["total"]
-	tn += c["n"]
 	err = c["total"]/c["n"]
+	terr.append(err);
 	print "ELEM",oid,err
 
-err = terr/tn
+err = numpy.percentile(terr, 50);
+
 print "TOTAL",err
