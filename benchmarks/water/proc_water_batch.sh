@@ -69,15 +69,6 @@ do
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
 	
-	ERRORS=""
-	KIND="normal"
-	for efile in  `ls output/$folder/err*`
-	do
-		ERROR=$(cat $efile | grep -E "Average Vector Pos Pct Err:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
-		ERRORS=$ERRORS","$ERROR
-	done
-	
-	echo "$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
   fi
   #echo $folder
   #echo $PROB $BS kind=$KIND
