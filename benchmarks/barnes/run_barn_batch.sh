@@ -6,11 +6,11 @@ PROB=0.01
 BLOCKSIZE=5
 #STARTSEED=1
 #NSEEDS=3
-STARTSEED=4
-NSEEDS=6
+STARTSEED=8
+NSEEDS=10
 SCRIPT=run_barn
 
-FLAGS=d
+FLAGS=
 
 echo "barnes has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
@@ -41,11 +41,6 @@ sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.40 iact-me
 sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.60 iact-med-$TYP $FLAGS
 sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.80 iact-med-$TYP $FLAGS
 sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
-
-
-
-
-
 
 
 done
