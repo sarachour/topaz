@@ -18,6 +18,7 @@ do
 	for efile in  `ls output/$folder/err*`
 	do
 		ERROR=$(cat $efile | grep -E "Average Vector Pos Pct Err:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
+		echo "$efile : $ERROR"
 		ERRORS=$ERRORS","$ERROR
 	done
 	echo "$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
