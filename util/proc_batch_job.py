@@ -171,7 +171,7 @@ except KeyError:
 try:
 	title = "Target Probability vs Percent Errors Detected (Detect)"
 	ylab = "Percent Errors Detected"
-	yfun = lambda y : y
+	yfun = lambda y :100-y
 	xfun = lambda x : get(['ldet',5,x])
 	filename = "det_macro_prob.png"
 	plot_figure(filename, title, xlab, ylab, xvals, xticks, xfun, yfun);
