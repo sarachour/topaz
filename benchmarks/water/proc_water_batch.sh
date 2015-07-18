@@ -28,33 +28,33 @@ do
   then 
 	RATES=""
 	KIND="ldet"
+	ERRS=""
 	for ldfolder in  `ls output/$folder/ | grep "data"`
 	do
 		cd output/$folder/$ldfolder
-		QUALDIR=$(echo $folder | sed "s/.ldet//g")
-		QUALFILE=$(echo "$ldfolder.txt" | sed "s/data/err/g")
-		QUALPATH="../$QUALDIR/$QUALFILE"
 		
-		echo $QUALPATH
-		cat $QUALPATH
 		if [ ! -f "interf.det.txt" ];
 		then 
-			echo "detected no interf file... working...."
+			echo "detected no det file... working...."
 			tpz_det ldet.out interf 0 > interf.det.txt
-			tpz_det_stat ldet.out 0 > interf.stat.txt
-		fi
-		if [ ! -f "poteng.det.txt" ];
-		then 
-			echo "detected no poteng file... working...."
 			tpz_det ldet.out poteng 1 > poteng.det.txt
-			tpz_det_stat ldet.out 1 > poteng.stat.txt
+		fi
+		if [ ! -f "interf.stat.txt" ];
+		then 
+			echo "detected no stat file... working...."
+			tpz_det_stats ldet.out 0 > interf.stat.txt
+			tpz_det_stats ldet.out 1 > poteng.stat.txt
 		fi
 		cp interf.det.txt det.txt
+		cp interf.stat.txt stat.txt
 		RATE=$(cat interf.det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		ERR=$(cat interf.stat.txt | grep -E "^TOTAL[ 0-9\.e\-]+$" | grep -o -E "[0-9\.e\-]+")
+		ERRS=$ERRS","$ERR
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$PROB,$BS,ldeterr$ERRS" >> $SUMMARY
   fi
   
   if [ "$KIND" = "ltime" ];
