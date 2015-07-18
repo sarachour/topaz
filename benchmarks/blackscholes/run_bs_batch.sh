@@ -6,8 +6,8 @@ PROB=0.01
 BLOCKSIZE=5
 #STARTSEED=1
 #NSEEDS=3
-STARTSEED=4
-NSEEDS=6
+STARTSEED=7
+NSEEDS=9
 FLAGS=
 
 echo "blacscholes is beginning execution." > tmp.txt
