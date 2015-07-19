@@ -57,12 +57,17 @@ for line in flog:
 		if(id != sel_id):
 			continue;
 
+		is_accept = "y" in fields[header.index("IS-ACCEPT")];
 		oid=float(fields[header.index("OUT-ID")]);
 		cpt=float(fields[header.index("CORR-VAL")]);
 		ept=float(fields[header.index("VAL")]);
 		if not (oid in cumerr):
 			cumerr[oid] = {"total":0,"n":0};
-		err = abs(cpt - ept);
+			
+		if is_accept:
+			err = abs(cpt - ept);
+		else:
+			err = 0
 		if (not math.isnan(err)) and (not math.isinf(err)):
 			cumerr[oid]["total"] += err;
 			cumerr[oid]["n"] += 1;
