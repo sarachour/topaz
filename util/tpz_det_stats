@@ -61,10 +61,11 @@ for line in flog:
 		oid=float(fields[header.index("OUT-ID")]);
 		cpt=float(fields[header.index("CORR-VAL")]);
 		ept=float(fields[header.index("VAL")]);
+		
 		if not (oid in cumerr):
 			cumerr[oid] = {"total":0.0,"n":0.0};
 		
-		if is_accept:
+		if not is_accept:
 			err = abs(cpt - ept);
 			print err
 		else:
