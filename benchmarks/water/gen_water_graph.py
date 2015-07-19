@@ -147,7 +147,7 @@ axes[i].set_ylabel("Output Quality (% Position Error)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].errorbar(idxs,task,label="Taskset Quality", yerr=task_err, color=colors[i],linewidth=w,marker="^",linestyle="-.");
+axes[i].plot(idxs,task,label="Taskset Quality", color=colors[i],linewidth=w,marker="^",linestyle="-.");
 axes[i].set_ylabel("Taskset Quality (% Task Output Error)")
 axes[i].spines['right'].set_color(colors[i]);
 
