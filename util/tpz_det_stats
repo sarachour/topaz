@@ -67,7 +67,6 @@ for line in flog:
 		
 		if not is_accept:
 			err = abs(cpt - ept);
-			print err
 		else:
 			err = 0.0
 			
