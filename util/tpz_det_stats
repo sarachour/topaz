@@ -65,7 +65,7 @@ for line in flog:
 		if not (oid in cumerr):
 			cumerr[oid] = {"total":0.0,"n":0.0};
 		
-		if not is_accept:
+		if is_accept:
 			err = abs(cpt - ept);
 		else:
 			err = 0.0
