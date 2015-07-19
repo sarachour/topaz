@@ -66,10 +66,10 @@ for line in flog:
 		
 		if is_accept:
 			err = abs(cpt - ept);
+			print err
 		else:
 			err = 0.0
 			
-		print err
 			
 		if (not math.isnan(err)) and (not math.isinf(err)):
 			cumerr[oid]["total"] += err;
