@@ -193,12 +193,26 @@ def analyze(hwstats, timerstats):
 	print(str(HIERARCHY_SAV)+","+str(MAX_HIERARCHY_SAV));
 	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV*SRAM_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
-	OUTDET_SAV = 1.0/timerstats["outdet"]*(timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
+	
+	OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"] - timerstats["woutdet"]) - timerstats["woutdet"]*(1-NOMINAL_SAV) )
+	
+	AE = 1.0-NOMINAL_SAV
+	PE = 1.0
+	BASELINE = PE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
+	NOMINAL = AE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
+	WITHDET = AE*timerstats["worker"] + PE(timerstats["outdet"] - timerstats["worker"])
+	FACTOR1 = NOMINAL/BASELINE
+	FACTOR2 = WITHDET/BASELINE
+	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
 	print "Maximum Savings: "+str(MAX_SAV*100)
 	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
 	print "With Outdet Savings: "+str(OUTDET_SAV*100)
+	print "--------------"
+	print "Nominal Factor:",FACTOR1
+	print "Detector Factor:",FACTOR2
+	
 	
 if len(sys.argv) < 3:
 	print "USAGE: tpz_energy2 hw_stats_dir timer_dir"
