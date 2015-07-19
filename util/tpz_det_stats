@@ -62,12 +62,13 @@ for line in flog:
 		cpt=float(fields[header.index("CORR-VAL")]);
 		ept=float(fields[header.index("VAL")]);
 		if not (oid in cumerr):
-			cumerr[oid] = {"total":0,"n":0};
+			cumerr[oid] = {"total":0.0,"n":0.0};
 			
 		if is_accept:
 			err = abs(cpt - ept);
 		else:
-			err = 0
+			err = 0.0
+			
 		if (not math.isnan(err)) and (not math.isinf(err)):
 			cumerr[oid]["total"] += err;
 			cumerr[oid]["n"] += 1;
