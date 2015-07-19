@@ -193,7 +193,7 @@ def analyze(hwstats, timerstats):
 	print(str(HIERARCHY_SAV)+","+str(MAX_HIERARCHY_SAV));
 	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV*SRAM_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
-	OUTDET_SAV = 1.0/timerstats["outdet"]*(timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"])*NOMINAL_SAV)
+	OUTDET_SAV = 1.0/timerstats["outdet"]*(timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	print(timerstats["nominal"],timerstats["outdet"])
 	
 	print "Maximum Savings: "+str(MAX_SAV*100)
