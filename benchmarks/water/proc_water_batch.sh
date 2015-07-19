@@ -39,7 +39,6 @@ do
 			tpz_det ldet.out interf 0 > interf.det.txt
 			tpz_det ldet.out poteng 1 > poteng.det.txt
 		fi
-		rm interf.stat.txt
 		if [ ! -f "interf.stat.txt" ];
 		then 
 			echo "detected no stat file... working...."
