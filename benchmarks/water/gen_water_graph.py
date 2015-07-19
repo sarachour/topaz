@@ -88,19 +88,20 @@ en = map(lambda x : get(["ltime",5,x,"median"]),xvals)
 errdet = map(lambda x : 100-get(["ldet",5,x,"median"]),xvals) 
 
 colors = ["#2980b9","#27ae60","#c0392b"];
+w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
-axes[i].errorbar(idxs,qual,label="Output Quality",yerr=err,color=colors[i],marker="o",linestyle="--");
+axes[i].errorbar(idxs,qual,label="Output Quality",yerr=err,linewidth=w,color=colors[i],marker="o",linestyle="--");
 axes[i].set_ylabel("Output Quality (% Position Error)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].plot(idxs,en,label="Energy Savings", color=colors[i],marker="^",linestyle="-.");
+axes[i].plot(idxs,en,label="Energy Savings", color=colors[i],linewidth=w,marker="^",linestyle="-.");
 axes[i].set_ylabel("Energy Savings (%)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].plot(idxs,errdet,label="% Errors Detected",color=colors[i],marker="x",linestyle=":");
+axes[i].plot(idxs,errdet,label="% Errors Detected",color=colors[i],linewidth=w,marker="x",linestyle=":");
 axes[i].set_ylabel("% Errors Detected (%)")
 axes[i].spines['right'].set_color(colors[i]);
 
@@ -108,4 +109,48 @@ axes[0].set_xlabel(xlab)
 plt.xticks(idxs,xvals);
 #plt.ylabel(indep)
 #plt.barplot(indep, avg)
+plt.savefig(filename)
+
+
+
+title = "Output Quality / Taskset Quality Correlation for Water"
+xlab = "Target Re-execution Rate"
+ylab = "Relative Value"
+xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
+filename = "correl_water.png"
+
+
+fig,ax = plt.subplots()
+axes = [ax, ax.twinx()]
+
+
+fig.subplots_adjust(right=0.75);
+
+axes[-1].spines['right'].set_position(('axes',1.2))
+axes[-1].set_frame_on(True);
+axes[-1].patch.set_visible(False);
+
+plt.margins(0.05, 0.05)
+plt.title(title,fontsize=14)
+idxs = range(0,len(xvals));
+qual = map(lambda x : get(["normal",5,x,"median"]),xvals) 
+qual_err = map(lambda x : get(["normal",5,x,"low"]),xvals) 
+task = map(lambda x : get(["ldeterr",5,x,"median"]),xvals) 
+task_err = map(lambda x : get(["ldeterr",5,x,"low"]),xvals) 
+
+colors = ["#2980b9","#27ae60","#c0392b"];
+w=3
+i=0;
+#axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
+axes[i].errorbar(idxs,qual,label="Output Quality",yerr=qual_err,linewidth=w,color=colors[i],marker="o",linestyle="--");
+axes[i].set_ylabel("Output Quality (% Position Error)")
+axes[i].spines['right'].set_color(colors[i]);
+
+i+=1;
+axes[i].errorbar(idxs,task,label="Taskset Quality", yerr=task_err, color=colors[i],linewidth=w,marker="^",linestyle="-.");
+axes[i].set_ylabel("Taskset Quality (% Task Output Error)")
+axes[i].spines['right'].set_color(colors[i]);
+
+axes[0].set_xlabel(xlab)
+plt.xticks(idxs,xvals);
 plt.savefig(filename)

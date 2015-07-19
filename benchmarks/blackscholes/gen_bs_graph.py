@@ -86,20 +86,21 @@ en = map(lambda x : get(["ltime",5,x,"median"]),xvals)
 errdet = map(lambda x : 100-get(["ldet",5,x,"median"]),xvals) 
 
 colors = ["#2980b9","#27ae60","#c0392b"];
+w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
-axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
-axes[i].errorbar(idxs,qual,yerr=err,label="Output Quality",color=colors[i],marker="o",linestyle="--");
+axes[i].plot(idxs,qual,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
+axes[i].errorbar(idxs,qual,yerr=err,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
 axes[i].set_ylabel("Output Quality (% Error)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].plot(idxs,en,label="Energy Savings", color=colors[i],marker="^",linestyle="-.");
+axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
 axes[i].set_ylabel("Energy Savings (%)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].plot(idxs,errdet,label="% Errors Detected",color=colors[i],marker="x",linestyle=":");
+axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
 axes[i].set_ylabel("% Errors Detected (%)")
 axes[i].spines['right'].set_color(colors[i]);
 
