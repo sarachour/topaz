@@ -137,7 +137,7 @@ qual_err = map(lambda x : get(["normal",5,x,"low"]),xvals)
 task = map(lambda x : get(["ldeterr",5,x,"median"]),xvals) 
 task_err = map(lambda x : get(["ldeterr",5,x,"low"]),xvals) 
 
-colors = ["#2980b9","#27ae60","#c0392b"];
+colors = ["#2980b9","#c0392b","#27ae60"];
 w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
