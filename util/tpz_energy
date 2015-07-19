@@ -23,6 +23,7 @@ def read_timer(path):
 	topaz_w = 0.0 
 	main_m = 0.0
 	topaz_m = 0.0 
+	det = 0.0
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -43,6 +44,9 @@ def read_timer(path):
 			
 			if(typ != 6 and typ != 7 and typ != 4):
 				nominal += amt
+			
+			if(typ != 6 and typ != 7 and typ != 4):
+				det += amt
 		except:
 			continue
 	
@@ -72,6 +76,7 @@ def read_timer(path):
 	data["outdet"] = outdet
 	data["topaz.worker"] = topaz_w;
 	data["topaz.prec"] = topaz_m;
+	data["det"] = topaz_m;
 	data["main"] = main_m;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
@@ -207,9 +212,9 @@ def analyze(hwstats, timerstats):
 	
 	AE = 1.0-NOMINAL_SAV
 	PE = 1.0
-	BASELINE = PE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
-	NOMINAL = AE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
-	WITHDET = AE*timerstats["worker"] + PE*(timerstats["outdet"] - timerstats["worker"])
+	BASELINE = PE*timerstats["worker"] + PE*(timerstats["nominal"])
+	NOMINAL = AE*timerstats["worker"] + PE*(timerstats["nominal"])
+	WITHDET = AE*timerstats["worker"] + PE*(timerstats["outdet"])
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
 	
@@ -217,7 +222,7 @@ def analyze(hwstats, timerstats):
 	
 	print "Maximum Savings: "+str(MAX_SAV*100)
 	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
-	print "With Outdet Savings: "+str(OUTDET_SAV*100)
+	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
 	print "Nominal Factor:",FACTOR1*100
 	print "Detector Factor:",FACTOR2*100
