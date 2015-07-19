@@ -20,7 +20,9 @@ def read_timer(path):
 	nominal = 0.0
 	outdet = 0.0
 	worker = 0.0
-	ser = 0.0
+	topaz_w = 0.0 
+	main_m = 0.0
+	topaz_m = 0.0 
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -31,8 +33,11 @@ def read_timer(path):
 			if(typ == 2 or typ == 3):
 				continue
 			
-			if(typ == 5):
-				continue
+			if(typ == 5 or type == 0):
+				topaz_m += amt
+			
+			if(typ == 1):
+				main_m += amt
 				
 			outdet += amt
 			
@@ -53,9 +58,9 @@ def read_timer(path):
 			if(typ == 2 or typ == 3):
 				continue
 			
-			if(typ == 5):
-				continue
-				
+			if(typ == 5 or type == 0):
+				topaz_w += amt
+			
 			worker += amt
 			
 		except:
@@ -63,8 +68,11 @@ def read_timer(path):
 	
 	data = {};
 	data["worker"] = worker
-	data["nominal"] = nominal+ser+worker
-	data["outdet"] = outdet+ser+worker
+	data["nominal"] = nominal+worker
+	data["outdet"] = outdet+worker
+	data["topaz.worker"] = topaz_w;
+	data["topaz.prec"] = topaz_m;
+	data["main"] = main_m;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
 	
@@ -109,6 +117,7 @@ def read_time_from_profile(path):
 			continue
 	
 	data = {};
+	data["main"] = main
 	data["worker"] = worker
 	data["nominal"] = nominal + worker
 	data["outdet"] = outdet + worker
