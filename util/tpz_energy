@@ -194,7 +194,7 @@ def analyze(hwstats, timerstats):
 	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV*SRAM_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	
-	OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"] - timerstats["woutdet"]) - timerstats["woutdet"]*(1-NOMINAL_SAV) )
+	OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
 	AE = 1.0-NOMINAL_SAV
 	PE = 1.0
@@ -210,8 +210,8 @@ def analyze(hwstats, timerstats):
 	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
 	print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "Nominal Factor:",FACTOR1
-	print "Detector Factor:",FACTOR2
+	print "Nominal Factor:",FACTOR1*100
+	print "Detector Factor:",FACTOR2*100
 	
 	
 if len(sys.argv) < 3:
