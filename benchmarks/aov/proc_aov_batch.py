@@ -108,18 +108,20 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 	axes[0].set_xlabel(xlab)
 	
 	if(is_tiny):
+		axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
 		axes[0].set_xticklabels(xticks,rotation=45);
 		axes[0].tick_params(axis="x",labelsize=8);
 	
 	else:
-		locs,tics=plt.xticks(idxs,xticks);
+		axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
+		axes[0].set_xticklabels(xticks,rotation=0);
 		
 	plt.savefig(filename)
 
 print plot
 
 indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
-labels = ["price", "input,price","rate,price", "strike,price","type,price","vol,price","time,price","all"]		
+labels = ["price", "input","rate", "strike","type","vol","time","all"]		
 xaxis="Tuple Elements Selected"
 title="Effect of Input-Output Tuple Selection"
 produce_tuple_plot("tradeoff_selection",title,"selection",indep,labels,xaxis,True)
@@ -134,8 +136,8 @@ produce_tuple_plot("tradeoff_batching",title,"batching",indep,labels,xaxis,False
 
 
 xaxis="Normalization Type"
-indep = ["naive","subtract","arbitrarge"]
-labels = ["price", "price-initial_price", "arbitrarge"]
+indep = ["naive","arbitrarge"]
+labels = ["price", "arbitrarge"]
 title="Effect of Price Normalization"
 produce_tuple_plot("tradeoff_norm",title,"normalization",indep,labels,xaxis,False)
 	
