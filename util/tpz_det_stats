@@ -58,6 +58,8 @@ for line in flog:
 			continue;
 
 		is_accept = "y" in fields[header.index("IS-ACCEPT")];
+		acc_val = fields[header.index("IS-ACCEPT")];
+		corr_val = fields[header.index("IS-CORR")];
 		oid=float(fields[header.index("OUT-ID")]);
 		cpt=float(fields[header.index("CORR-VAL")]);
 		ept=float(fields[header.index("VAL")]);
@@ -67,13 +69,14 @@ for line in flog:
 		
 		if is_accept:
 			err = abs(cpt - ept);
+			#print id,oid,corr_val,acc_val,err	
 		else:
 			err = 0.0
 			
-			
-		if (not math.isnan(err)) and (not math.isinf(err)):
-			cumerr[oid]["total"] += err;
-			cumerr[oid]["n"] += 1;
+		if math.isnan(err) or math.isinf(err) or err > 1e5:
+			continue;	
+		cumerr[oid]["total"] += err;
+		cumerr[oid]["n"] += 1;
 	except ValueError:
 		print "skipping.."
 
