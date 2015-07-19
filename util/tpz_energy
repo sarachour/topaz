@@ -84,7 +84,7 @@ def read_time_from_profile(path):
 			typ = int(a.group(1));
 			amt = float(a.group(2));
 			
-			if(typ == 2 or typ == 3 or typ == 5):
+			if(typ == 2 or typ == 3):
 				continue
 				
 			outdet += amt
@@ -100,7 +100,7 @@ def read_time_from_profile(path):
 			typ = int(a.group(1));
 			amt = float(a.group(2));
 			
-			if(typ == 2 or typ == 3 or typ == 5):
+			if(typ == 2 or typ == 3):
 				continue
 			
 			worker += amt
