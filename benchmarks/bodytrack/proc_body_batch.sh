@@ -28,6 +28,7 @@ do
   then 
 	RATES=""
 	KIND="ldet"
+	ERRS=""
 	for ldfolder in  `ls output/$folder/ | grep "data"`
 	do
 		cd output/$folder/$ldfolder
@@ -36,11 +37,19 @@ do
 			echo "detected no detector file... working...."
 			tpz_det ldet.out graph 0 > det.txt
 		fi
+		if [ ! -f "stat.txt" ];
+		then 
+			echo "detected no stat file... working...."
+			tpz_det_stats ldet.out 0 > stat.txt
+		fi
 		RATE=$(cat det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		ERR=$(cat stat.txt | grep -E "^TOTAL[ 0-9\.e\-]+$" | grep -o -E "[0-9\.e\-]+")
+		ERRS=$ERRS","$ERR
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$PROB,$BS,ldeterr$ERRS" >> $SUMMARY
   fi
   
   if [ "$KIND" = "ltime" ];
