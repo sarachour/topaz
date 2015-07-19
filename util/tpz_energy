@@ -200,7 +200,7 @@ def analyze(hwstats, timerstats):
 	PE = 1.0
 	BASELINE = PE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
 	NOMINAL = AE*timerstats["worker"] + PE*(timerstats["nominal"] - timerstats["worker"])
-	WITHDET = AE*timerstats["worker"] + PE(timerstats["outdet"] - timerstats["worker"])
+	WITHDET = AE*timerstats["worker"] + PE*(timerstats["outdet"] - timerstats["worker"])
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
 	
