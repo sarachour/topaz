@@ -88,6 +88,6 @@ for oid in cumerr:
 	terr.append(err);
 	print "ELEM",oid,err
 
-err = numpy.percentile(terr, 50);
+err = numpy.mean(terr );
 
 print "TOTAL",err
