@@ -45,7 +45,7 @@ def read_timer(path):
 			if(typ != 6 and typ != 7 and typ != 4):
 				nominal += amt
 			
-			if(typ != 6 and typ != 7 and typ != 4):
+			if(typ != 6 and typ != 7):
 				det += amt
 		except:
 			continue
