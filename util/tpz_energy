@@ -180,7 +180,7 @@ def analyze(hwstats, timerstats):
 	OA = timerstats["worker.topaz"]
 	TE = timerstats["reexec"]
 	TA = timerstats["worker"]
-	M = timerstats["main"]*0.5
+	M = timerstats["main"]
 	D = timerstats["det"]
 	
 	AE = 1.0-NOMINAL_SAV
