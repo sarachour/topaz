@@ -47,21 +47,22 @@ float fastabs(float f){
 }
 
 
-#define CHUNKSIZE 5
+#define BATCH 5
 
 //improve by calculating by block.simparm
 void ensemble_interfLoop1(ensemble * e){
 	int i, j;
 	int n = e->numMol;
-	int ntasks = n*n;
+	int ntasks = (n/BATCH)*(n/BATCH);
 	i=0;
 	j=0;
 	//const char instead of char for parms
 	taskset interfLoop1(k=0; k < ntasks; k+=1){
 		before {
-			i = k/n;
-			j = k%n;
+			i = (k/n)*BATCH;
+			j = (k%n)*BATCH;
 			if(j <= i) continue;
+			printf("indices: %d %d\n", i,j);
 			//printf("before %d, %d, t=%d\n", i ,j, k);
 			//printf("%d,%d\n",i,j);
 		}
@@ -73,48 +74,55 @@ void ensemble_interfLoop1(ensemble * e){
 			   const char tparms[sizeof(simparm_t)]= (char *) parms
 			   )
 			   
-			out(double Res1[9],
-				double Res2[9],
-				double incr)
+			out(double Res[BATCH*9],
+				double incr[BATCH])
 		{
+			
+			double Res1Tmp[BATCH][BATCH][3][3];
+			double Res2Tmp[BATCH][BATCH][3][3];
+			
 			skratch_pad * molecs = (skratch_pad *) cmolec;
 			parms = (simparm_t *) tparms;
-			skratch_pad * P1 = (skratch_pad *) &molecs[ti];
-			skratch_pad * P2 = (skratch_pad *) &molecs[tj];
-			double Res1Tmp[3][3];
-			double Res2Tmp[3][3];
-			incr = 0;
 			
-			incr += ensemble_interf2_aux(P1,P2,Res1Tmp,Res2Tmp);
-			int pi;
-			for(pi=0; pi < 9; pi++){
-				Res1[pi] = Res1Tmp[pi/3][pi%3];
-				Res2[pi] = Res2Tmp[pi/3][pi%3];
+			//clear
+			for(pi=0; pi < 9*BATCH; pi++){
+				Res[pi] = 0;
 			}
-			P1->update_forces_1D(Res1);
-			P2->update_forces_1D(Res2);
-			//printf("task %d,%d\n", ci+ti ,cj+tj);
 			
-			
-			
+			incr = 0;
+			//run simulation for nxn molecules
+			for(int k = 0; k < BATCH; k++){
+				for(int kd = k+1; kd < BATCH; kd++){
+					printf("	subindices: %d %d\n", ti+k,tj+kd);
+					//get molecules we're comparing
+					skratch_pad * P1 = (skratch_pad *) &molecs[ti+k];
+					skratch_pad * P2 = (skratch_pad *) &molecs[tj+kd];
+					//updating forces is simply addition
+					incr += ensemble_interf2_aux(P1,P2,Res1Tmp[k][kd],Res2Tmp[k][kd]);
+					for(int pi=0; pi < 9; pi++){
+						Res[k*9 + pi] += Res1Tmp[k][kd][pi/3][pi%3];
+						Res[kd*9 + pi] += Res2Tmp[k][kd][pi/3][pi%3];
+					}
+					P1->update_forces(Res1Tmp[k][kd]);
+					P2->update_forces(Res2Tmp[k][kd]);
+				}
+			}
+			//printf("task %d,%d\n", ci+ti ,cj+tj)
 			
 		}
 		transform in(int rank_out_i, int rank_out_j) 
-			out(float o1x, float o1y, float o1z, float o2x, float o2y, float o2z, float lincr){
+			out(float ox, float oy, float oz, float lincr){
 			//compute distance, and
 			lincr = incr;
-			o1x = o2x = 0;
-			o1y = o2y = 0;
-			o1z = o2z = 0;
-			for(int q=0; q < NDIM; q++){
-				o1x += fastabs(Res1[3*q]);
-				o2x += fastabs(Res2[3*q]);
-				
-				o1y += fastabs(Res1[3*q+1]);
-				o2y += fastabs(Res2[3*q+1]);
-				
-				o1z += fastabs(Res1[3*q+2]);
-				o2z += fastabs(Res2[3*q+2]);
+			ox = 0;
+			oy = 0;
+			oz = 0;
+			for(int k=0; k < BATCH; k++){
+				for(int q=0; q < NDIM; q++){
+					ox += fastabs(Res[k*9 + 3*q]);
+					oy += fastabs(Res[k*9 + 3*q+1]);
+					oz += fastabs(Res[k*9 + 3*q+2]);
+				}
 			}
 			//given the distance between two molecules, compute the magnitudes
 			//of velocity, accelerate.
