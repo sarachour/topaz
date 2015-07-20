@@ -47,7 +47,7 @@ float fastabs(float f){
 }
 
 
-#define BATCH 10
+#define BATCH 5
 
 //improve by calculating by block.simparm
 void ensemble_interfLoop1(ensemble * e){
