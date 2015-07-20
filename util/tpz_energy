@@ -116,7 +116,8 @@ def read_time_from_profile(path):
 			if(typ == 2 or typ == 3):
 				continue
 			
-			worker += amt
+			if(typ == 4):
+				worker += amt
 			
 		except:
 			continue
