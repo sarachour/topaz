@@ -25,6 +25,7 @@ def read_timer(path):
 	topaz_m = 0.0 
 	det = 0.0
 	reexec = 0.0
+	serm = 0.0
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -38,6 +39,9 @@ def read_timer(path):
 			if(typ == 5 or type == 0):
 				topaz_m += amt
 			
+			if(typ == 5):
+				serm += amt
+				
 			if(typ == 1):
 				main_m += amt
 				
@@ -84,6 +88,7 @@ def read_timer(path):
 	data["det"] = det*frac;
 	data["reexec"] = reexec*frac;
 	data["main"] = main_m*frac;
+	data["main.serialize"] = serm*frac;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
 	
@@ -193,6 +198,16 @@ def analyze(hwstats, timerstats):
 		DET_INST_ROOM = WITHDET - BASELINE
 		DET_TRADEOFF = 1-DET_INST_ROOM/timerstats["det"]
 	
+	
+	OE = timerstats["topaz.prec"]
+	OA = timerstats["topaz.worker"]
+	TE = timerstats["reexec"]
+	TA = timerstats["worker"]
+	M = timerstats["main"]
+	D = timerstats["det"]
+	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
+	print "OA=",OA,"	TA=",TA
+	print "-----------"
 	
 	print "REEXECUTION OVERHEAD",timerstats["reexec"]/timerstats["worker"]
 	print "REEXECUTION DETECT",timerstats["det"]/timerstats["worker"]
