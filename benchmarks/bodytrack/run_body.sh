@@ -4,7 +4,7 @@
 #gdb --args  src/TrackingBenchmark/bodytrack inputs/sequenceB_1 4 1 4000 5 0 0 1
 #src/TrackingBenchmark/bodytrack inputs/sequenceB_1 4 1 4000 5 0 0 1
 #!/bin/bash
-NFRAMES=2
+NFRAMES=1
 NPOSES=4000
 PIN_ARGS=$1
 TOPAZ_ARGS=$2
