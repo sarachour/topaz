@@ -36,7 +36,7 @@ def read_timer(path):
 			if(typ == 2 or typ == 3):
 				continue
 			
-			if(typ == 5 or type == 0):
+			if(type == 0):
 				topaz_m += amt
 			
 			if(typ == 5):
@@ -83,12 +83,12 @@ def read_timer(path):
 	data["worker"] = worker*frac
 	data["nominal"] = nominal*frac
 	data["outdet"] = outdet*frac
-	data["topaz.worker"] = topaz_w*frac;
-	data["topaz.prec"] = topaz_m*frac;
+	data["worker.topaz"] = topaz_w*frac;
+	data["main.topaz"] = topaz_m*frac;
 	data["det"] = det*frac;
 	data["reexec"] = reexec*frac;
 	data["main"] = main_m*frac;
-	data["main.serialize"] = serm*frac;
+	data["main.ser"] = serm*frac;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
 	
@@ -176,11 +176,11 @@ def analyze(hwstats, timerstats):
 	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
 	
-	OE = timerstats["topaz.prec"]
-	OA = timerstats["topaz.worker"]
+	OE = timerstats["main.topaz"]
+	OA = timerstats["worker.topaz"]
 	TE = timerstats["reexec"]
 	TA = timerstats["worker"]
-	M = timerstats["main"]
+	M = timerstats["main"] + timerstats["main.ser"]
 	D = timerstats["det"]
 	
 	AE = 1.0-NOMINAL_SAV
