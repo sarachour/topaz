@@ -175,13 +175,22 @@ def analyze(hwstats, timerstats):
 	
 	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
+	
+	OE = timerstats["topaz.prec"]
+	OA = timerstats["topaz.worker"]
+	TE = timerstats["reexec"]
+	TA = timerstats["worker"]
+	M = timerstats["main"]
+	D = timerstats["det"]
+	
 	AE = 1.0-NOMINAL_SAV
 	PE = 1.0
-	BASELINE = PE*timerstats["worker"] + PE*(timerstats["nominal"])
-	NOMINAL = AE*timerstats["worker"] + PE*(timerstats["nominal"])
-	WITHDET = AE*timerstats["worker"] + PE*(timerstats["outdet"])
+	BASELINE = PE*(TA+OA) + PE*(OE+M)
+	NOMINAL = AE*(TA+OA) + PE*(OE+M)
+	WITHDET = AE*(TA+OA) + PE*(OE+M+TE+D)
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
+	
 	
 	
 	if NOMINAL < BASELINE:
@@ -199,12 +208,6 @@ def analyze(hwstats, timerstats):
 		DET_TRADEOFF = 1-DET_INST_ROOM/timerstats["det"]
 	
 	
-	OE = timerstats["topaz.prec"]
-	OA = timerstats["topaz.worker"]
-	TE = timerstats["reexec"]
-	TA = timerstats["worker"]
-	M = timerstats["main"]
-	D = timerstats["det"]
 	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
 	print "OA=",OA,"	TA=",TA
 	print "-----------"
