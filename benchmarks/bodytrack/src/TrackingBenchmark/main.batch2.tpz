@@ -83,7 +83,7 @@ float internal_CalcWeights(float * v_proj,float * v_mdl, char * v_img, int ncame
 
 TrackingModel g_TrackingModel;
 	
-#define BATCH 1
+#define BATCH 2
 float* gparticle[BATCH];
 void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 {	
@@ -134,16 +134,14 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				}
 				tvalid = is_valid;
 			}
+			
 			transform in(int npart, float tweight, char tvalid) 
-				      out(float tv, float lweight, float bp1, float bp2, float bp3){
+				      out(float tv, float lweight){
 				tv = tvalid;
 				//lvalid = (int) (tvalid);
 				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
 				for(int k=0; k < BATCH; k++){
 					lweight +=  tweight[k];
-					bp1+=gparticle[k][3]; 
-					bp2+=gparticle[k][4]; 
-					bp3+=gparticle[k][5]; 
 				}
 			}
 			combine {
