@@ -23,7 +23,6 @@ typedef struct VECTOR_T {
 	double val[NDIM];
 } vector_t;
 
-#define CHUNKSIZE 1
 
 void in_vector(std::ifstream& f, double *v);
 void tvecClr(double *v);

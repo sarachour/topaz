@@ -62,15 +62,16 @@ void nbody_Simulate_orig(nbody_t * t_n, double t_tol, double t_hts, double t_eps
 }
 nbody_t * nb = NULL;
 
+#define BATCH 2
 void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
     //printf("start simulate\n");
     #define FREQ 1000
-	taskset nbodysim(i=0; i < n->nbody; i+=CHUNKSIZE){
+	taskset nbodysim(i=0; i < n->nbody; i+=BATCH){
 		before {
 			if(i%FREQ == 0)printf("task %d started\n",i);
 		}
 		compute in(
-					int t_siz = n->nbody-i < CHUNKSIZE ? n->nbody-i : CHUNKSIZE,
+					int t_siz = n->nbody-i < BATCH ? n->nbody-i : BATCH,
 					double t_tol = tol,
 					double t_eps = eps, 
 					double t_hts = hts,
@@ -80,11 +81,10 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 					const char t_cells[sizeof(cell_t)*max_ncells] = (char *) n->cells.celltab,
 					const char t_bodies[sizeof(body_t)*max_nbodies] = (char *) n->bodies.bodytab)
 		     out (
-				double vel[NDIM*CHUNKSIZE],
-				double acc[NDIM*CHUNKSIZE], 
+				double vel[NDIM*BATCH],
+				double acc[NDIM*BATCH], 
 				int r_siz,
-				double phi[CHUNKSIZE] ,
-				float mass
+				double phi[BATCH]
 				)
 		{
 		    //printf("worker start\n");
@@ -95,7 +95,6 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 			body_t * curr_n = (body_t*) bodyset_get(&t_n->bodies, bodyptr(i));
 			
 			nbody_simulate(i,t_n, t_siz, t_tol, t_eps, t_hts, t_ts, vel, acc, &r_siz, phi);
-			mass=curr_n->node.mass;
 			//printf("worker done\n");
 					
 		}
@@ -105,18 +104,19 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 		{
 			#define proc_v(v) (v*v)
 			#define proc_a(a) (a*a)
-			ev=ea=0;
-			ev +=  proc_v(vel[0]);
-			ea += proc_a(acc[0]);
-			ev +=  proc_v(vel[1]);
-			ea += proc_a(acc[1]);
-			ev +=  proc_v(vel[2]);
-			ea += proc_a(acc[2]);
-			ephi = phi[0];
+			ephi=ev=ea=0;
+			int idx = 0;
+			for(int k=0; k < t_siz; k++){
+				for(int d = 0; d < 3; d++){
+					ev +=  proc_v(vel[idx]);
+					ea += proc_a(acc[idx]);
+					idx++;
+				}
+				ephi += phi[k];
+			}
 			siz = r_siz;
 		}
 		combine {
-		    	if(i%FREQ == 0)printf("task %d completed\n",i);
 			body_t * body_ptr;
 			int ri;
 			for(ri =0; ri < r_siz; ri++){
@@ -125,17 +125,6 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 				vecLoad(&body_ptr->acc, &acc[ri*NDIM]);
 				body_ptr->phi = phi[ri];
 			}
-			/*
-			printf("# Node %d\n", i);
-			PRTV(&body_ptr->node.pos, "pos");
-			printf("\n");
-			PRTV(&body_ptr->vel, "vel");
-			printf("\n");
-			PRTV(&body_ptr->acc, "acc");
-			printf("\n");
-			printf("phi=%f\n", body_ptr->phi);
-			*/
-			//printf("combine done\n");
 		}
 		
 	}
