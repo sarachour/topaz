@@ -146,6 +146,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 					bp2+=gparticle[k][4]; 
 					bp3+=gparticle[k][5]; 
 				}
+			}
 			combine {
 				for(int k=0; k < BATCH; k++){
 					bool c_isvalid = (bool) t_valid[k];
