@@ -180,7 +180,7 @@ def analyze(hwstats, timerstats):
 	OA = timerstats["worker.topaz"]
 	TE = timerstats["reexec"]
 	TA = timerstats["worker"]
-	M = timerstats["main"]*0.5
+	M = timerstats["main"]
 	D = timerstats["det"]
 	
 	AE = 1.0-NOMINAL_SAV
@@ -226,8 +226,8 @@ def analyze(hwstats, timerstats):
 	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
-	#print "Maximum Savings: "+str(MAX_SAV*100)
-	#print "No Outdet Savings: "+str(NOMINAL_SAV*100)
+	print "Maximum Cache Savings: "+str(MAX_SAV*100)
+	print "Nominal Cache Savings: "+str(NOMINAL_SAV*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
 	print "No Outdet Savings:",(100-FACTOR1*100)
