@@ -194,6 +194,9 @@ def analyze(hwstats, timerstats):
 		DET_TRADEOFF = 1-DET_INST_ROOM/timerstats["det"]
 	
 	
+	print "REEXECUTION OVERHEAD",timerstats["reexec"]/timerstats["worker"]
+	print "REEXECUTION DETECT",timerstats["det"]/timerstats["worker"]
+	print "-----------"
 	
 	print "ROOM WITH NOMINAL",NOM_INST_ROOM
 	print "ROOM_WITH_DET",DET_INST_ROOM
