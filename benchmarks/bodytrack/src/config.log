@@ -671,7 +671,7 @@ configure:19419: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:51:6: warning: conflicting types for built-in function 'sqrt' [enabled by default]
  char sqrt ();
       ^
-/tmp/ccEdhGEu.o: In function `main':
+/tmp/ccJx4xEl.o: In function `main':
 /home/ubuntu/TOPAZ/benchmarks/bodytrack/src/conftest.c:62: undefined reference to `sqrt'
 collect2: error: ld returned 1 exit status
 configure:19419: $? = 1
