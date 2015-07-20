@@ -45,7 +45,7 @@ def read_timer(path):
 			if(typ != 6 and typ != 7 and typ != 4):
 				nominal += amt
 			
-			if(typ == 7 or typ == 4):
+			if(typ == 6 or typ == 7 or typ == 4):
 				det += amt
 		except:
 			continue
@@ -208,7 +208,7 @@ def analyze(hwstats, timerstats):
 	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV*SRAM_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	
-	OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
+	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
 	AE = 1.0-NOMINAL_SAV
 	PE = 1.0
@@ -218,14 +218,17 @@ def analyze(hwstats, timerstats):
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
 	
+	N_LEFTOVER = ((PE-AE)*timerstats["worker"] - PE*(timerstats["outdet"] - timerstats["nominal"]))/PE
+	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
 	print "Maximum Savings: "+str(MAX_SAV*100)
 	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "Nominal Factor:",FACTOR1*100
-	print "Detector Factor:",FACTOR2*100
+	print "Nominal Factor:",(100-FACTOR1*100)
+	print "Detector Factor:",(100-FACTOR2*100)
+	print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
 if len(sys.argv) < 3:

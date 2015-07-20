@@ -69,7 +69,8 @@ xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
 filename = "tradeoff_curve_barn.png"
 
 fig,ax = plt.subplots()
-axes = [ax, ax.twinx(), ax.twinx()]
+#axes = [ax, ax.twinx(), ax.twinx()]
+axes = [ax, ax.twinx()]
 
 
 fig.subplots_adjust(right=0.75);
@@ -94,10 +95,10 @@ axes[i].errorbar(idxs,qual,yerr=err,label="Output Quality",linewidth=w,color=col
 axes[i].set_ylabel("Output Quality (% Position Error)")
 axes[i].spines['right'].set_color(colors[i]);
 
-i+=1;
-axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
-axes[i].set_ylabel("Energy Savings (%)")
-axes[i].spines['right'].set_color(colors[i]);
+#i+=1;
+#axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
+#axes[i].set_ylabel("Energy Savings (%)")
+#axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
 axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");

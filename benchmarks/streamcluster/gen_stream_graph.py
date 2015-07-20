@@ -68,8 +68,9 @@ xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
 filename = "tradeoff_curve_stream.png"
 
 fig,ax = plt.subplots()
-axes = [ax, ax.twinx(), ax.twinx()]
+#axes = [ax, ax.twinx(), ax.twinx()]
 
+axes = [ax, ax.twinx()]
 
 fig.subplots_adjust(right=0.75);
 
@@ -99,9 +100,9 @@ axes[i].set_ylabel("Energy Savings (%)")
 axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
-axes[i].set_ylabel("% Errors Detected (%)")
-axes[i].spines['right'].set_color(colors[i]);
+#axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
+#axes[i].set_ylabel("% Errors Detected (%)")
+#axes[i].spines['right'].set_color(colors[i]);
 
 axes[0].set_xlabel(xlab)
 plt.xticks(idxs,xvals);
