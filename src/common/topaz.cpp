@@ -468,8 +468,8 @@ bool Topaz::receive(){
 	}
 	
 	this->timer->stop(TOPAZ_TIMER);
-	if(nticks % 10 == 0) Topaz::topaz->getTimers()->dump();
-	nticks++;
+	Topaz::topaz->getTimers()->dump();
+	if(nticks%50 == 0) nticks++;
 	Topaz::topaz->getTimers()->start_active();
 	return status;
 }

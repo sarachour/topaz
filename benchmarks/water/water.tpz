@@ -47,7 +47,7 @@ float fastabs(float f){
 }
 
 
-#define BATCH 2
+#define BATCH 10
 
 //improve by calculating by block.simparm
 void ensemble_interfLoop1(ensemble * e){
@@ -75,7 +75,8 @@ void ensemble_interfLoop1(ensemble * e){
 			   
 			out(double Res1[BATCH*9],
 				double Res2[BATCH*9],
-				double incr)
+				double incr,
+				double mag)
 		{
 			
 			double Res1Tmp[3][3];
@@ -97,11 +98,15 @@ void ensemble_interfLoop1(ensemble * e){
 				//if block two is less than block one, 
 				int start = tj > ti ? 0 : (tj == ti ? k+1 : BATCH);
 				for(int kd = start; kd < BATCH; kd++){
-					printf("	index: %d %d\n", ti+k,tj+kd);
+					//printf("	index: %d %d\n", ti+k,tj+kd);
 					//get molecules we're comparing
 					skratch_pad * P1 = (skratch_pad *) &molecs[ti+k];
 					skratch_pad * P2 = (skratch_pad *) &molecs[tj+kd];
 					//updating forces is simply addition
+					
+					for(int pi=0; pi < 9; pi++){
+						Res2Tmp[pi/3][pi%3] = Res1Tmp[pi/3][pi%3] =  0;
+					}
 					incr += ensemble_interf2_aux(P1,P2,Res1Tmp,Res2Tmp);
 					for(int pi=0; pi < 9; pi++){
 						Res1[k*9 + pi] += Res1Tmp[pi/3][pi%3];
@@ -116,21 +121,21 @@ void ensemble_interfLoop1(ensemble * e){
 			
 		}
 		transform in(int rank_out_i, int rank_out_j) 
-			out(float ox, float oy, float oz, float lincr){
+			out(float o, float lincr){
 			//compute distance, and
 			lincr = incr;
-			ox = 0;
-			oy = 0;
-			oz = 0;
+			o = 0;
+			int idx = 0;
 			for(int k=0; k < BATCH; k++){
 				for(int q=0; q < NDIM; q++){
-					ox += fastabs(Res1[k*9 + 3*q]);
-					oy += fastabs(Res1[k*9 + 3*q+1]);
-					oz += fastabs(Res1[k*9 + 3*q+2]);
+					o += fastabs(Res1[idx]);
+					o += fastabs(Res1[idx+1]);
+					o += fastabs(Res1[idx+2]);
 					
-					ox += fastabs(Res2[k*9 + 3*q]);
-					oy += fastabs(Res2[k*9 + 3*q+1]);
-					oz += fastabs(Res2[k*9 + 3*q+2]);
+					o += fastabs(Res2[idx]);
+					o += fastabs(Res2[idx+1]);
+					o += fastabs(Res2[idx+2]);
+					idx += 3;
 				}
 			}
 			//given the distance between two molecules, compute the magnitudes
@@ -143,13 +148,14 @@ void ensemble_interfLoop1(ensemble * e){
 			double * u1 = Res1;
 			double * u2 = Res2;
 			for(int k=0; k < BATCH; k++){
-				int start = j > i ? 0 : (j == i ? k+1 : BATCH);
-				for(int kd=start; kd < BATCH; kd++){
-					r1 = ensemble_getPad(e,i+k);
-					r2 = ensemble_getPad(e,j+kd);
-					r1->update_forces_1D(&u1[k*9]);
-					r2->update_forces_1D(&u2[kd*9]);
-				}
+				r1 = ensemble_getPad(e,i+k);
+				r1->update_forces_1D(&u1[k*9]);
+			}
+			
+			int start = j > i ? 0 : (j == i ? k+1 : BATCH);
+			for(int kd=start; kd < BATCH; kd++){
+				r2 = ensemble_getPad(e,j+kd);
+				r2->update_forces_1D(&u2[kd*9]);
 			}
 			e->VIR.addval(incr);
 		}
@@ -209,15 +215,15 @@ void ensemble_potengLoop2(ensemble * e, int idx){
 void ensemble_poteng_topaz(ensemble * e){
 	int i, j;
 	int isiz, jsiz;
-	int n = e->numMol;
+	int n = e->numMol/BATCH;
 	int ntasks = n*n;
 	i=0;
 	j=0;
     taskset poteng(k=0; k < ntasks; k+=1){
 		before {
-			i = k/n;
-			j = k%n;
-			if(j <= i) continue;
+			i = k/n*BATCH;
+			j = k%n*BATCH;
+			if(j < i) continue;
 		}
 		compute 
 			in(
@@ -228,19 +234,37 @@ void ensemble_poteng_topaz(ensemble * e){
 			out(double res[3])
 		{
 			skratch_pad * molecs = (skratch_pad*) cmolecs;
-			skratch_pad * P1 =  &molecs[ti];
-			skratch_pad * P2 =  &molecs[tj];
 			parms = ((simparm_t *) tparms);
+			double tmp[3];
 			res[0] = res[1] = res[2]=0;
-			ensemble_interPoteng2Aux(P1,P2,res);
+			for(int k = 0; k < BATCH; k++){
+				//if block two is ahead of block one, run whole block.
+				//if block two matches block one, run upper right triangle of block
+				//if block two is less than block one, 
+				int start = tj > ti ? 0 : (tj == ti ? k+1 : BATCH);
+				for(int kd = start; kd < BATCH; kd++){
+					//printf("	index: %d %d\n", ti+k,tj+kd);
+					//get molecules we're comparing
+					skratch_pad * P1 = (skratch_pad *) &molecs[ti+k];
+					skratch_pad * P2 = (skratch_pad *) &molecs[tj+kd];
+					ensemble_interPoteng2Aux(P1,P2,tmp);
+					res[0] += tmp[0];
+					res[1] += tmp[1];
+					res[2] += tmp[2];
+					
+				}
+			}
+			
+			
 		}
-		transform in(int rank_i) out(float pot0, float pot1, float pot2){
+		transform in(int rank_i) out(float pot){
 			/*getM -> you can get potential energy from vel, acc, pos
 			 */
 			#define procr(r) (r)
-			pot0 = procr(res[0]);
-			pot1 = procr(res[1]);
-			pot2 = procr(res[2]);
+			pot = 0;
+			pot += procr(res[0]);
+			pot += procr(res[1]);
+			pot += procr(res[2]);
 			//printf("poteng:%d,%d] %f %f %f\n", rank_i, rank_j,pot1, pot2, pot3);
 		}
 		combine{

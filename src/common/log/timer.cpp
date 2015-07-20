@@ -1,9 +1,15 @@
 #include "logger.h"
+#include "string.h"
+
+pthread_mutex_t lock;
 
 #define MAX_SIZE (300/(sizeof(timer_info_t)))
 
 RealTimerInfo::RealTimerInfo(const char * base){
+	strcpy(this->filename,base);
+	printf("INITIALIZE TIMER\n");
 	this->file = fopen(base, "w");
+	fprintf(this->file, "INDEX\tINSTRUCTIONS\n");
 	this->ndumps = 0;
 	this->TIMER_OFF = false;
 	this->n_stops = 0;
@@ -90,18 +96,18 @@ void RealTimerInfo::stop(int c){
 void RealTimerInfo::print(){
 	FILE * fp = this->file;
 	timer_node_t * n = this->timers;
-	if(this->ndumps == 0) fprintf(fp, "INDEX\tINSTRUCTIONS\n");
 	while(n != NULL){
 		timer_info_t d = n->data;
 		fprintf(fp, "%u\t%f\n", d.idx, d.inst);
 		n=n->NEXT;
 	}
+	fflush(fp);
 	
 }
 
 RealCommunicationInfo::RealCommunicationInfo(const char * filename){
-	file = fopen(filename, "w");
-	fprintf(file, "taskset\ttask\tsent\trecvd\n");
+	//file = fopen(filename, "w");
+	//fprintf(file, "taskset\ttask\tsent\trecvd\n");
 	taskset = -1;
 	task = -1;
 	sent = 0;
@@ -109,10 +115,10 @@ RealCommunicationInfo::RealCommunicationInfo(const char * filename){
 }
 
 void RealCommunicationInfo::write_line(){
-	fprintf(file,"%d\t%d\t%d\t%d\n", taskset, task, sent, recvd);
+	//fprintf(file,"%d\t%d\t%d\t%d\n", taskset, task, sent, recvd);
 }
 RealCommunicationInfo::~RealCommunicationInfo(){
-	fclose(file);
+	//fclose(file);
 }
 void RealCommunicationInfo::dump(){
 	

@@ -103,6 +103,7 @@ class RealTimerInfo : public TimerInfo{
 	int n_stops ;
 	bool stopped[N_HISTS][N_TIMERS];
 	FILE * file; // file to write to
+	char filename[256];
 	int ndumps;
 	bool TIMER_OFF;
 	
