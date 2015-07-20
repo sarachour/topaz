@@ -81,7 +81,7 @@ def read_timer(path):
 	data["topaz.worker"] = topaz_w;
 	data["topaz.prec"] = topaz_m;
 	data["det"] = det;
-	data["reexec"] = det;
+	data["reexec"] = reexec;
 	data["main"] = main_m;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
