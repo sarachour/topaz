@@ -163,11 +163,15 @@ def analyze(hwstats, timerstats):
 	L2_ASSOC = 4
 	L2_LINE = 16
 	
-	L1D_APPROX = hwstats["l1"]["lines"]/100.0;
-	L2_APPROX = hwstats["l2"]["lines"]/100.0;
+	L1D_APPROX = hwstats["l1"]["accs"]/100.0;
+	L2_APPROX = hwstats["l2"]["accs"]/100.0;
 	
-	HIERARCHY_SAV = (L1D_APPROX*L1D_SIZE+L2_APPROX*L2_SIZE)/(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
-	MAX_HIERARCHY_SAV = float(L1D_SIZE+L2_SIZE)/float(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
+	L1D_APPROX_CONS = lambda x : x*L1D_SIZE*(1-SRAM_SAV) + (1-x)*L1D_SIZE*(1)
+	L2_APPROX_CONS = lambda x : x*L2_SIZE*(1-SRAM_SAV) + (1-x)*L2_SIZE*(1)
+	L1I_CONS = L1I_SIZE*1
+	PREC_CACHE_BANK = (L1D_SIZE + L2_SIZE + L1I_SIZE)*1.0
+	HIERARCHY_SAV = (L1D_APPROX_CONS(L1D_APPROX)+L2_APPROX_CONS(L2_APPROX) + L1I_CONS + PREC_CACHE_BANK)/(PREC_CACHE_BANK + PREC_CACHE_BANK);
+	MAX_HIERARCHY_SAV = (L1D_APPROX_CONS(1)+L2_APPROX_CONS(1) + L1I_CONS + PREC_CACHE_BANK)/(PREC_CACHE_BANK + PREC_CACHE_BANK);
 	
 	print(str(HIERARCHY_SAV)+","+str(MAX_HIERARCHY_SAV));
 	MAX_SAV = SRAM_SYS_CONS*MAX_HIERARCHY_SAV*SRAM_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
@@ -226,8 +230,8 @@ def analyze(hwstats, timerstats):
 	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
-	print "Maximum Cache Savings: "+str(MAX_SAV*100)
-	print "Nominal Cache Savings: "+str(NOMINAL_SAV*100)
+	print "Maximum Cache+Memory Savings: "+str(MAX_SAV*100)
+	print "Nominal Cache+Memory Savings: "+str(NOMINAL_SAV*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
 	print "No Outdet Savings:",(100-FACTOR1*100)
