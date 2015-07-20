@@ -2,7 +2,7 @@ PIN_DIR=siact/tool/pin-2.12-58423-gcc.4.4.7-linux/source/tools/SiAct
 
 all: pin
 
-pin: $(PIN_DIR)/siact.cpp $(PIN_DIR)/*.H $(PIN_DIR)/include/*.H
+pin: $(PIN_DIR)/siact.cpp $(PIN_DIR)/*.H $(PIN_DIR)/include/*.h
 	cd $(PIN_DIR); make clean; make
 	cp $(PIN_DIR)/include/* $(TOPAZ_ROOT)/include
 	cp $(PIN_DIR)/include/*.cpp $(TOPAZ_ROOT)/src/common/emul

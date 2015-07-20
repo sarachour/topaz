@@ -89,53 +89,6 @@ def read_timer(path):
 	print data
 	return data
 
-def read_time_from_profile(path):
-	m = open(path+"/insmix.0.txt",'r');
-	w = open(path+"/insmix.1.txt",'r');
-
-	nominal = 0.0
-	outdet = 0.0
-	worker = 0.0
-	for line in m:
-		try:
-			a = re.match('TIMER\[([0-9]+)\]	([0-9\.]*)', line)
-			typ = int(a.group(1));
-			amt = float(a.group(2));
-			
-			if(typ == 2 or typ == 3):
-				continue
-				
-			outdet += amt
-			
-			if(typ != 6 and typ != 7 and typ != 4):
-				nominal += amt
-		except:
-			continue
-	
-	for line in w:
-		try:
-			a = re.match('TIMER\[([0-9]+)\]	([0-9\.]*)', line)
-			typ = int(a.group(1));
-			amt = float(a.group(2));
-			
-			if(typ == 2 or typ == 3):
-				continue
-			
-			if(typ == 4):
-				worker += amt
-			
-		except:
-			continue
-	
-	data = {};
-	data["main"] = main
-	data["worker"] = worker
-	data["nominal"] = nominal + worker
-	data["outdet"] = outdet + worker
-	
-	print data
-	return data
-	
 def read_profile(path):
 	m = open(path+"/insmix.0.txt",'r');
 	w = open(path+"/insmix.1.txt",'r');
