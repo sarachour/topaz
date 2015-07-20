@@ -218,6 +218,29 @@ def analyze(hwstats, timerstats):
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
 	
+	
+	if NOMINAL < BASELINE:
+		NOM_INST_ROOM = BASELINE - NOMINAL
+		NOM_TRADEOFF = 1+NOM_INST_ROOM/timerstats["det"]
+	else:
+		NOM_INST_ROOM = NOMINAL - BASELINE
+		NOM_TRADEOFF = 1-NOM_INST_ROOM/timerstats["det"]
+	
+	if WITHDET < BASELINE:
+		DET_INST_ROOM = BASELINE - WITHDET
+		DET_TRADEOFF = 1+DET_INST_ROOM/timerstats["det"]
+	else:
+		DET_INST_ROOM = WITHDET - BASELINE
+		DET_TRADEOFF = 1-DET_INST_ROOM/timerstats["det"]
+	
+	
+	
+	print "ROOM WITH NOMINAL",NOM_INST_ROOM
+	print "ROOM_WITH_DET",DET_INST_ROOM
+	print "TRADEOFF POINT (Nominal)",NOM_TRADEOFF
+	print "TRADEOFF POINT (Detector)",DET_TRADEOFF
+	
+	print "-----------"
 	N_LEFTOVER = ((PE-AE)*timerstats["worker"] - PE*(timerstats["outdet"] - timerstats["nominal"]))/PE
 	
 	print(timerstats["nominal"],timerstats["outdet"])

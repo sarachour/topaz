@@ -94,15 +94,15 @@ axes[i].errorbar(idxs,qual,label="Output Quality",yerr=err,linewidth=w,color=col
 axes[i].set_ylabel("Output Quality (Cluster Score)")
 axes[i].spines['left'].set_color(colors[i]);
 
-i+=1;
-axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
-axes[i].set_ylabel("Energy Savings (%)")
-axes[i].spines['right'].set_color(colors[i]);
+#i+=1;
+#axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
+#axes[i].set_ylabel("Energy Savings (%)")
+#axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
-#axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
-#axes[i].set_ylabel("% Errors Detected (%)")
-#axes[i].spines['right'].set_color(colors[i]);
+axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
+axes[i].set_ylabel("% Errors Detected (%)")
+axes[i].spines['right'].set_color(colors[i]);
 
 axes[0].set_xlabel(xlab)
 plt.xticks(idxs,xvals);
