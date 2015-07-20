@@ -163,8 +163,8 @@ def analyze(hwstats, timerstats):
 	L2_ASSOC = 4
 	L2_LINE = 16
 	
-	L1D_APPROX = hwstats["l1"]["accs"]/100.0;
-	L2_APPROX = hwstats["l2"]["accs"]/100.0;
+	L1D_APPROX = hwstats["l1"]["lines"]/100.0;
+	L2_APPROX = hwstats["l2"]["lines"]/100.0;
 	
 	HIERARCHY_SAV = (L1D_APPROX*L1D_SIZE+L2_APPROX*L2_SIZE)/(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
 	MAX_HIERARCHY_SAV = float(L1D_SIZE+L2_SIZE)/float(2*(L1D_SIZE + L2_SIZE + L1I_SIZE));
