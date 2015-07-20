@@ -75,14 +75,15 @@ def read_timer(path):
 			continue
 	
 	data = {};
-	data["worker"] = worker
-	data["nominal"] = nominal
-	data["outdet"] = outdet
-	data["topaz.worker"] = topaz_w;
-	data["topaz.prec"] = topaz_m;
-	data["det"] = det;
-	data["reexec"] = reexec;
-	data["main"] = main_m;
+	frac = 1/1000000.0;
+	data["worker"] = worker*frac
+	data["nominal"] = nominal*frac
+	data["outdet"] = outdet*frac
+	data["topaz.worker"] = topaz_w*frac;
+	data["topaz.prec"] = topaz_m*frac;
+	data["det"] = det*frac;
+	data["reexec"] = reexec*frac;
+	data["main"] = main_m*frac;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
 	
