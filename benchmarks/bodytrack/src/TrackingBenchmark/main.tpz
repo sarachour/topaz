@@ -105,6 +105,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 	mModel->getAbbPrimitive(mdl_prim);
 	mModel->getImagePrimitive(img_prim);
 	
+	printf("beginning taskset\n");
 	taskset calcweights(i=0; i < particles.size(); i+=BATCH){
 			before {
 				for(int k=0; k < BATCH; k++){
@@ -196,6 +197,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 		}
 	}
 	mWeights *= fpType(1.0) / total;
+	printf("finished taskset\n");
 							//normalize weights
 	
 }
