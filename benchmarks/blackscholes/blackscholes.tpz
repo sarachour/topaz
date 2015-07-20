@@ -211,7 +211,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
     return OptionPrice;
 }
 
-#define NELEMS 8
+#define NELEMS 64
 
 /////////////
 //16: 69%
@@ -240,36 +240,7 @@ int BlkSchlsEqEuroNoDiv() {
 			normavgprice=0;
 			for(int q=0; q < NELEMS; q++) 
 				normavgprice += tfprice[q]-tsptprice[q];
-			/*
-			float delta = 1.0;
-			float adjprice;
-			normavgprice=0;
-			int q=0;
-			float expo = tstrike[q]*exp((0-trate[q])*(ttime[q] - 0));
 			
-			float old_price = tsptprice[q] - delta;
-			float min_bound;
-			float max_bound;
-			if(totype[q] == 0) { //call
-				min_bound = old_price- expo ;
-				//min_bound=0;
-				if(min_bound < 0.0) {
-					min_bound=0;
-				}
-				max_bound = (float) tsptprice[q];
-			}
-			else { //put
-				min_bound = expo - old_price;
-				//min_bound = 0;
-				if(min_bound < 0.0) {
-					min_bound=0;
-				}
-				max_bound = expo;
-			}
-			adjprice = (tfprice[q] - min_bound)/(max_bound);
-			normavgprice+=adjprice;
-			normavgprice/NELEMS;
-			*/
 		}
 		combine {
 			float priceDelta;

@@ -251,7 +251,7 @@ def analyze(hwstats, timerstats):
 	print "--------------"
 	print "Nominal Factor:",(100-FACTOR1*100)
 	print "Detector Factor:",(100-FACTOR2*100)
-	print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
+	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
 if len(sys.argv) < 3:

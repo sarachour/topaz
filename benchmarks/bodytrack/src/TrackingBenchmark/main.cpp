@@ -85,7 +85,9 @@ float internal_CalcWeights (float * v_proj,float * v_mdl, char * v_img, int ncam
 }
 
 TrackingModel g_TrackingModel; 
-float* gparticle; 
+
+#define BATCH 5
+ float* gparticle[BATCH]; 
 void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 {
 	mBestParticle = 0; 
@@ -95,9 +97,9 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 	//allocate
  float * mdl_prim = new float[MAX_MODEL_SIZE]; 
 	char * img_prim = new char[MAX_IMAGE_SIZE]; 
-	float * part_proj = new float[MAX_PROJECTED_BODY_SIZE]; 
+	float * part_proj = new float[MAX_PROJECTED_BODY_SIZE*BATCH]; 
 	int particle_size = 0; 
-	bool valid; 
+	bool valid[BATCH]; 
 	int m_ncams = mModel->NCameras (); 
 	int m_nbits = mModel->getBytesPerPixel (); 
 	int m_width = mModel->getWidth (); 
@@ -107,37 +109,43 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 	mModel->getImagePrimitive (img_prim ); 
 	
 	float* tproj ; 
-	int t_valid ; 
+	int* t_valid ; 
 	float* tmodel ; 
 	char* timg ; 
 	int nCams ; 
 	int nBits ; 
 	int width ; 
 	int height ; 
-	float tweight ; 
+	float* tweight ; 
 	char tvalid ; 
 	Topaz::topaz->start (0 ); 
-	for (int i = 0 ; i <= (particles.size())-1 ; i += 1 )
+	for (int i = 0 ; i <= (particles.size())-1 ; i += BATCH )
 	{
-		gparticle = &particles[i][0]; 
-		mModel->SetupPose (particles[i], m_ncams, &valid, part_proj ); 
+		for (int k=0; k < BATCH; k++ ){
+			gparticle[k] = &particles[i+k][0]; 
+			mModel->SetupPose (particles[i+k], m_ncams, &valid[k], &part_proj[MAX_PROJECTED_BODY_SIZE*k] ); 
+		}
 		//printf("particle %d\n", i);
  
 		Topaz::topaz->send (0 , i , (float*)part_proj , valid , (float*)mdl_prim , (char*)img_prim , m_ncams , m_nbits , m_width , m_height ); 
 		Topaz::topaz->unpack_inputs (0 , &i , &tproj , &t_valid , &tmodel , &timg , &nCams , &nBits , &width , &height ); 
 		if (Topaz::topaz->receive (0 , &i , &tweight , &tvalid )){
-			bool c_isvalid = (bool )tvalid; 
-			mWeights[i] = tweight; 
-			//printf("combine %d/%d : %f %s\n", i,particles.size(), tweight, c_isvalid? "y":"n");
+			for (int k=0; k < BATCH; k++ ){
+				bool c_isvalid = (bool )t_valid[k]; 
+				mWeights[i+k] = tweight[k]; 
+				//printf("weight[%d]: %f\n",i+k,mWeights[i+k]);
+ //printf("combine %d/%d : %f %s\n", i,particles.size(), tweight, c_isvalid? "y":"n");
  //don't skip particle like that.
  if (!c_isvalid )//if not valid(model prior), remove the particle from the list
  {
-				particles[i].clear (); 
-			}
-			else {
-				minWeight = std::min (mWeights[i], minWeight ); // TODO:  postincrement maybe an issue.
+					particles[i+k].clear (); 
+				}
+				else {
+					minWeight = std::min (mWeights[i+k], minWeight ); // TODO:  postincrement maybe an issue.
  particle_size++; 
+				}
 			}
+			
 		}
 	}
 	delete mdl_prim; 
@@ -166,7 +174,7 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
  if (i == 0 || mWeights[i] > best )//find highest likelihood particle
  {best = mWeights[i]; 
 			mBestParticle = i; 
-			printf ("weight: %f\n" , mWeights[i] ); 
+			printf ("anneal: %f\n" , mWeights[i] ); 
 		}
 	}
 	mWeights *= fpType (1.0 )/ total; 
@@ -389,22 +397,24 @@ void calcweights_COMPUTE_TPZ (Task* __INPUT , Task* __OUTPUT )
 {
 	int i ; 
 	float* tproj ; 
-	int t_valid ; 
+	int* t_valid ; 
 	float* tmodel ; 
 	char* timg ; 
 	int nCams ; 
 	int nBits ; 
 	int width ; 
 	int height ; 
-	float tweight ; 
+	float tweight [ BATCH ] ; 
 	char tvalid ; 
 	Topaz::topaz->unpack_inputs (0 , &i , &tproj , &t_valid , &tmodel , &timg , &nCams , &nBits , &width , &height ); 
 	pin_start_inject_errors (); 
 	
-	bool is_valid = (bool )t_valid; 
-	//get's stuck on log-likelihood.
- if (is_valid ){
-		tweight = internal_CalcWeights (tproj, tmodel, timg, nCams, width, height, nBits ); 
+	bool is_valid = true; 
+	for (int k=0; k < BATCH; k++ ){
+		is_valid = is_valid && t_valid[k]; 
+		if (t_valid[k] ){
+			tweight[k] = internal_CalcWeights (&tproj[MAX_PROJECTED_BODY_SIZE*k], tmodel, timg, nCams, width, height, nBits ); 
+		}
 	}
 	tvalid = is_valid; 
 	pin_stop_inject_errors (); 
@@ -414,14 +424,14 @@ bool calcweights_TRANS_TPZ (Task* __INPUT , Task* __OUTPUT ){
 	
 	int i ; 
 	float* tproj ; 
-	int t_valid ; 
+	int* t_valid ; 
 	float* tmodel ; 
 	char* timg ; 
 	int nCams ; 
 	int nBits ; 
 	int width ; 
 	int height ; 
-	float tweight ; 
+	float* tweight ; 
 	char tvalid ; 
 	float tv ; 
 	float lweight ; 
@@ -431,27 +441,30 @@ bool calcweights_TRANS_TPZ (Task* __INPUT , Task* __OUTPUT ){
 	Topaz::topaz->unpack_inputs (__INPUT , 0 , &i , &tproj , &t_valid , &tmodel , &timg , &nCams , &nBits , &width , &height ); 
 	Topaz::topaz->unpack_outputs (__OUTPUT , 0 , &i , &tweight , &tvalid ); 
 	
-	int q=0; 
 	tv = tvalid; 
 	//lvalid = (int) (tvalid);
- lweight = tweight; 
-	q=3; 
-	bp1=gparticle[q]; q++; 
-	bp2=gparticle[q]; q++; 
-	bp3=gparticle[q]; q++; 
+ bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0; 
+	for (int k=0; k < BATCH; k++ ){
+		if (tweight[k] < lweight || k == 0 ){
+			lweight = tweight[k]; 
+			bp1=gparticle[k][3]; 
+			bp2=gparticle[k][4]; 
+			bp3=gparticle[k][5]; 
+		}
+	}
 	return Topaz::topaz->check (0 , i , tv , lweight , bp1 , bp2 , bp3 ); 
 }
 int topaz_init (int argv , char** argc ){
 	Topaz::topaz->add (0 , calcweights_COMPUTE_TPZ , calcweights_TRANS_TPZ , 8 , 2 , 5 , 
-		 TASK_ARG_ARRAY , FLOAT , MAX_PROJECTED_BODY_SIZE , 
-		 TASK_ARG_SCALAR , INT , 1 , 
+		 TASK_ARG_ARRAY , FLOAT , MAX_PROJECTED_BODY_SIZE*BATCH , 
+		 TASK_ARG_ARRAY , INT , BATCH , 
 		 TASK_ARG_CONST_ARRAY , FLOAT , MAX_MODEL_SIZE , 
 		 TASK_ARG_CONST_ARRAY , CHAR , MAX_IMAGE_SIZE , 
 		 TASK_ARG_CONST_SCALAR , INT , 1 , 
 		 TASK_ARG_CONST_SCALAR , INT , 1 , 
 		 TASK_ARG_CONST_SCALAR , INT , 1 , 
 		 TASK_ARG_CONST_SCALAR , INT , 1 , 
-		 TASK_ARG_SCALAR , FLOAT , 1 , 
+		 TASK_ARG_ARRAY , FLOAT , BATCH , 
 		 TASK_ARG_SCALAR , CHAR , 1 ); 
 	
 }

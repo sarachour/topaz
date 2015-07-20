@@ -14,7 +14,8 @@ FlexIO.lo: FlexIO.cpp /usr/include/stdc-predef.h ../config.h FlexIO.h \
  /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
  /usr/include/x86_64-linux-gnu/bits/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/stdio2.h FlexImage.h \
- /home/ubuntu/TOPAZ/include/pin_util.H /usr/include/c++/4.8/string \
+ /mnt/hgfs/sachour/Documents/git/research/topaz/include/pin_util.H \
+ /usr/include/c++/4.8/string \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -78,8 +79,9 @@ FlexIO.lo: FlexIO.cpp /usr/include/stdc-predef.h ../config.h FlexIO.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/c++/4.8/cstdlib \
  /usr/include/c++/4.8/cstring /usr/include/string.h \
  /usr/include/x86_64-linux-gnu/bits/string3.h FlexDataExchange.h \
- FlexImageStore.h /home/ubuntu/TOPAZ/include/pin_util.h FlexColor.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
+ FlexImageStore.h \
+ /mnt/hgfs/sachour/Documents/git/research/topaz/include/pin_util.h \
+ FlexColor.h /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
  /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/c++/4.8/bits/stl_algo.h \
  /usr/include/c++/4.8/bits/algorithmfwd.h \
@@ -136,7 +138,7 @@ FlexIO.h:
 
 FlexImage.h:
 
-/home/ubuntu/TOPAZ/include/pin_util.H:
+/mnt/hgfs/sachour/Documents/git/research/topaz/include/pin_util.H:
 
 /usr/include/c++/4.8/string:
 
@@ -300,7 +302,7 @@ FlexDataExchange.h:
 
 FlexImageStore.h:
 
-/home/ubuntu/TOPAZ/include/pin_util.h:
+/mnt/hgfs/sachour/Documents/git/research/topaz/include/pin_util.h:
 
 FlexColor.h:
 
