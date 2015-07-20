@@ -140,8 +140,14 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
 				for(int k=0; k < BATCH; k++){
 					bool is_valid = t_valid[k];
-					if(k==0 || (is_valid && tweight[k] < lweight)){
+					if(is_valid && tweight[k] < lweight){
 						lweight= tweight[k];
+						bp1=gparticle[k][3]; 
+						bp2=gparticle[k][4]; 
+						bp3=gparticle[k][5]; 
+					}
+					else if(k==0){
+						lweight = 999999;
 						bp1=gparticle[k][3]; 
 						bp2=gparticle[k][4]; 
 						bp3=gparticle[k][5]; 
