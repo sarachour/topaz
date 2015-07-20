@@ -8,7 +8,7 @@ BLOCKSIZE=2
 #NSEEDS=3
 STARTSEED=7
 NSEEDS=9
-FLAGS=
+FLAGS=t
 
 echo "blacscholes is beginning execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
@@ -18,6 +18,7 @@ echo "input: $INP" >> tmp.txt
 #mutt -s "Blackscholes Started" sarachour@gmail.com < tmp.txt
 
 
+sutil_run_script.sh run_bs.sh $INP 1 none perfect
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
