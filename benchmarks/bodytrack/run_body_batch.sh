@@ -10,7 +10,7 @@ NSEEDS=8
 #NSEEDS=7
 SCRIPT=run_body
 
-FLAGS=
+FLAGS=t
 
 echo "bodytrack has started execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
