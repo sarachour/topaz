@@ -245,12 +245,12 @@ def analyze(hwstats, timerstats):
 	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
-	print "Maximum Savings: "+str(MAX_SAV*100)
-	print "No Outdet Savings: "+str(NOMINAL_SAV*100)
+	#print "Maximum Savings: "+str(MAX_SAV*100)
+	#print "No Outdet Savings: "+str(NOMINAL_SAV*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "Nominal Factor:",(100-FACTOR1*100)
-	print "Detector Factor:",(100-FACTOR2*100)
+	print "No Outdet Savings:",(100-FACTOR1*100)
+	print "With Outdet Savings:",(100-FACTOR2*100)
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
