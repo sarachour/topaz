@@ -86,7 +86,7 @@ float internal_CalcWeights (float * v_proj,float * v_mdl, char * v_img, int ncam
 
 TrackingModel g_TrackingModel; 
 
-#define BATCH 5
+#define BATCH 2 
  float* gparticle[BATCH]; 
 void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 {

@@ -10,7 +10,7 @@ NSEEDS=8
 #NSEEDS=7
 SCRIPT=run_body
 
-FLAGS=
+FLAGS=t
 
 echo "bodytrack has started execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
@@ -19,7 +19,7 @@ echo "input: $INP" >> tmp.txt
 
 #mutt -s "Bodytrack Started" sarachour@gmail.com < tmp.txt
 
-sutil_run_script.sh $SCRIPT.sh $INP $i perfect none
+sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect 
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
