@@ -176,11 +176,11 @@ def analyze(hwstats, timerstats):
 	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
 	
-	OE = timerstats["main.topaz"] 
+	OE = timerstats["main.topaz"] + timerstats["main.ser"]
 	OA = timerstats["worker.topaz"]
 	TE = timerstats["reexec"]
 	TA = timerstats["worker"]
-	M = timerstats["main"]
+	M = timerstats["main"]*0.5
 	D = timerstats["det"]
 	
 	AE = 1.0-NOMINAL_SAV
