@@ -24,6 +24,7 @@ def read_timer(path):
 	main_m = 0.0
 	topaz_m = 0.0 
 	det = 0.0
+	reexec = 0.0
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -45,8 +46,11 @@ def read_timer(path):
 			if(typ != 6 and typ != 7 and typ != 4):
 				nominal += amt
 			
-			if(typ == 6 or typ == 7 or typ == 4):
+			if(typ == 6 or typ == 7):
 				det += amt
+				
+			if( typ == 4):
+				reexec += amt
 		except:
 			continue
 	
@@ -77,6 +81,7 @@ def read_timer(path):
 	data["topaz.worker"] = topaz_w;
 	data["topaz.prec"] = topaz_m;
 	data["det"] = det;
+	data["reexec"] = det;
 	data["main"] = main_m;
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
