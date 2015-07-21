@@ -166,12 +166,10 @@ bool Topaz::isConstDataRefresh(){
 	bool is_const;
 	if (this->isMain()){
 		is_const = this->output_task->isRefresh();
-		
 	}
 	else {
 		is_const = this->input_task->isRefresh();
 	}
-	printf("refreshing: %s\n", is_const ? "yes" : "no");
 	return is_const;
 }
 

@@ -93,13 +93,13 @@ void Topaz::unpack_outputs(Task *t, TASK_HANDLE taskid, int * rank, ...){
 
 
 bool Topaz::receive(TASK_HANDLE TASKID, int * RANK, ...){
+	bool ok = this->receive();
 	int __dummy;
-	bool ok;
+	Topaz::topaz->getTimers()->stop_active(3);
+	
 	va_list arguments;
 	va_start(arguments, RANK);
 	
-	ok=this->receive();
-	Topaz::topaz->getTimers()->stop_active(3);
 	if(ok){
 		if(this->isMain()){
 			__unpack_outputs(this, &__dummy, RANK, arguments);
