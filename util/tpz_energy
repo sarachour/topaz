@@ -170,12 +170,13 @@ def analyze(hwstats, timerstats):
 	AL2_COST = lambda x : (x*(1.0-SRAM_SAV) + (1-x)*(1))*L2_SIZE
 	L1I_COST = L1I_SIZE*1
 	L12ID_COST = (L1D_SIZE + L2_SIZE + L1I_SIZE)*1.0
-	HIERARCHY_SAV = 1 - (AL1D_COST(L1D_APPROX)+AL2_COST(L2_APPROX) +L1I_COST+ L12ID_COST)/(L12ID_COST + L12ID_COST);
-	MAX_HIERARCHY_SAV = 1 - (AL1D_COST(1)+AL2_COST(1) + L1I_COST + L12ID_COST)/(L12ID_COST + L12ID_COST);
+	HIERARCHY_CONS =  (AL1D_COST(L1D_APPROX)+AL2_COST(L2_APPROX) +L1I_COST+ L12ID_COST)/(L12ID_COST + L12ID_COST);
+	MAX_HIERARCY_CONS = (AL1D_COST(1)+AL2_COST(1) + L1I_COST + L12ID_COST)/(L12ID_COST + L12ID_COST);
 	
+	DRAM_CONS = ((1-DRAM_SAV)*FRAC_DRAM_NOREF + (1-FRAC_DRAM_NOREF))/1
+	MAX_APPROX_CONS = SRAM_SYS_CONS*MAX_HIERARCY_CONS + DRAM_SYS_CONS*DRAM_CONS
+	NOM_APPROX_CONS = SRAM_SYS_CONS*HIERARCHY_CONS+  DRAM_SYS_CONS*DRAM_CONS
 	
-	MAX_SAV =     SRAM_SYS_CONS*MAX_HIERARCHY_SAV + DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
-	NOMINAL_SAV = SRAM_SYS_CONS*HIERARCHY_SAV+  DRAM_SYS_CONS*DRAM_SAV*FRAC_DRAM_NOREF
 	
 	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
@@ -187,7 +188,7 @@ def analyze(hwstats, timerstats):
 	M = timerstats["main"]
 	D = timerstats["det"]
 	
-	AE = 1.0-NOMINAL_SAV
+	AE = NOM_APPROX_CONS
 	PE = 1.0
 	BASELINE = PE*(TA+OA) + PE*(OE+M)
 	NOMINAL = AE*(TA+OA) + PE*(OE+M)
@@ -230,8 +231,8 @@ def analyze(hwstats, timerstats):
 	
 	print(timerstats["nominal"],timerstats["outdet"])
 	
-	print "Maximum Cache+Memory Savings: "+str(MAX_SAV*100)
-	print "Nominal Cache+Memory Savings: "+str(NOMINAL_SAV*100)
+	print "Maximum Cache+Memory Savings: "+str((1-MAX_APPROX_CONS)*100)
+	print "Nominal Cache+Memory Savings: "+str((1-NOM_APPROX_CONS)*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
 	print "No Outdet Savings:",(100-FACTOR1*100)
