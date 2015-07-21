@@ -63,15 +63,17 @@ float internal_CalcWeights(float * v_proj,float * v_mdl, char * v_img, int ncame
 {
 	
 	//unpack
-	v_proj = g_projections.setPrimitive(v_proj,ncameras);
-	v_mdl = g_measurements.setPrimitive(v_mdl);
-	g_mFGMaps.resize(ncameras);
-	g_mEdgeMaps.resize(ncameras);
-	for(int i=0; i < g_mEdgeMaps.size(); i++){
-		v_img = g_mEdgeMaps[i].setPrimitive(v_img,w,h,b);
-	}
-	for(int i=0; i < g_mFGMaps.size(); i++){
-		v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
+	if(Topaz::topaz->isConstDataRefresh()){
+		v_proj = g_projections.setPrimitive(v_proj,ncameras);
+		v_mdl = g_measurements.setPrimitive(v_mdl);
+		g_mFGMaps.resize(ncameras);
+		g_mEdgeMaps.resize(ncameras);
+		for(int i=0; i < g_mEdgeMaps.size(); i++){
+			v_img = g_mEdgeMaps[i].setPrimitive(v_img,w,h,b);
+		}
+		for(int i=0; i < g_mFGMaps.size(); i++){
+			v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
+		}
 	}
 	FlexImage8u * t_mEdgeMaps = &g_mEdgeMaps[0];
 	BinaryImage * t_mFGMaps = &g_mFGMaps[0];
