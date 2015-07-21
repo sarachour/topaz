@@ -8,7 +8,7 @@ STARTSEED=1
 NSEEDS=1
 #STARTSEED=4
 #NSEEDS=10
-FLAGS=d
+FLAGS=t
 
 echo "water has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt

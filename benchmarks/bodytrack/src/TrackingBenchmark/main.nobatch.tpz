@@ -82,7 +82,9 @@ float internal_CalcWeights(float * v_proj,float * v_mdl, char * v_img, int ncame
 }
 
 TrackingModel g_TrackingModel;
-float* gparticle;
+	
+#define BATCH 1
+float* gparticle[BATCH];
 void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 {	
 	mBestParticle = 0;
@@ -92,9 +94,9 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 	//allocate
 	float * mdl_prim = new float[MAX_MODEL_SIZE];	
 	char * img_prim = new char[MAX_IMAGE_SIZE];
-	float * part_proj = new float[MAX_PROJECTED_BODY_SIZE];
+	float * part_proj = new float[MAX_PROJECTED_BODY_SIZE*BATCH];
 	int particle_size = 0;
-	bool valid;
+	bool valid[BATCH];
 	int m_ncams = mModel->NCameras();
 	int m_nbits = mModel->getBytesPerPixel();
 	int m_width = mModel->getWidth();
@@ -102,55 +104,69 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 	
 	mModel->getAbbPrimitive(mdl_prim);
 	mModel->getImagePrimitive(img_prim);
-
-	taskset calcweights(i=0; i < particles.size(); i+=1){
+	
+	printf("beginning taskset\n");
+	taskset calcweights(i=0; i < particles.size(); i+=BATCH){
 			before {
-				gparticle = &particles[i][0];
-				mModel->SetupPose(particles[i], m_ncams, &valid, part_proj);
+				for(int k=0; k < BATCH; k++){
+					gparticle[k] = &particles[i+k][0];
+					mModel->SetupPose(particles[i+k], m_ncams, &valid[k], &part_proj[MAX_PROJECTED_BODY_SIZE*k]);
+				}
 				//printf("particle %d\n", i);
 			}
 			compute in (
-						float tproj[MAX_PROJECTED_BODY_SIZE] =  (float*) part_proj,
-						int t_valid = valid,
+						float tproj[MAX_PROJECTED_BODY_SIZE*BATCH] =  (float*) part_proj,
+						int t_valid[BATCH] = valid,
 						const float tmodel[MAX_MODEL_SIZE] = (float*) mdl_prim,
 						const char timg[MAX_IMAGE_SIZE] = (char *) img_prim, 
 						const int nCams = m_ncams,
 						const int nBits = m_nbits,
 						const int width = m_width,
 						const int height =m_height)
-				out (  float tweight , char tvalid)
+				out (  float tweight[BATCH] , char tvalid)
 			{
-				bool is_valid = (bool) t_valid;
-				//get's stuck on log-likelihood.
-				if(is_valid){
-					tweight = internal_CalcWeights(tproj, tmodel, timg, nCams, width, height, nBits);
+				bool is_valid = true;
+				for(int k=0; k < BATCH; k++){
+					is_valid = is_valid && t_valid[k];
+					if(t_valid[k]){
+						tweight[k] = internal_CalcWeights(&tproj[MAX_PROJECTED_BODY_SIZE*k], tmodel, timg, nCams, width, height, nBits);
+					}
+					else {
+						tweight[k]
+					}
 				}
 				tvalid = is_valid;
 			}
+			
 			transform in(int npart, float tweight, char tvalid) 
 				      out(float tv, float lweight, float bp1, float bp2, float bp3){
-				int q=0;
 				tv = tvalid;
 				//lvalid = (int) (tvalid);
-				lweight =  tweight;
-				q=3;
-				bp1=gparticle[q]; q++;
-				bp2=gparticle[q]; q++;
-				bp3=gparticle[q]; q++;
+				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
+				for(int k=0; k < BATCH; k++){
+					lweight +=  tweight[k];
+					bp1+=gparticle[k][3]; 
+					bp2+=gparticle[k][4]; 
+					bp3+=gparticle[k][5]; 
+				}
 			}
 			combine {
-				bool c_isvalid = (bool) tvalid;
-				mWeights[i] = tweight;
-				//printf("combine %d/%d : %f %s\n", i,particles.size(), tweight, c_isvalid? "y":"n");
-				//don't skip particle like that.
-				if(!c_isvalid)														//if not valid(model prior), remove the particle from the list
-				{	
-					particles[i].clear();
+				for(int k=0; k < BATCH; k++){
+					bool c_isvalid = (bool) t_valid[k];
+					mWeights[i+k] = tweight[k];
+					//printf("weight[%d]: %f\n",i+k,mWeights[i+k]);
+					//printf("combine %d/%d : %f %s\n", i,particles.size(), tweight, c_isvalid? "y":"n");
+					//don't skip particle like that.
+					if(!c_isvalid)														//if not valid(model prior), remove the particle from the list
+					{	
+						particles[i+k].clear();
+					}
+					else {
+						minWeight = std::min(mWeights[i+k], minWeight);	// TODO:  postincrement maybe an issue.
+						particle_size++;
+					}
 				}
-				else {
-					minWeight = std::min(mWeights[i], minWeight);	// TODO:  postincrement maybe an issue.
-					particle_size++;
-				}
+				
 			}
 	}
 	delete mdl_prim;
@@ -179,10 +195,11 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 		if(i == 0 || mWeights[i] > best)								//find highest likelihood particle
 		{	best = mWeights[i];
 			mBestParticle = i;
-			printf("weight: %f\n", mWeights[i]);
+			printf("anneal: %f\n", mWeights[i]);
 		}
 	}
 	mWeights *= fpType(1.0) / total;
+	printf("finished taskset\n");
 							//normalize weights
 	
 }

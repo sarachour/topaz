@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INP=16K
+INP=4K
 TYP=static
 PROB=0.01
 BLOCKSIZE=2
@@ -10,7 +10,7 @@ STARTSEED=8
 NSEEDS=8
 SCRIPT=run_barn
 
-FLAGS=t
+FLAGS=d
 
 echo "barnes has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
