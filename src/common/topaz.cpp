@@ -427,6 +427,7 @@ void Topaz::reexecute_log(int id, TaskSpec * ts){
 	ts->log(true,this->input_task, incorr, this->output_task);
 }
 int nticks = 0;
+int nfails = 0;
 bool Topaz::receive(){
 	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
@@ -453,6 +454,7 @@ bool Topaz::receive(){
 			return true;
 		}
 		
+		#define NFAILS_BEFORE_RESEND 3
 		//printf("r: main detect\n");
 		if(this->config.DETECTOR_ENABLED){
 			//handle the outliers
@@ -462,8 +464,12 @@ bool Topaz::receive(){
 			if(status == false && !this->config.DISCARD_TASK){
 				//printf("r: main reexecuting\n");
 				this->reexecute(id, &ts);
+				nfails++;
 				//printf("r: main reexecuted\n");
-				this->packAllTaskData(true);
+				if(nfails > NFAILS_BEFORE_RESEND){
+					this->packAllTaskData(true);
+					nfails = 0;
+				}
 				status = true;
 			}
 			//if we're logging, reexecute anyway.
