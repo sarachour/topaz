@@ -62,7 +62,7 @@ void nbody_Simulate_orig(nbody_t * t_n, double t_tol, double t_hts, double t_eps
 }
 nbody_t * nb = NULL;
 
-#define BATCH 1
+#define BATCH 2
 void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
     //printf("start simulate\n");
     #define FREQ 1000
@@ -88,7 +88,6 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 				)
 		{
 		    //printf("worker start\n");
-		    bool test = Topaz::topaz->isConstDataRefresh();
 		    nbody_t * t_n = (nbody_t *) nch;
 			t_n->bodies.bodytab = (body_t *) t_bodies;
 			t_n->leaves.leaftab = (leaf_t *) t_leaves;

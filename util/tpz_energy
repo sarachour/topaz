@@ -196,11 +196,14 @@ def analyze(hwstats, timerstats):
 	AE = NOM_APPROX_CONS
 	PE = 1.0
 	BASELINE = PE*(TA+OA) + PE*(OE+M)
+	NOTOPAZ_BASELINE = PE*(TA) + PE*(M)
+	
 	NOMINAL = AE*(TA+OA) + PE*(OE+M)
 	WITHDET = AE*(TA+OA) + PE*(OE+M+TE+D)
 	FACTOR1 = NOMINAL/BASELINE
 	FACTOR2 = WITHDET/BASELINE
-	
+	NOTOPAZ_FACTOR1 = NOMINAL/NOTOPAZ_BASELINE
+	NOTOPAZ_FACTOR2 = WITHDET/NOTOPAZ_BASELINE
 	
 	
 	if NOMINAL < BASELINE:
@@ -239,8 +242,10 @@ def analyze(hwstats, timerstats):
 	print "Nominal Cache+Memory Savings: "+str((1-NOM_APPROX_CONS)*100)
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "No Outdet Savings:",(100-FACTOR1*100)
-	print "With Outdet Savings:",(100-FACTOR2*100)
+	print "No Outdet Savings		",(100-FACTOR1*100)
+	print "With Outdet Savings		",(100-FACTOR2*100)
+	print "No Outdet Savings (No Topaz)		",(100-NOTOPAZ_FACTOR1*100)
+	print "With Outdet Savings (No Topaz)		:",(100-NOTOPAZ_FACTOR2*100)
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
