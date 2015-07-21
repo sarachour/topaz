@@ -122,10 +122,8 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 	printf("beginning taskset\n");
 	taskset calcweights(i=0; i < particles.size(); i+=BATCH){
 			before {
-				printf("%d\n", i);
 				for(int k=0; k < BATCH; k++){
 					gparticle[k] = &particles[i+k][0];
-					valid[k]=true;
 					mModel->SetupPose(particles[i+k], m_ncams, &valid[k], &part_proj[MAX_PROJECTED_BODY_SIZE*k]);
 				}
 			}
@@ -144,7 +142,6 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				unpack_data(tmodel, timg, nCams, width, height, nBits);
 				for(int k=0; k < BATCH; k++){
 					is_valid = is_valid && t_valid[k];
-					printf(" -> %d\n",k);
 					if(t_valid[k]){
 						tweight[k] = internal_CalcWeights(&tproj[MAX_PROJECTED_BODY_SIZE*k], nCams);
 					}
@@ -155,15 +152,15 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 			}
 			
 			transform in(int npart, float tweight, char tvalid) 
-				      out(float lweight, float bp1, float bp2, float bp3){
+				      out(float lweight){
 				//lvalid = (int) (tvalid);
-				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
+				//bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
 				for(int k=0; k < BATCH; k++){
 					if(lweight > tweight[k] && t_valid[k]){
 						lweight=tweight[k];
-						bp1=gparticle[k][3]; 
-						bp2=gparticle[k][4]; 
-						bp3=gparticle[k][5]; 
+						//bp1=gparticle[k][3]; 
+						//bp2=gparticle[k][4]; 
+						//bp3=gparticle[k][5]; 
 					}
 				}
 			}

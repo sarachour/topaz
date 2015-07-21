@@ -427,6 +427,7 @@ void Topaz::reexecute_log(int id, TaskSpec * ts){
 	ts->log(true,this->input_task, incorr, this->output_task);
 }
 int nticks = 0;
+int nfails = 0;
 bool Topaz::receive(){
 	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
@@ -453,24 +454,32 @@ bool Topaz::receive(){
 			return true;
 		}
 		
+		#define NFAILS_BEFORE_RESEND 3
 		//printf("r: main detect\n");
 		if(this->config.DETECTOR_ENABLED){
 			//handle the outliers
 			// outlier | is true error | inject
 			status = ts.test(this->input_task, this->output_task);
 			//outlier detector detects outlier, and we're not discarding.
-			if(status == false && !this->config.DISCARD_TASK){
+			if(status == false){
 				//printf("r: main reexecuting\n");
 				this->reexecute(id, &ts);
+				nfails++;
 				//printf("r: main reexecuted\n");
-				this->packAllTaskData(true);
+				if(nfails > NFAILS_BEFORE_RESEND){
+					this->packAllTaskData(true);
+					nfails = 0;
+				}
 				status = true;
 			}
 			//if we're logging, reexecute anyway.
 			else if(this->config.LOG_DETECTORS_ENABLED){
 				this->reexecute_log(id,&ts);
+				nfails = 0;
 			}
-						
+			else {
+				nfails = 0;
+			}
 		}
 		
 		//printf("r: main detected\n");
