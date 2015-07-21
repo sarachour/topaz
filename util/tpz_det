@@ -199,6 +199,8 @@ print "Percent True Rejects:",pct(true_reject,total)
 print "Percent False Rejects:",pct(false_reject,total)
 print "------------------------------------"
 print "Percent Errors:",pct(false_accept + true_reject,total)
+print "Percent Detections That Are Errors:", pct(true_reject, false_reject + true_reject)
+print "Percent Errors Detected:", pct(true_reject, false_accept + true_reject)
 print "Percent Errors Undetected:", pct(false_accept, false_accept + true_reject)
 print "Percent Rejects:",pct(true_reject + false_reject,total)
 
