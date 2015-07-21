@@ -26,6 +26,8 @@ def read_timer(path):
 	det = 0.0
 	reexec = 0.0
 	serm = 0.0
+	ntasks = 0;
+	worker_task = 0;
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -55,6 +57,7 @@ def read_timer(path):
 				
 			if( typ == 4):
 				reexec += amt
+				ntasks += 1
 		except:
 			continue
 	
@@ -73,6 +76,10 @@ def read_timer(path):
 			if(typ == 5 or type == 0):
 				topaz_w += amt
 			
+			if(typ == 4):
+				worker_task += amt;
+				ntasks += 1
+				
 			worker += amt
 			
 		except:
@@ -84,6 +91,7 @@ def read_timer(path):
 	data["nominal"] = nominal*frac
 	data["outdet"] = outdet*frac
 	data["worker.topaz"] = topaz_w*frac;
+	data["task.len"] = (worker_task + reexec)/ntasks;
 	data["main.topaz"] = topaz_m*frac;
 	data["det"] = det*frac;
 	data["reexec"] = reexec*frac;
@@ -219,6 +227,7 @@ def analyze(hwstats, timerstats):
 	
 	print "REEXECUTION OVERHEAD",timerstats["reexec"]/timerstats["worker"]
 	print "REEXECUTION DETECT",timerstats["det"]/timerstats["worker"]
+	print "IDEAL TASK LENGTH",timerstats["task.len"]
 	print "-----------"
 	
 	print "ROOM WITH NOMINAL",NOM_INST_ROOM
