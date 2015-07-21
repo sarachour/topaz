@@ -1,13 +1,15 @@
 #include "logger.h"
 #include "string.h"
+#include "topaz.h"
+#include "pin_util.h"
 
-pthread_mutex_t lock;
 
+//#define DEBUG
 #define MAX_SIZE (300/(sizeof(timer_info_t)))
 
 RealTimerInfo::RealTimerInfo(const char * base){
+	pin_disable_timers();
 	strcpy(this->filename,base);
-	printf("INITIALIZE TIMER\n");
 	this->file = fopen(base, "w");
 	fprintf(this->file, "INDEX\tINSTRUCTIONS\n");
 	this->ndumps = 0;
@@ -20,35 +22,53 @@ RealTimerInfo::RealTimerInfo(const char * base){
 		}
 	}
 	init_timers();
+	pin_enable_timers();
 }
 RealTimerInfo::~RealTimerInfo(){
 	del_timers();
 	fclose(this->file);
 }
-void  RealTimerInfo::stop_active(){
-	int j = this->n_stops;
+void  RealTimerInfo::stop_active(int cache){
+	pin_disable_timers();
+	int j = cache;
+	#ifdef DEBUG
+	printf("[%s,%d] stopping: ", Topaz::topaz == NULL ? "?" : (Topaz::topaz->isMain() ? "m" : "w"),j);
+	#endif
 	for(int i=0; i < N_TIMERS; i++){
 		this->stopped[j][i] = this->active[i]; //stop any active timers.
 		if(this->active[i]){
-			this->stop(i);
+			int ninst = this->_stop(i);
+			#ifdef DEBUG
+			printf("%d=%d ",i,ninst);
+			#endif
 		}
 	}
-	if(this->n_stops <  N_HISTS-1){
-		this->n_stops++;
-	}
-	else {
-	}
+	#ifdef DEBUG
+	printf("\n");
+	#endif
+	pin_enable_timers();
 }
-void  RealTimerInfo::start_active(){
-	int j = this->n_stops-1;
-	if(j < 0) return;
+void  RealTimerInfo::start_active(int cache){
+	pin_disable_timers();
+	int j = cache;
+	#ifdef DEBUG
+	printf("[%s,%d] starting: ", Topaz::topaz == NULL ? "?" : (Topaz::topaz->isMain() ? "m" : "w"),j);
+	#endif
 	for(int i=0; i < N_TIMERS; i++){
 		if(this->stopped[j][i]){
 			this->stopped[j][i] = false;
-			this->start(i);
+			
+			this->_start(i);
+			
+			#ifdef DEBUG
+			printf("%d ",i);
+			#endif
 		}
 	}
-	this->n_stops--;
+	#ifdef DEBUG
+	printf("\n");
+	#endif
+	pin_enable_timers();
 }
 void RealTimerInfo::on(){
 	this->TIMER_OFF = false;
@@ -58,27 +78,33 @@ void RealTimerInfo::off(){
 }
 
 //start,stop timers
-void RealTimerInfo::start(int c){
+void RealTimerInfo::_start(int c){
 	if(this->TIMER_OFF || this->active[c])
 		return;
 	this->active[c] = true;
 	pin_start_timer(c);
 }
+void RealTimerInfo::start(int c){
+	pin_disable_timers();
+	this->_start(c);
+	pin_enable_timers();
+}
 void RealTimerInfo::dump(){
-	this->stop_active();
+	pin_disable_timers();
 	this->print();
 	this->del_timers();
 	this->ndumps++;
-	this->start_active();
+	this->start_active(0);
+	pin_enable_timers();
 }
 void print_timer(FILE * fp, timer_info_t d){
 	fprintf(fp, "%u\t%f\n", d.idx, d.inst);
 	
 }
 
-void RealTimerInfo::stop(int c){
+int RealTimerInfo::_stop(int c){
 	if(this->TIMER_OFF || !this->active[c])
-		return;
+		return 0;
 	pin_timer_info_t p;
 	pin_stop_timer(c, &p);
 	this->active[c] = false;
@@ -91,7 +117,12 @@ void RealTimerInfo::stop(int c){
 		//this->dump();
 	}
 	this->add_timer(pt);
-	
+	return pt.inst;
+}
+void RealTimerInfo::stop(int c){
+	pin_disable_timers();
+	this->_stop(c);
+	pin_enable_timers();
 }
 void RealTimerInfo::print(){
 	FILE * fp = this->file;

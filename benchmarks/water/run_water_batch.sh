@@ -33,7 +33,7 @@ do
 #sutil_run_script.sh run_water.sh $INP $i none perfect
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-med-$TYP $FLAGS
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.01 iact-med-$TYP $FLAGS
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.05 iact-med-$TYP $FLAGS
+sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-med-$TYP $FLAGS
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.02 iact-med-$TYP $FLAGS
 
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.10 iact-med-$TYP $FLAGS

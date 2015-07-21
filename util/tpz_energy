@@ -17,17 +17,14 @@ def read_timer(path):
 	m = open(path+"/timer.0.out",'r');
 	w = open(path+"/timer.1.out",'r');
 	
-	nominal = 0.0
-	outdet = 0.0
-	worker = 0.0
-	topaz_w = 0.0 
-	main_m = 0.0
-	topaz_m = 0.0 
-	det = 0.0
-	reexec = 0.0
-	serm = 0.0
+	main = {}
+	main["ser"] = main["topaz"] = main["comp"] = main["task"] = main["det"]= 0;
+	work = {}
+	work["ser"] = work["topaz"] = work["task"] = 0;
+	
+
 	ntasks = 0;
-	worker_task = 0;
+	
 	for line in m:
 		try:
 			args = line.split("\t");
@@ -39,24 +36,20 @@ def read_timer(path):
 				continue
 			
 			if(type == 0):
-				topaz_m += amt
+				main["topaz"] += amt
 			
 			if(typ == 5):
-				serm += amt
+				main["ser"] += amt
 				
 			if(typ == 1):
-				main_m += amt
+				main["comp"] += amt
 				
-			outdet += amt
-			
-			if(typ != 6 and typ != 7 and typ != 4):
-				nominal += amt
 			
 			if(typ == 6 or typ == 7):
-				det += amt
+				main["det"] += amt
 				
 			if( typ == 4):
-				reexec += amt
+				main["task"] += amt
 				ntasks += 1
 		except:
 			continue
@@ -73,30 +66,33 @@ def read_timer(path):
 			if(typ == 2 or typ == 3):
 				continue
 			
-			if(typ == 5 or type == 0):
-				topaz_w += amt
+			if( type == 0):
+				work["topaz"] += amt
+				
+			if(typ == 5):
+				work["ser"] += amt
 			
 			if(typ == 4):
-				worker_task += amt;
+				work["task"] += amt;
 				ntasks += 1
 				
-			worker += amt
 			
 		except:
 			continue
 	
 	data = {};
 	frac = 1/1000000.0
-	data["worker"] = worker*frac
-	data["nominal"] = nominal*frac
-	data["outdet"] = outdet*frac
-	data["worker.topaz"] = topaz_w*frac;
-	data["task.len"] = (worker_task + reexec)/ntasks;
-	data["main.topaz"] = topaz_m*frac;
-	data["det"] = det*frac;
-	data["reexec"] = reexec*frac;
-	data["main"] = main_m*frac;
-	data["main.ser"] = serm*frac;
+	
+	for k in work:
+		work[k] *= frac;
+	
+	for k in main:
+		main[k] *= frac;
+		
+	data["w"] = work
+	data["m"] = main
+	data["n"] = ntasks
+	
 	#data["nominal"] = nominal
 	#data["outdet"] = outdet
 	
@@ -189,12 +185,13 @@ def analyze(hwstats, timerstats):
 	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
 	
 	
-	OE = timerstats["main.topaz"] + timerstats["main.ser"]
-	OA = timerstats["worker.topaz"]
-	TE = timerstats["reexec"]
-	TA = timerstats["worker"]
-	M = timerstats["main"]
-	D = timerstats["det"]
+	OE = timerstats["m"]["topaz"] + timerstats["m"]["ser"] 
+	OA = timerstats["w"]["topaz"] + timerstats["w"]["ser"] 
+	TE = timerstats["m"]["task"]
+	TA = timerstats["w"]["task"]
+	M = timerstats["m"]["comp"]
+	D = timerstats["m"]["det"]
+	ntasks = timerstats["n"]
 	
 	AE = NOM_APPROX_CONS
 	PE = 1.0
@@ -208,26 +205,26 @@ def analyze(hwstats, timerstats):
 	
 	if NOMINAL < BASELINE:
 		NOM_INST_ROOM = BASELINE - NOMINAL
-		NOM_TRADEOFF = 1+NOM_INST_ROOM/timerstats["det"]
+		NOM_TRADEOFF = 1+NOM_INST_ROOM/D
 	else:
 		NOM_INST_ROOM = NOMINAL - BASELINE
-		NOM_TRADEOFF = 1-NOM_INST_ROOM/timerstats["det"]
+		NOM_TRADEOFF = 1-NOM_INST_ROOM/D
 	
 	if WITHDET < BASELINE:
 		DET_INST_ROOM = BASELINE - WITHDET
-		DET_TRADEOFF = 1+DET_INST_ROOM/timerstats["det"]
+		DET_TRADEOFF = 1+DET_INST_ROOM/D
 	else:
 		DET_INST_ROOM = WITHDET - BASELINE
-		DET_TRADEOFF = 1-DET_INST_ROOM/timerstats["det"]
+		DET_TRADEOFF = 1-DET_INST_ROOM/D
 	
 	
 	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
 	print "OA=",OA,"	TA=",TA
 	print "-----------"
 	
-	print "REEXECUTION OVERHEAD",timerstats["reexec"]/timerstats["worker"]
-	print "REEXECUTION DETECT",timerstats["det"]/timerstats["worker"]
-	print "IDEAL TASK LENGTH",timerstats["task.len"]
+	print "REEXECUTION OVERHEAD",TE/TA
+	print "REEXECUTION DETECT",D/TA
+	print "IDEAL TASK LENGTH",(TE+TA)/ntasks
 	print "-----------"
 	
 	print "ROOM WITH NOMINAL",NOM_INST_ROOM
@@ -236,9 +233,7 @@ def analyze(hwstats, timerstats):
 	print "TRADEOFF POINT (Detector)",DET_TRADEOFF
 	
 	print "-----------"
-	N_LEFTOVER = ((PE-AE)*timerstats["worker"] - PE*(timerstats["outdet"] - timerstats["nominal"]))/PE
-	
-	print(timerstats["nominal"],timerstats["outdet"])
+
 	
 	print "Maximum Cache+Memory Savings: "+str((1-MAX_APPROX_CONS)*100)
 	print "Nominal Cache+Memory Savings: "+str((1-NOM_APPROX_CONS)*100)

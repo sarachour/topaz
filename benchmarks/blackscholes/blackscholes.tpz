@@ -211,7 +211,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
     return OptionPrice;
 }
 
-#define NELEMS 64
+#define NELEMS 1 
 
 /////////////
 //16: 69%

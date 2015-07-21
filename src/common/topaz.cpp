@@ -95,7 +95,7 @@ Topaz::Topaz(int argc, char ** argv){
 		this->timer = new DummyTimerInfo();
 		this->comm = new DummyCommunicationInfo();
 	}
-	this->timer->stop_active();
+	this->timer->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	
 	if(this->config.DETECTOR_ENABLED){
@@ -131,7 +131,7 @@ Topaz::Topaz(int argc, char ** argv){
 	this->isLocalExecute = false;
 	
 	this->timer->stop(TOPAZ_TIMER);
-	this->timer->start_active();
+	this->timer->start_active(1);
 	
 }
 
@@ -166,18 +166,16 @@ bool Topaz::isConstDataRefresh(){
 	bool is_const;
 	if (this->isMain()){
 		is_const = this->output_task->isRefresh();
-		
 	}
 	else {
 		is_const = this->input_task->isRefresh();
 	}
-	printf("refreshing: %s\n", is_const ? "yes" : "no");
 	return is_const;
 }
 
 
 TASK_HANDLE Topaz::add(int id, fxnptr comp, lrnptr lrn, int nin, int nout, int ntrans,...){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	va_list arguments;
 	va_start(arguments, ntrans);
@@ -231,12 +229,12 @@ TASK_HANDLE Topaz::add(int id, fxnptr comp, lrnptr lrn, int nin, int nout, int n
 	this->input_task->update(0, 0, 0, inbufsize);
 	this->output_task->update(0, 0, 0, outbufsize);
 	this->timer->stop(TOPAZ_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 	return handle;
 }
 //FIXME: No detector code
 TASK_HANDLE Topaz::add(int id, TaskSpec tspec){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	TASK_HANDLE handle = this->tasks->add(id,tspec);
 	this->input_task->update(0, 0, 0, this->tasks->getInputBufferSize());
@@ -247,7 +245,7 @@ TASK_HANDLE Topaz::add(int id, TaskSpec tspec){
 		this->scheduler->addTask(handle);
 	}
 	this->timer->stop(TOPAZ_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 	return handle;
 	
 }
@@ -296,7 +294,7 @@ void Topaz::finalize(){
 }
 
 bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(2);
 	TaskSpec sp = this->tasks->get(tsk);
 	if(this->output_task->hasFailed()) return true;
 	int nabs = sp.getNumAbstractedOutputs(); //abstracted
@@ -313,7 +311,7 @@ bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_DET);
 	bool res= this->detector->run(tsk); //run train, test, etc
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_DET);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(2);
 	return res;
 }
 void Topaz::packAllTaskData(bool doit){
@@ -329,7 +327,7 @@ bool Topaz::isPackAll(){
 }
 
 void Topaz::execute(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER); // start whole computation timer
 	TASK_HANDLE id;
 	this->input_task->startUnpack();
@@ -355,11 +353,12 @@ void Topaz::execute(){
 	}
 	
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER); // start whole computation timer
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 }
 
 bool Topaz::send(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
+	Topaz::topaz->getTimers()->start(TOPAZ_TIMER); // start whole computation timer
 	
 	//set metadata for this communication
 	
@@ -388,7 +387,8 @@ bool Topaz::send(){
 		this->machines->sendTo(this->machines->getMain().getId(), task);
 		//printf("s: worker sent..\n");
 	}
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER); // start whole computation timer
+	Topaz::topaz->getTimers()->start_active(1);
 	return true;
 }
 
@@ -428,7 +428,7 @@ void Topaz::reexecute_log(int id, TaskSpec * ts){
 }
 int nticks = 0;
 bool Topaz::receive(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	int id = this->input_task->getId();
 	TaskSpec ts = this->tasks->get(id);
@@ -449,7 +449,7 @@ bool Topaz::receive(){
 			this->reexecute_failed(id, &ts);
 			this->packAllTaskData(true);
 			this->timer->stop(TOPAZ_TIMER);
-			Topaz::topaz->getTimers()->start_active();
+			Topaz::topaz->getTimers()->start_active(1);
 			return true;
 		}
 		
@@ -485,7 +485,7 @@ bool Topaz::receive(){
 	this->timer->stop(TOPAZ_TIMER);
 	Topaz::topaz->getTimers()->dump();
 	if(nticks%50 == 0) nticks++;
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 	return status;
 }
 

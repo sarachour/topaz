@@ -81,8 +81,8 @@ class TimerInfo {
 	virtual void on() = 0;
 	virtual void off() = 0;
 	virtual void print() = 0;
-	virtual void stop_active()=0;
-	virtual void start_active()=0;
+	virtual void stop_active(int i)=0;
+	virtual void start_active(int i)=0;
 };
 
 
@@ -115,13 +115,16 @@ class RealTimerInfo : public TimerInfo{
 	void del_timers();
 	void light_save(pin_timer_info_t * p);
 	void light_load();
+	void _start(int i);
+	int _stop(int i);
+	
 	public:
 	RealTimerInfo(const char * filename);
 	~RealTimerInfo();
 	void off();
 	void on();
-	void stop_active();
-	void start_active();
+	void stop_active(int id);
+	void start_active(int id);
 	void start(int idx);
 	void stop(int idx);
 	void print();
@@ -130,10 +133,10 @@ class RealTimerInfo : public TimerInfo{
 };
 
 class DummyTimerInfo : public TimerInfo {
-	void stop_active(){
+	void stop_active(int id){
 		
 	}
-	void start_active(){
+	void start_active(int id){
 		
 	}
 	void start(int idx){
