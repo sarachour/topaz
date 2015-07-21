@@ -61,6 +61,7 @@ class Topaz {
 	~Topaz();
 	bool isPackAll();
 	bool isMain();
+	bool isConstDataRefresh();
 	static pin_task_info_t getPinInfo(){return PIN_INFO;};
 	static void setPinInfo(pin_task_info_t pt){PIN_INFO = pt;};
 	int getMachineId(){return this->machines->getCurrent().getId();};
