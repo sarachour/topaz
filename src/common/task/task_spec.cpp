@@ -44,11 +44,11 @@ bool TaskSpec::test(Task * inputs, Task * outputs){
 	if(this->transform != NULL){
 		//Topaz::topaz->getTimers()->start(TASK_TIMER);
 		AbsDetector::setMode(ABS_DETECTOR_TEST);
-		Topaz::topaz->getTimers()->stop_active(); 
+		Topaz::topaz->getTimers()->stop_active(5);
 		Topaz::topaz->getTimers()->start(TOPAZ_TIMER_ABS); 
 		bool res= this->transform(inputs, outputs);
 		Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_ABS);
-		Topaz::topaz->getTimers()->start_active(); 
+		Topaz::topaz->getTimers()->start_active(5);
 		return res;
 		//Topaz::topaz->getTimers()->stop(TASK_TIMER);
 	}
@@ -58,7 +58,7 @@ bool TaskSpec::train(Task * inputs, Task * outputs, Task * key){
 	bool res;
 	if(this->transform != NULL){
 		//set detector info to key
-		Topaz::topaz->getTimers()->stop_active(); 
+		Topaz::topaz->getTimers()->stop_active(5);
 		Topaz::topaz->getTimers()->start(TOPAZ_TIMER_ABS); 
 		AbsDetector::setMode(ABS_DETECTOR_KEY);
 		this->transform(inputs, key); //record key.
@@ -67,14 +67,14 @@ bool TaskSpec::train(Task * inputs, Task * outputs, Task * key){
 		res = this->transform(inputs, outputs); //record outputs.
 		AbsDetector::setMode(ABS_DETECTOR_TEST);
 		Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_ABS);
-		Topaz::topaz->getTimers()->start_active(); 
+		Topaz::topaz->getTimers()->start_active(5);
 	}
 	return res;
 }
 void TaskSpec::log(bool is_reexec, Task * inputs, Task * outputs, Task * key){
 	if(this->transform != NULL){
 		//set detector info to key
-		Topaz::topaz->getTimers()->stop_active();
+		Topaz::topaz->getTimers()->stop_active(5);
 		Topaz::topaz->getTimers()->start(TOPAZ_TIMER_ABS); 
 		AbsDetector::setMode(ABS_DETECTOR_KEY);
 		this->transform(inputs, key); //record key.
@@ -89,16 +89,16 @@ void TaskSpec::log(bool is_reexec, Task * inputs, Task * outputs, Task * key){
 		this->transform(inputs, outputs); //record outputs.
 		AbsDetector::setMode(ABS_DETECTOR_TEST);
 		Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_ABS);
-		Topaz::topaz->getTimers()->start_active();
+		Topaz::topaz->getTimers()->start_active(5);
 	}
 }
 void TaskSpec::execute(Task * inputs, Task * outputs){
 	if(this->function != NULL){
-		Topaz::topaz->getTimers()->stop_active();
+		Topaz::topaz->getTimers()->stop_active(4);
 		Topaz::topaz->getTimers()->start(TASK_TIMER);
 		this->function(inputs, outputs);
 		Topaz::topaz->getTimers()->stop(TASK_TIMER);
-		Topaz::topaz->getTimers()->start_active();
+		Topaz::topaz->getTimers()->start_active(4);
 	}
 }
 

@@ -32,7 +32,7 @@ void main_loop(){
 
 void segfault_sigaction(int signal, siginfo_t * si, void * arg){
 	PIN_STOP_INJECT_ERRORS();
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	siglongjmp(sig_escape,1);
 }
 

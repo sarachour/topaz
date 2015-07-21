@@ -15,37 +15,56 @@ void __unpack_outputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_list arg
 
 
 void Topaz::pack_inputs(TASK_HANDLE taskid, int rank, ...){
+	Topaz::topaz->getTimers()->stop_active(3);
+	
 	va_list arguments;
 	va_start(arguments, rank);
 	__pack_inputs(this, taskid, rank, arguments);
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 
 
 void Topaz::pack_outputs(TASK_HANDLE taskid, int rank, ...){
+	Topaz::topaz->getTimers()->stop_active(3);
+	//printf("pack inputs\n");
+	
 	va_list arguments;
 	va_start(arguments, rank);
 	__pack_outputs(this, taskid, rank, arguments);
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 
 
 void Topaz::unpack_inputs(TASK_HANDLE taskid, int * rank, ...){
+	Topaz::topaz->getTimers()->stop_active(3);
+	//printf("unpack inputs\n");
 	int __dummy;
 	va_list arguments;
 	va_start(arguments, rank);
 	__unpack_inputs(this, &__dummy, rank, arguments);
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 void Topaz::unpack_outputs(TASK_HANDLE taskid, int * rank, ...){
 	int __dummy;
+	Topaz::topaz->getTimers()->stop_active(3);
+	
 	va_list arguments;
 	va_start(arguments, rank);
 	__unpack_outputs(this, &__dummy, rank, arguments);
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 void Topaz::unpack_inputs(Task * t, TASK_HANDLE taskid, int * rank, ...){
 	int __dummy;
+	Topaz::topaz->getTimers()->stop_active(3);
+	
 	Task * back = this->input_task;
 	this->input_task = t;
 	va_list arguments;
@@ -53,9 +72,13 @@ void Topaz::unpack_inputs(Task * t, TASK_HANDLE taskid, int * rank, ...){
 	__unpack_inputs(this, &__dummy, rank, arguments);
 	this->input_task = back;
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 void Topaz::unpack_outputs(Task *t, TASK_HANDLE taskid, int * rank, ...){
 	int __dummy;
+	Topaz::topaz->getTimers()->stop_active(3);
+	
 	Task * back = this->output_task;
 	this->output_task = t;
 	va_list arguments;
@@ -63,6 +86,8 @@ void Topaz::unpack_outputs(Task *t, TASK_HANDLE taskid, int * rank, ...){
 	__unpack_outputs(this, &__dummy, rank, arguments);
 	this->output_task = back;
 	va_end(arguments);
+	
+	Topaz::topaz->getTimers()->start_active(3);
 }
 
 
@@ -74,6 +99,7 @@ bool Topaz::receive(TASK_HANDLE TASKID, int * RANK, ...){
 	va_start(arguments, RANK);
 	
 	ok=this->receive();
+	Topaz::topaz->getTimers()->stop_active(3);
 	if(ok){
 		if(this->isMain()){
 			__unpack_outputs(this, &__dummy, RANK, arguments);
@@ -83,19 +109,24 @@ bool Topaz::receive(TASK_HANDLE TASKID, int * RANK, ...){
 		}
 	}
 	va_end(arguments);
+	Topaz::topaz->getTimers()->start_active(3);
 	return ok;
 }
 
 bool Topaz::send(TASK_HANDLE TASKID, int RANK, ...){
+	Topaz::topaz->getTimers()->stop_active(3);
 	va_list arguments;
 	va_start(arguments, RANK);
+	
 	if(this->isMain()){
 		__pack_inputs(this, TASKID, RANK, arguments);
 	}
 	else{
 		__pack_outputs(this, TASKID, RANK, arguments);
 	}
+	
 	va_end(arguments);
+	Topaz::topaz->getTimers()->start_active(3);
 	return this->send();
 }
 /*
@@ -173,7 +204,6 @@ inline void __pack_entry(Task * t, va_list arguments, TaskArgSpec targ){
 
 inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list arguments){
 	TaskSpec tspec = that->tasks->get(taskid);
-	Topaz::topaz->getTimers()->stop_active();
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_SERIALIZE);
 	int n = tspec.getNumInputs();
 	Task * t = that->input_task;
@@ -194,7 +224,6 @@ inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list ar
 		}
 	}
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
-	Topaz::topaz->getTimers()->start_active();
 	
 }
 /*
@@ -203,7 +232,6 @@ inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list ar
 
 
 inline void __pack_outputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list arguments){
-	Topaz::topaz->getTimers()->stop_active();
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_SERIALIZE);
 	TaskSpec tspec = that->tasks->get(taskid);
 	int n = tspec.getNumOutputs();
@@ -221,12 +249,10 @@ inline void __pack_outputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list a
 		__pack_entry(t, arguments, targ);
 	}
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
-	Topaz::topaz->getTimers()->start_active();
 }
 
 
 inline void __unpack_inputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_list arguments){
-	Topaz::topaz->getTimers()->stop_active();
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_SERIALIZE);
 	Task * t = that->input_task;
 	t->startUnpack();
@@ -252,12 +278,10 @@ inline void __unpack_inputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_li
 		__unpack_entry(t, arguments,targ);
 	}
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
-	Topaz::topaz->getTimers()->start_active();
 }
 
 
 inline void __unpack_outputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_list arguments){
-	Topaz::topaz->getTimers()->stop_active();
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_SERIALIZE);
 	Task * t = that->output_task;
 	t->startUnpack();
@@ -274,5 +298,4 @@ inline void __unpack_outputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_l
 		__unpack_entry(t, arguments, targ);
 	}
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
-	Topaz::topaz->getTimers()->start_active();
 }

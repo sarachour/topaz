@@ -42,7 +42,7 @@ void MachineNetwork::receiveFrom(Task * t){
 	#ifdef DEBUG
 	printf("[?->%d] recieving: %d\n", this->current->getId(), t->getMaxSize());
 	#endif
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_DATA_TIMER);
 	
@@ -51,13 +51,13 @@ void MachineNetwork::receiveFrom(Task * t){
 		
 	Topaz::topaz->getTimers()->stop(COMM_DATA_TIMER);
 	Topaz::topaz->getTimers()->stop(COMM_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start(TOPAZ_TIMER);
 }
 void MachineNetwork::sendTo(Task * t){
 	#ifdef DEBUG
 	printf("[%d->?] recieving: %d\n", this->current->getId(), t->getMaxSize());
 	#endif
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_TIMER);
 	Topaz::topaz->getTimers()->start(COMM_DATA_TIMER);
 	
@@ -70,5 +70,5 @@ void MachineNetwork::sendTo(Task * t){
 	
 	Topaz::topaz->getTimers()->stop(COMM_DATA_TIMER);
 	Topaz::topaz->getTimers()->stop(COMM_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start(TOPAZ_TIMER);
 }
