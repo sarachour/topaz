@@ -461,7 +461,7 @@ bool Topaz::receive(){
 			// outlier | is true error | inject
 			status = ts.test(this->input_task, this->output_task);
 			//outlier detector detects outlier, and we're not discarding.
-			if(status == false && !this->config.DISCARD_TASK){
+			if(status == false){
 				//printf("r: main reexecuting\n");
 				this->reexecute(id, &ts);
 				nfails++;
@@ -475,8 +475,11 @@ bool Topaz::receive(){
 			//if we're logging, reexecute anyway.
 			else if(this->config.LOG_DETECTORS_ENABLED){
 				this->reexecute_log(id,&ts);
+				nfails = 0;
 			}
-						
+			else {
+				nfails = 0;
+			}
 		}
 		
 		//printf("r: main detected\n");
