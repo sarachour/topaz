@@ -36,8 +36,6 @@ void  RealTimerInfo::stop_active(){
 	if(this->n_stops <  N_HISTS-1){
 		this->n_stops++;
 	}
-	else {
-	}
 }
 void  RealTimerInfo::start_active(){
 	int j = this->n_stops-1;

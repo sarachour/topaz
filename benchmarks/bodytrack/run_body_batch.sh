@@ -3,7 +3,7 @@
 INP=1
 TYP=static
 PROB=0.01
-BLOCKSIZE=2
+BLOCKSIZE=3
 STARTSEED=8
 NSEEDS=8
 #STARTSEED=6
@@ -19,7 +19,7 @@ echo "input: $INP" >> tmp.txt
 
 #mutt -s "Bodytrack Started" sarachour@gmail.com < tmp.txt
 
-sutil_run_script.sh $SCRIPT.sh $INP $i perfect none
+#sutil_run_script.sh $SCRIPT.sh $INP $i perfect none
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
@@ -34,7 +34,7 @@ do
 #sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.04 iact-med-$TYP $FLAGS
 #sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-med-$TYP $FLAGS
 
-sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-med-$TYP $FLAGS
+#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-med-$TYP $FLAGS
 sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.02 iact-med-$TYP $FLAGS
 #sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-med-$TYP $FLAGS
 #sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.0001 iact-med-$TYP $FLAGS

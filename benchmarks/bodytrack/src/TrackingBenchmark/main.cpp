@@ -62,20 +62,34 @@ ImageMeasurements g_measurements;
 vector<FlexImage8u> g_mEdgeMaps; 
 vector<BinaryImage> g_mFGMaps; 
 
-float internal_CalcWeights (float * v_proj,float * v_mdl, char * v_img, int ncameras,int w,int h, int b )
+float unpack_data (float * v_mdl, char * v_img, int ncameras,int w,int h, int b ){
+	if (Topaz::topaz->isConstDataRefresh ()){
+		v_mdl = g_measurements.setPrimitive (v_mdl ); 
+		g_mFGMaps.resize (ncameras ); 
+		g_mEdgeMaps.resize (ncameras ); 
+		for (int i=0; i < g_mEdgeMaps.size (); i++ ){
+			v_img = g_mEdgeMaps[i].setPrimitive (v_img,w,h,b ); 
+		}
+		for (int i=0; i < g_mFGMaps.size (); i++ ){
+			v_img = g_mFGMaps[i].setPrimitive (v_img,w,h ); 
+		}
+	}
+	else if (ncameras != g_mFGMaps.size ()){
+		g_mFGMaps.resize (ncameras ); 
+		g_mEdgeMaps.resize (ncameras ); 
+		for (int i=0; i < g_mEdgeMaps.size (); i++ ){
+			v_img = g_mEdgeMaps[i].setPrimitive (v_img,w,h,b ); 
+		}
+		for (int i=0; i < g_mFGMaps.size (); i++ ){
+			v_img = g_mFGMaps[i].setPrimitive (v_img,w,h ); 
+		}
+	}
+}
+float internal_CalcWeights (float * v_proj,int ncameras )
 {
-	
+	v_proj = g_projections.setPrimitive (v_proj,ncameras ); 
 	//unpack
- v_proj = g_projections.setPrimitive (v_proj,ncameras ); 
-	v_mdl = g_measurements.setPrimitive (v_mdl ); 
-	g_mFGMaps.resize (ncameras ); 
-	g_mEdgeMaps.resize (ncameras ); 
-	for (int i=0; i < g_mEdgeMaps.size (); i++ ){
-		v_img = g_mEdgeMaps[i].setPrimitive (v_img,w,h,b ); 
-	}
-	for (int i=0; i < g_mFGMaps.size (); i++ ){
-		v_img = g_mFGMaps[i].setPrimitive (v_img,w,h ); 
-	}
+ 
 	FlexImage8u * t_mEdgeMaps = &g_mEdgeMaps[0]; 
 	BinaryImage * t_mFGMaps = &g_mFGMaps[0]; 
 	//compute projected 2D points into each camera image for each body part
@@ -86,7 +100,7 @@ float internal_CalcWeights (float * v_proj,float * v_mdl, char * v_img, int ncam
 
 TrackingModel g_TrackingModel; 
 
-#define BATCH 5
+#define BATCH 2
  float* gparticle[BATCH]; 
 void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 {
@@ -108,6 +122,7 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 	mModel->getAbbPrimitive (mdl_prim ); 
 	mModel->getImagePrimitive (img_prim ); 
 	
+	printf ("beginning taskset\n" ); 
 	float* tproj ; 
 	int* t_valid ; 
 	float* tmodel ; 
@@ -178,6 +193,7 @@ void ParticleFilter::CalcWeights (std::vector<Vectorf > &particles )
 		}
 	}
 	mWeights *= fpType (1.0 )/ total; 
+	printf ("finished taskset\n" ); 
 	//normalize weights
  
 }
@@ -410,10 +426,14 @@ void calcweights_COMPUTE_TPZ (Task* __INPUT , Task* __OUTPUT )
 	pin_start_inject_errors (); 
 	
 	bool is_valid = true; 
+	unpack_data (tmodel, timg, nCams, width, height, nBits ); 
 	for (int k=0; k < BATCH; k++ ){
 		is_valid = is_valid && t_valid[k]; 
 		if (t_valid[k] ){
-			tweight[k] = internal_CalcWeights (&tproj[MAX_PROJECTED_BODY_SIZE*k], tmodel, timg, nCams, width, height, nBits ); 
+			tweight[k] = internal_CalcWeights (&tproj[MAX_PROJECTED_BODY_SIZE*k], nCams ); 
+		}
+		else {
+			tweight[k] = 9999; 
 		}
 	}
 	tvalid = is_valid; 
@@ -433,7 +453,6 @@ bool calcweights_TRANS_TPZ (Task* __INPUT , Task* __OUTPUT ){
 	int height ; 
 	float* tweight ; 
 	char tvalid ; 
-	float tv ; 
 	float lweight ; 
 	float bp1 ; 
 	float bp2 ; 
@@ -441,21 +460,20 @@ bool calcweights_TRANS_TPZ (Task* __INPUT , Task* __OUTPUT ){
 	Topaz::topaz->unpack_inputs (__INPUT , 0 , &i , &tproj , &t_valid , &tmodel , &timg , &nCams , &nBits , &width , &height ); 
 	Topaz::topaz->unpack_outputs (__OUTPUT , 0 , &i , &tweight , &tvalid ); 
 	
-	tv = tvalid; 
 	//lvalid = (int) (tvalid);
  bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0; 
 	for (int k=0; k < BATCH; k++ ){
-		if (tweight[k] < lweight || k == 0 ){
-			lweight = tweight[k]; 
+		if (lweight > tweight[k] && t_valid[k] ){
+			lweight=tweight[k]; 
 			bp1=gparticle[k][3]; 
 			bp2=gparticle[k][4]; 
 			bp3=gparticle[k][5]; 
 		}
 	}
-	return Topaz::topaz->check (0 , i , tv , lweight , bp1 , bp2 , bp3 ); 
+	return Topaz::topaz->check (0 , i , lweight , bp1 , bp2 , bp3 ); 
 }
 int topaz_init (int argv , char** argc ){
-	Topaz::topaz->add (0 , calcweights_COMPUTE_TPZ , calcweights_TRANS_TPZ , 8 , 2 , 5 , 
+	Topaz::topaz->add (0 , calcweights_COMPUTE_TPZ , calcweights_TRANS_TPZ , 8 , 2 , 4 , 
 		 TASK_ARG_ARRAY , FLOAT , MAX_PROJECTED_BODY_SIZE*BATCH , 
 		 TASK_ARG_ARRAY , INT , BATCH , 
 		 TASK_ARG_CONST_ARRAY , FLOAT , MAX_MODEL_SIZE , 
