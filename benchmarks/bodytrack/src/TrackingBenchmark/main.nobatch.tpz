@@ -146,7 +146,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 						tweight[k] = internal_CalcWeights(&tproj[MAX_PROJECTED_BODY_SIZE*k], nCams);
 					}
 					else {
-						tweight[k] = 9999;
+						tweight[k] = 0;
 					}
 				}
 			}
@@ -155,14 +155,9 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				      out(float lweight){
 				//lvalid = (int) (tvalid);
 				//bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
-				lweight=0;
+				lweight = 0;
 				for(int k=0; k < BATCH; k++){
-					if(fabs(lweight) < fabs(tweight[k]) && t_valid[k]){
-						lweight=tweight[k];
-						//bp1=gparticle[k][3]; 
-						//bp2=gparticle[k][4]; 
-						//bp3=gparticle[k][5]; 
-					}
+					lweight+= fabs(tweight[k]);
 				}
 			}
 			combine {
