@@ -126,7 +126,6 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 					gparticle[k] = &particles[i+k][0];
 					mModel->SetupPose(particles[i+k], m_ncams, &valid[k], &part_proj[MAX_PROJECTED_BODY_SIZE*k]);
 				}
-				//printf("particle %d\n", i);
 			}
 			compute in (
 						float tproj[MAX_PROJECTED_BODY_SIZE*BATCH] =  (float*) part_proj,
@@ -137,7 +136,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 						const int nBits = m_nbits,
 						const int width = m_width,
 						const int height =m_height)
-				out (  float tweight[BATCH] , char tvalid)
+				out (  float tweight[BATCH])
 			{
 				bool is_valid = true;
 				unpack_data(tmodel, timg, nCams, width, height, nBits);
@@ -150,7 +149,6 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 						tweight[k] = 9999;
 					}
 				}
-				tvalid = is_valid;
 			}
 			
 			transform in(int npart, float tweight, char tvalid) 
@@ -170,10 +168,7 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				for(int k=0; k < BATCH; k++){
 					bool c_isvalid = (bool) t_valid[k];
 					mWeights[i+k] = tweight[k];
-					//printf("weight[%d]: %f\n",i+k,mWeights[i+k]);
-					//printf("combine %d/%d : %f %s\n", i,particles.size(), tweight, c_isvalid? "y":"n");
-					//don't skip particle like that.
-					if(!c_isvalid)														//if not valid(model prior), remove the particle from the list
+					if(!c_isvalid)													
 					{	
 						particles[i+k].clear();
 					}
