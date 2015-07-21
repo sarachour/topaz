@@ -75,6 +75,9 @@ float internal_CalcWeights(float * v_proj,float * v_mdl, char * v_img, int ncame
 			v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
 		}
 	}
+	else {
+		v_proj = g_projections.setPrimitive(v_proj,ncameras);
+	}
 	FlexImage8u * t_mEdgeMaps = &g_mEdgeMaps[0];
 	BinaryImage * t_mFGMaps = &g_mFGMaps[0];
 	//compute projected 2D points into each camera image for each body part
