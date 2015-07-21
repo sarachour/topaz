@@ -227,7 +227,7 @@ def analyze(hwstats, timerstats):
 	
 	print "REEXECUTION OVERHEAD",TE/TA
 	print "REEXECUTION DETECT",D/TA
-	print "IDEAL TASK LENGTH",(TE+TA)/ntasks
+	print "IDEAL TASK LENGTH",(TE+TA)/ntasks*1000000
 	print "-----------"
 	
 	print "ROOM WITH NOMINAL",NOM_INST_ROOM
