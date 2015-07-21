@@ -59,20 +59,34 @@ ImageMeasurements g_measurements;
 vector<FlexImage8u> g_mEdgeMaps;
 vector<BinaryImage> g_mFGMaps;
 
-float internal_CalcWeights(float * v_proj,float * v_mdl, char * v_img, int ncameras,int w,int h, int b)
+float unpack_data(float * v_mdl, char * v_img, int ncameras,int w,int h, int b){
+	if(Topaz::topaz->isConstDataRefresh()){
+		v_mdl = g_measurements.setPrimitive(v_mdl);
+		g_mFGMaps.resize(ncameras);
+		g_mEdgeMaps.resize(ncameras);
+		for(int i=0; i < g_mEdgeMaps.size(); i++){
+			v_img = g_mEdgeMaps[i].setPrimitive(v_img,w,h,b);
+		}
+		for(int i=0; i < g_mFGMaps.size(); i++){
+			v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
+		}
+	}
+	else if(ncameras != g_mFGMaps.size()){
+		g_mFGMaps.resize(ncameras);
+		g_mEdgeMaps.resize(ncameras);
+		for(int i=0; i < g_mEdgeMaps.size(); i++){
+			v_img = g_mEdgeMaps[i].setPrimitive(v_img,w,h,b);
+		}
+		for(int i=0; i < g_mFGMaps.size(); i++){
+			v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
+		}
+	}
+}
+float internal_CalcWeights(float * v_proj,int ncameras)
 {
-	
-	//unpack
 	v_proj = g_projections.setPrimitive(v_proj,ncameras);
-	v_mdl = g_measurements.setPrimitive(v_mdl);
-	g_mFGMaps.resize(ncameras);
-	g_mEdgeMaps.resize(ncameras);
-	for(int i=0; i < g_mEdgeMaps.size(); i++){
-		v_img = g_mEdgeMaps[i].setPrimitive(v_img,w,h,b);
-	}
-	for(int i=0; i < g_mFGMaps.size(); i++){
-		v_img = g_mFGMaps[i].setPrimitive(v_img,w,h);
-	}
+	//unpack
+	
 	FlexImage8u * t_mEdgeMaps = &g_mEdgeMaps[0];
 	BinaryImage * t_mFGMaps = &g_mFGMaps[0];
 	//compute projected 2D points into each camera image for each body part
@@ -126,25 +140,30 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 				out (  float tweight[BATCH] , char tvalid)
 			{
 				bool is_valid = true;
+				unpack_data(tmodel, timg, nCams, width, height, nBits);
 				for(int k=0; k < BATCH; k++){
 					is_valid = is_valid && t_valid[k];
 					if(t_valid[k]){
-						tweight[k] = internal_CalcWeights(&tproj[MAX_PROJECTED_BODY_SIZE*k], tmodel, timg, nCams, width, height, nBits);
+						tweight[k] = internal_CalcWeights(&tproj[MAX_PROJECTED_BODY_SIZE*k], nCams);
+					}
+					else {
+						tweight[k] = 9999;
 					}
 				}
 				tvalid = is_valid;
 			}
 			
 			transform in(int npart, float tweight, char tvalid) 
-				      out(float tv, float lweight, float bp1, float bp2, float bp3){
-				tv = tvalid;
+				      out(float lweight, float bp1, float bp2, float bp3){
 				//lvalid = (int) (tvalid);
 				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
 				for(int k=0; k < BATCH; k++){
-					lweight +=  tweight[k];
-					bp1+=gparticle[k][3]; 
-					bp2+=gparticle[k][4]; 
-					bp3+=gparticle[k][5]; 
+					if(lweight > tweight[k] && t_valid[k]){
+						lweight=tweight[k];
+						bp1=gparticle[k][3]; 
+						bp2=gparticle[k][4]; 
+						bp3=gparticle[k][5]; 
+					}
 				}
 			}
 			combine {
