@@ -3,7 +3,7 @@ SEED=1
 TYP=heavy-static
 STARTSEED=1
 NSEEDS=1
-FLAGS=d
+FLAGS=t
 
 #echo "aov batch is beginning execution." > tmp.txt
 #echo "flags $FLAGS" >> tmp.txt
