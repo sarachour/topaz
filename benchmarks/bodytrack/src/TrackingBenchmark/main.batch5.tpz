@@ -152,12 +152,14 @@ void ParticleFilter::CalcWeights(std::vector<Vectorf > &particles)
 			}
 			
 			transform in(int npart, float tweight, char tvalid) 
-				      out(float lweight){
+				      out(float lweight, float bp1, float bp2, float bp3){
 				//lvalid = (int) (tvalid);
-				//bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
-				lweight = 0;
+				bp1 = 0; bp2 = 0; bp3 = 0; lweight = 0;
 				for(int k=0; k < BATCH; k++){
-					lweight+= fabs(tweight[k]);
+					lweight+= tweight[k];
+					bp1=gparticle[k][3]; 
++					bp2=gparticle[k][4]; 
++					bp3=gparticle[k][5]; 
 				}
 			}
 			combine {
