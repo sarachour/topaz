@@ -15,17 +15,16 @@ do
 		  BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
 		  KIND=$(echo $folder | grep -o -E "[a-z]+$")
 		  
-		  if [ "$KIND" = "" ];
+		  if [ "$KIND" = "ltime" ];
 		  then 
 			ERRORS=""
-			KIND="normal"
 			for efile in  `ls $output/$folder/err*`
 			do
 				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				ERRORS=$ERRORS","$ERROR
 			done
-			echo "$category,$kind,$PROB,$BS,$KIND$ERRORS" >> $SUMMARY
+			echo "$category,$kind,$PROB,$BS,normal$ERRORS" >> $SUMMARY
 		  fi
 		  
 		  if [ "$KIND" = "ldet" ];
@@ -51,6 +50,7 @@ do
 		  then 
 			RATES=""
 			KIND="ltime"
+			TRATES=""
 			for ldfolder in  `ls $output/$folder/ | grep "timers"`
 			do
 				cd $output/$folder/$ldfolder
@@ -60,11 +60,14 @@ do
 					hwdir=$(echo $ldfolder | sed s/timers/profile/g)
 					tpz_energy ../$hwdir . > energy.txt
 				fi
-				RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
+				RATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep -v "Topaz" | grep -o -E "[0-9\.\-]+")
+				TRATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep "Topaz" | grep -o -E "[0-9\.\-]+")
 				RATES=$RATES","$RATE
+				TRATES=$TRATES","$TRATE
 				cd $cdir
 			done
 			echo "$category,$kind,$PROB,$BS,$KIND$RATES" >> $SUMMARY
+			echo "$category,$kind,$PROB,$BS,ltime-tpz$TRATES" >> $SUMMARY
 		  fi
 		  
 		done

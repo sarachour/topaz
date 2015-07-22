@@ -62,7 +62,7 @@ void nbody_Simulate_orig(nbody_t * t_n, double t_tol, double t_hts, double t_eps
 }
 nbody_t * nb = NULL;
 
-#define BATCH 2
+#define BATCH 1
 void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
     //printf("start simulate\n");
     #define FREQ 1000
