@@ -43,7 +43,7 @@ do
 			echo "detected no stat file... working...."
 			tpz_det_stats ldet.out 0 > stat.txt
 		fi
-		RATE=$(cat det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat det.txt | grep -E "Percent Errors Detected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 		ERR=$(cat stat.txt | grep -E "^TOTAL[ 0-9\.e\-]+$" | grep -o -E "[0-9\.e\-]+")
 		ERRS=$ERRS","$ERR
 		RATES=$RATES","$RATE
