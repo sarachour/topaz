@@ -221,31 +221,32 @@ def analyze(hwstats, timerstats):
 		DET_TRADEOFF = 1-DET_INST_ROOM/D
 	
 	
-	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
-	print "OA=",OA,"	TA=",TA
-	print "-----------"
 	
-	print "REEXECUTION OVERHEAD",TE/TA
-	print "REEXECUTION DETECT",D/TA
-	print "IDEAL TASK LENGTH",(TE+TA)/ntasks*1000000
-	print "-----------"
-	
-	print "ROOM WITH NOMINAL",NOM_INST_ROOM
-	print "ROOM_WITH_DET",DET_INST_ROOM
-	print "TRADEOFF POINT (Nominal)",NOM_TRADEOFF
-	print "TRADEOFF POINT (Detector)",DET_TRADEOFF
 	
 	print "-----------"
-
 	
 	print "Maximum Cache+Memory Savings: "+str((1-MAX_APPROX_CONS)*100)
 	print "Nominal Cache+Memory Savings: "+str((1-NOM_APPROX_CONS)*100)
+	print "-----------"
+	print "ROOM WITH NOMINAL,",NOM_INST_ROOM
+	print "ROOM_WITH_DET,",DET_INST_ROOM
+	print "TRADEOFF POINT (Nominal),",NOM_TRADEOFF
+	print "TRADEOFF POINT (Detector),",DET_TRADEOFF
+	
+	print "-----------"
+	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
+	print "OA=",OA,"	TA=",TA
+	print "-----------"
+	print "IDEAL TASK LENGTH,",(TE+TA)/ntasks*1000000
+	print "REEXECUTION OVERHEAD,",TE/TA
+	print "REEXECUTION DETECT,",D/TA
+	print "-----------"
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "No Outdet Savings		",(100-FACTOR1*100)
-	print "With Outdet Savings		",(100-FACTOR2*100)
-	print "No Outdet Savings (No Topaz)		",(100-NOTOPAZ_FACTOR1*100)
-	print "With Outdet Savings (No Topaz)		:",(100-NOTOPAZ_FACTOR2*100)
+	print "No Outdet Savings,",(100-FACTOR1*100)
+	print "With Outdet Savings,",(100-FACTOR2*100)
+	print "No Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR1*100)
+	print "With Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR2*100)
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
