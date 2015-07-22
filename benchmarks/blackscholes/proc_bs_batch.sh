@@ -33,12 +33,13 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
+		rm det.txt
+		rm *.png
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."
 			tpz_det ldet.out graph 0 > det.txt
 		fi
-		rm stat.txt
 		if [ ! -f "stat.txt" ];
 		then 
 			echo "detected no stat file... working...."

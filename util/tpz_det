@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as matplot
 
 import sys
 from os import listdir
@@ -32,55 +32,64 @@ def calc_length(s,line,n):
 		return n+1;
 	return n;
 
-def colormap(value):
-	colors = [[0,0,1],[0,1,0],[1,1,0],[1,0,0],[1,0,0]];
-	thresh = 1.0/(len(colors)-1);
-	idx = int(value/thresh); #gives us the index.
-	local_frac = (value - thresh*idx)/value;
-	r = colors[idx]*local_frac + colors[idx+1]*(1-local_frac)
-	
+
 def plot_data(pts,name):
-	colors=["k","m","r","b","r","y","o"]
+	
+	bound_color="#2980b9"
+	bound_thickness=2;
+	mean_color="black"
+	mean_thickness=4;
+	error_color="#c0392b"
+	error_size=20;
+	dist_color="#bdc3c7"
+	dist_size=20;
+	
 	for i in range(0, len(pts['corr'])):
 		print "Plotting Output "+str(i)
-		plt.clf();
 		px = pts['corr'][i]['x']
 		py = pts['corr'][i]['y']
 		ex = pts['err'][i]['x']
 		ey = pts['err'][i]['y']
 		
+		miny = min(py);
+		maxy = max(py);
 		minx = min(px);
 		maxx = max(px);
-		dx=(maxx-minx)
-		maxx += dx/2;
-		minx -= dx/2;
-		ex = [max(minx,min(maxx,x)) for x in ex];
+		dy=(maxy-miny)
+		maxy += dy/2;
+		miny -= dy/2;
+		print miny,maxy
+		ey = map(lambda x : max(miny+dy*0.05,min(maxy-dy*0.05,x)), ey);
+		print ey
 		
 		for j in range(0,len(pts['regions'][i])):
-			plt.clf();
-			rmin = array(pts['regions'][i][j]['xmin'])
-			rmax = array(pts['regions'][i][j]['xmax'])
-			ry = array(pts['regions'][i][j]['y'])
-			ra= pts['regions'][i][j]['p']
+			plt = matplot.subplot(111)
+			rmin = array(pts['regions'][i][j]['ymin'])
+			rmax = array(pts['regions'][i][j]['ymax'])
+			rx = array(pts['regions'][i][j]['x'])
+			cx = pts['regions'][i][j]['x']
+			cy = pts['regions'][i][j]['cy']
 			
-			plt.plot(px,py,"xg",alpha=0.1);
-			plt.plot(ex,ey,"^r",alpha=0.1);
+			plt.set_title("Region Evolution over time for AOV["+str(i)+"]")
+			plt.set_xlim((minx,maxx))
+			plt.set_ylim((miny,maxy))
+			plt.set_xlabel("time elapsed");
+			plt.set_ylabel("AOV Index Value");
+			plt.spines['right'].set_visible(False)
+			plt.spines['top'].set_visible(False)
+			plt.yaxis.set_ticks_position('left')
+			plt.xaxis.set_ticks_position('bottom')
+
 			
-			plt.plot(rmin,ry,rmax,ry,"k-",lw=1,c=colors[j], alpha=0.5);
-			plt.fill_betweenx((ry),(rmin),(rmax),where=rmax>=rmin,facecolor=colors[j], alpha=0.5);
-			plt.fill_betweenx(ry,rmin,rmax,where=rmax<=rmin,facecolor='black');
-		
-			cx = pts['regions'][i][j]['cx']
-			cy = pts['regions'][i][j]['y']
-			plt.plot(cx,cy,"k-", c=colors[j],alpha=0.4);
+			plt.scatter(px,py,marker="o", c=dist_color, s=dist_size, edgecolors="none", alpha=0.33);
+			plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
 			
-			plt.savefig(prefix+'.'+str(i)+".region."+str(j)+".png");
-			#for k in range(0,len(rx)):
-			#	plt.plot(rx[k],ry[k],"k-",lw=1,c=colors[j], alpha=0.5);
-		plt.clf();
-		plt.plot(px,py,"xg",alpha=0.4);
-		plt.plot(ex,ey,"^r",alpha=0.4);
-		plt.savefig(prefix+'-'+str(i)+".png");
+			plt.plot(rx,rmin,rx,rmax,linestyle="-",c=bound_color,linewidth=bound_thickness);
+			plt.plot(cx,cy,linestyle=":",c=mean_color,linewidth=mean_thickness);
+			
+			matplot.savefig(prefix+'.'+str(i)+".region."+str(j)+".png");
+			matplot.clf();
+			
 	
 if(len(sys.argv) < 3):
 	print "logname graph-prefix task-id"
@@ -93,14 +102,6 @@ sel_id = int(sys.argv[3]);
 
 flog = open(log);
 ssel_id = str(sel_id);
-num_lines = 0
-for line in flog:
-	num_lines = calc_length(ssel_id,line,num_lines) 
-
-nycoords = 10000.0
-nptsperx = 10000.0
-YPROB = 1.0/max(float(num_lines)/nycoords,1.0);
-print "Finished Computing Length, Prob Accept:",num_lines,YPROB
 flog = open(log);
 epts = [];
 cpts = [];
@@ -132,16 +133,15 @@ for line in flog:
 			pts['regions'].append([]);
 		
 		while n >= len(pts['regions'][out_id]):
-			pts['regions'][out_id].append({'xmin':[],'xmax':[],'y':[],'p':[], 'cx':[], 'cy':[]})
+			pts['regions'][out_id].append({'ymin':[],'ymax':[],'x':[], 'cy':[]})
 		
 		cpt=float(fields[header.index("CORR-VAL")])
 		ept=float(fields[header.index("VAL")])
 		#print len(cpts[out_id]),len(pts['corr'][out_id]['x'])
-		if(random.random() < YPROB or not is_corr):
-			if(abs(ept - cpt) < 1e-4):	
-				cpts[out_id].append(ept);
-			else:
-				epts[out_id].append(ept);
+		if(abs(ept - cpt) < 1e-4):	
+			cpts[out_id].append(cpt);
+		else:
+			epts[out_id].append(ept);
 		
 		#randomly sample regions and consolidate points
 		tregions=[];
@@ -149,35 +149,29 @@ for line in flog:
 		is_accept = False;
 		for i in range(0,n):
 			idx=header.index(str(i)+".prob");
+			
 			if(idx >= len(fields)):
 				continue;
-			minx = float(fields[header.index(str(i)+".min")]);
-			maxx = float(fields[header.index(str(i)+".max")]);
-			probx = float(fields[header.index(str(i)+".prob")]);
-			cx = float(fields[header.index(str(i)+".center")]);
-			if  ept <= maxx and ept >= minx: 
+				
+			miny = float(fields[header.index(str(i)+".min")]);
+			maxy = float(fields[header.index(str(i)+".max")]);
+			cy = float(fields[header.index(str(i)+".center")]);
+			if  ept <= maxy and ept >= miny: 
 				is_accept = True;
 				
-			if(math.isnan(probx)):
-				probx = 0;
-			pts['regions'][out_id][i]['xmin'].append(minx);
-			pts['regions'][out_id][i]['xmax'].append(maxx);
-			pts['regions'][out_id][i]['y'].append(t);
-			pts['regions'][out_id][i]['p'].append(probx);
-			pts['regions'][out_id][i]['cx'].append(cx);
+			pts['regions'][out_id][i]['ymin'].append(miny);
+			pts['regions'][out_id][i]['ymax'].append(maxy);
+			pts['regions'][out_id][i]['x'].append(t);
+			pts['regions'][out_id][i]['cy'].append(cy);
 			
-		PDENS = nptsperx/(len(cpts))
 		#print len(cpts),num_lines,YPROB,PDENS
 		for c in cpts[out_id]:
-			if(random.random() < PDENS):
-				pts['corr'][out_id]['x'].append(c);
-				pts['corr'][out_id]['y'].append(t);
+			pts['corr'][out_id]['x'].append(t);
+			pts['corr'][out_id]['y'].append(c);
 				
-		PDENS = nptsperx/(len(epts))
 		for e in epts[out_id]:
-			if(random.random() < PDENS):
-				pts['err'][out_id]['x'].append(e);
-				pts['err'][out_id]['y'].append(t);
+			pts['err'][out_id]['x'].append(t);
+			pts['err'][out_id]['y'].append(e);
 				
 		cpts[out_id]=[];
 		epts[out_id]=[];

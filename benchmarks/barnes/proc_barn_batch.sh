@@ -33,7 +33,6 @@ do
 	do
 		cd $OUTPUT/$folder/$ldfolder
 		rm det.txt
-		rm stat.txt
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."

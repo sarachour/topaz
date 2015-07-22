@@ -2,9 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy
 import scipy
+import sys
 
-
-filename="data.txt"
+filename=sys.argv[1]+".txt"
 file=open(filename,"r")
 
 plot={}
@@ -48,7 +48,6 @@ for line in file:
 			
 		make_path(plot, [typ,bs,prob],{});
 		#stdev = scipy.std(data)
-		avg = numpy.percentile(data, 50)
 		avg = numpy.mean(data)
 		plot[typ][bs][prob]["median"] =avg 
 		plot[typ][bs][prob]["low"] = numpy.std(data)
@@ -62,15 +61,17 @@ for line in file:
 def get(path):
 	return get_path(plot,path);
 
+print plot
+blocks = 2
 title = "Tradeoff Curve for Barnes"
 xlab = "Target Re-execution Rate"
 ylab = "Relative Value"
-xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
-filename = "tradeoff_curve_barn.png"
+xvals = [0,0.01,0.02,0.04,0.08,0.11,0.16]
+filename = "tradeoff_curve_bs.png"
 
 fig,ax = plt.subplots()
-#axes = [ax, ax.twinx(), ax.twinx()]
-axes = [ax, ax.twinx()]
+axes = [ax, ax.twinx(), ax.twinx()]
+#axes = [ax, ax.twinx()]
 
 
 fig.subplots_adjust(right=0.75);
@@ -82,28 +83,29 @@ axes[-1].patch.set_visible(False);
 plt.margins(0.05, 0.05)
 plt.title(title,fontsize=14)
 idxs = range(0,len(xvals));
-qual = map(lambda x : get(["normal",5,x,"median"]),xvals) 
-err = map(lambda x : get(["normal",5,x,"low"]),xvals) 
-en = map(lambda x : get(["ltime",5,x,"median"]),xvals) 
-errdet = map(lambda x : 100-get(["ldet",5,x,"median"]),xvals) 
+qual = map(lambda x : get(["normal",blocks,x,"median"]),xvals) 
+err = map(lambda x : get(["normal",blocks,x,"low"]),xvals) 
+en = map(lambda x : get(["ltime",blocks,x,"median"]),xvals) 
+errdet = map(lambda x : 100-get(["ldet",blocks,x,"median"]),xvals) 
 
 colors = ["#2980b9","#27ae60","#c0392b"];
+w=3
 i=0;
-w=3;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
+axes[i].plot(idxs,qual,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
 axes[i].errorbar(idxs,qual,yerr=err,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
-axes[i].set_ylabel("Output Quality (% Position Error)")
-axes[i].spines['right'].set_color(colors[i]);
+axes[i].set_ylabel("Output Quality (% Error)")
+#axes[i].spines['right'].set_color(colors[i]);
 
-#i+=1;
-#axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
-#axes[i].set_ylabel("Energy Savings (%)")
+i+=1;
+axes[i].plot(idxs,en,label="Energy Savings",linewidth=w, color=colors[i],marker="^",linestyle="-.");
+axes[i].set_ylabel("Energy Savings (%)")
 #axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
 axes[i].plot(idxs,errdet,label="% Errors Detected",linewidth=w,color=colors[i],marker="x",linestyle=":");
 axes[i].set_ylabel("% Errors Detected (%)")
-axes[i].spines['right'].set_color(colors[i]);
+#axes[i].spines['right'].set_color(colors[i]);
 
 axes[0].set_xlabel(xlab)
 plt.xticks(idxs,xvals);
@@ -112,12 +114,10 @@ plt.xticks(idxs,xvals);
 plt.savefig(filename)
 
 
-
 title = "Output Quality / Taskset Quality Correlation for Barnes"
 xlab = "Target Re-execution Rate"
 ylab = "Relative Value"
-xvals = [0,0.10,0.20,0.40,0.60,0.80,1.00]
-filename = "correl_barn.png"
+filename = "correl_bs.png"
 
 
 fig,ax = plt.subplots()
@@ -133,24 +133,25 @@ axes[-1].patch.set_visible(False);
 plt.margins(0.05, 0.05)
 plt.title(title,fontsize=14)
 idxs = range(0,len(xvals));
-qual = map(lambda x : get(["normal",5,x,"median"]),xvals) 
-qual_err = map(lambda x : get(["normal",5,x,"low"]),xvals) 
-task = map(lambda x : get(["ldeterr",5,x,"median"]),xvals) 
-task_err = map(lambda x : get(["ldeterr",5,x,"low"]),xvals) 
+qual = map(lambda x : get(["normal",blocks,x,"median"]),xvals) 
+qual_err = map(lambda x : get(["normal",blocks,x,"low"]),xvals) 
+task = map(lambda x : get(["ldeterr",blocks,x,"median"]),xvals) 
+task_err = map(lambda x : get(["ldeterr",blocks,x,"low"]),xvals) 
 
 colors = ["#2980b9","#c0392b","#27ae60"];
 w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
 axes[i].errorbar(idxs,qual,label="Output Quality",yerr=qual_err,linewidth=w,color=colors[i],marker="o",linestyle="--");
-axes[i].set_ylabel("Output Quality (% Position Error)")
-axes[i].spines['right'].set_color(colors[i]);
+axes[i].set_ylabel("Output Quality (% Price Error)")
+#axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
 axes[i].plot(idxs,task,label="Taskset Quality", color=colors[i],linewidth=w,marker="^",linestyle="-.");
 axes[i].set_ylabel("Taskset Quality (% Task Output Error)")
-axes[i].spines['right'].set_color(colors[i]);
+#axes[i].spines['right'].set_color(colors[i]);
 
 axes[0].set_xlabel(xlab)
 plt.xticks(idxs,xvals);
 plt.savefig(filename)
+
