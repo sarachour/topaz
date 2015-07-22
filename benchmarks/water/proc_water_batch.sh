@@ -33,7 +33,7 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
-		
+		rm *.det.txt
 		if [ ! -f "interf.det.txt" ];
 		then 
 			echo "detected no det file... working...."

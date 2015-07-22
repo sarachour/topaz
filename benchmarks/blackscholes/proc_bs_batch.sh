@@ -12,7 +12,7 @@ do
   BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
   KIND=$(echo $folder | grep -o -E "[a-z]+$")
   
-  if [ "$KIND" = "" ];
+  if [ "$KIND" = "ltime" ];
   then 
 	ERRORS=""
 	for efile in  `ls $OUTPUT/$folder/err*`

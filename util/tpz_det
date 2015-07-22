@@ -117,21 +117,12 @@ for line in flog:
 		if(id != sel_id):
 			continue;
 		
-		is_accept = "y" in fields[header.index("IS-ACCEPT")];
+		#is_accept = "y" in fields[header.index("IS-ACCEPT")];
 		is_corr = "y" in fields[header.index("IS-CORR")];
 		out_id = int(float(fields[header.index("OUT-ID")]));
 		n = int(float(fields[header.index("n-regions")]));
 		
-		# count
-		if is_accept and is_corr:
-			true_accept+=1;
-		elif is_accept and not is_corr:
-			false_accept+=1;
-		elif not is_accept and is_corr:
-			true_reject+=1;
-		elif not is_accept and not is_corr:
-			false_reject+=1;
-		total += 1;
+		
 		
 		while out_id >= len(cpts):
 			cpts.append([]);
@@ -153,42 +144,58 @@ for line in flog:
 				epts[out_id].append(ept);
 		
 		#randomly sample regions and consolidate points
-		if(random.random() < YPROB or not is_corr or not is_accept):
-			tregions=[];
-			
-			for i in range(0,n):
-				idx=header.index(str(i)+".prob");
-				if(idx >= len(fields)):
-					continue;
-				minx = float(fields[header.index(str(i)+".min")]);
-				maxx = float(fields[header.index(str(i)+".max")]);
-				probx = float(fields[header.index(str(i)+".prob")]);
-				cx = float(fields[header.index(str(i)+".center")]);
-				if(math.isnan(probx)):
-					probx = 0;
-				pts['regions'][out_id][i]['xmin'].append(minx);
-				pts['regions'][out_id][i]['xmax'].append(maxx);
-				pts['regions'][out_id][i]['y'].append(t);
-				pts['regions'][out_id][i]['p'].append(probx);
-				pts['regions'][out_id][i]['cx'].append(cx);
+		tregions=[];
+		
+		is_accept = False;
+		for i in range(0,n):
+			idx=header.index(str(i)+".prob");
+			if(idx >= len(fields)):
+				continue;
+			minx = float(fields[header.index(str(i)+".min")]);
+			maxx = float(fields[header.index(str(i)+".max")]);
+			probx = float(fields[header.index(str(i)+".prob")]);
+			cx = float(fields[header.index(str(i)+".center")]);
+			if  ept <= maxx and ept >= minx: 
+				is_accept = True;
 				
-			PDENS = nptsperx/(len(cpts))
-			#print len(cpts),num_lines,YPROB,PDENS
-			for c in cpts[out_id]:
-				if(random.random() < PDENS):
-					pts['corr'][out_id]['x'].append(c);
-					pts['corr'][out_id]['y'].append(t);
-					
-			PDENS = nptsperx/(len(epts))
-			for e in epts[out_id]:
-				if(random.random() < PDENS):
-					pts['err'][out_id]['x'].append(e);
-					pts['err'][out_id]['y'].append(t);
-					
-			cpts[out_id]=[];
-			epts[out_id]=[];
-			t+=1;
+			if(math.isnan(probx)):
+				probx = 0;
+			pts['regions'][out_id][i]['xmin'].append(minx);
+			pts['regions'][out_id][i]['xmax'].append(maxx);
+			pts['regions'][out_id][i]['y'].append(t);
+			pts['regions'][out_id][i]['p'].append(probx);
+			pts['regions'][out_id][i]['cx'].append(cx);
 			
+		PDENS = nptsperx/(len(cpts))
+		#print len(cpts),num_lines,YPROB,PDENS
+		for c in cpts[out_id]:
+			if(random.random() < PDENS):
+				pts['corr'][out_id]['x'].append(c);
+				pts['corr'][out_id]['y'].append(t);
+				
+		PDENS = nptsperx/(len(epts))
+		for e in epts[out_id]:
+			if(random.random() < PDENS):
+				pts['err'][out_id]['x'].append(e);
+				pts['err'][out_id]['y'].append(t);
+				
+		cpts[out_id]=[];
+		epts[out_id]=[];
+		
+		# count
+		if is_accept and is_corr:
+			true_accept+=1;
+		elif is_accept and (not is_corr):
+			false_accept+=1;
+		elif (not is_accept) and is_corr:
+			false_reject+=1;
+		elif (not is_accept) and (not is_corr):
+			true_reject+=1;
+		
+		total += 1;
+		
+		t+=1;
+		
 	except ValueError:
 		print "skipping.."
 

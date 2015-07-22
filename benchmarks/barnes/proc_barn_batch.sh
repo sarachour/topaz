@@ -4,7 +4,7 @@ SUMMARY="summary.txt"
 
 cdir=$PWD
 echo "target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
-OUTPUT=output-nobatch
+OUTPUT=output-batch4
 for folder in `ls $OUTPUT | grep iact`
 do
   PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
@@ -32,6 +32,7 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
+		rm det.txt
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."

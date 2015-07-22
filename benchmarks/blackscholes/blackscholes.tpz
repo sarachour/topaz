@@ -239,7 +239,7 @@ int BlkSchlsEqEuroNoDiv() {
 		transform in(float tsptprice, float tfprice) out(float normavgprice){
 			normavgprice=0;
 			for(int q=0; q < NELEMS; q++) 
-				normavgprice += tfprice[q]-tsptprice[q];
+				normavgprice += tfprice[q];
 			
 		}
 		combine {
