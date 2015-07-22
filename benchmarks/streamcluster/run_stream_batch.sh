@@ -9,7 +9,7 @@ STARTSEED=6
 NSEEDS=6
 SCRIPT=run_stream
 
-FLAGS=t
+FLAGS=d
 
 echo "streamcluster has started executing." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
