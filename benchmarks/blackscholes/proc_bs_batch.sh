@@ -20,7 +20,6 @@ do
 		ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.\-e]+$" | grep -o -E "[0-9\.\-e]+$")
 		#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 		echo "$efile : $ERROR"
-		cat $efile
 		ERRORS=$ERRORS","$ERROR
 	done
 	echo "$PROB,$BS,normal$ERRORS" >> $SUMMARY
@@ -39,6 +38,7 @@ do
 			echo "detected no detector file... working...."
 			tpz_det ldet.out graph 0 > det.txt
 		fi
+		rm stat.txt
 		if [ ! -f "stat.txt" ];
 		then 
 			echo "detected no stat file... working...."
