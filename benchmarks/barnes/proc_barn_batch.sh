@@ -4,7 +4,7 @@ SUMMARY="summary.txt"
 
 cdir=$PWD
 echo "target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
-OUTPUT=output-batch2
+OUTPUT=output-nobatch
 for folder in `ls $OUTPUT | grep iact`
 do
   PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
@@ -42,7 +42,7 @@ do
 			echo "detected no stat file... working...."
 			tpz_det_stats ldet.out 0 > stat.txt
 		fi
-		RATE=$(cat det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat det.txt | grep -E "Percent Errors Detected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 		ERR=$(cat stat.txt | grep -E "^TOTAL[ 0-9\.e\-]+$" | grep -o -E "[0-9\.e\-]+")
 		ERRS=$ERRS","$ERR
 		RATES=$RATES","$RATE
