@@ -57,18 +57,33 @@ for line in flog:
 		if(id != sel_id):
 			continue;
 
-		is_accept = "y" in fields[header.index("IS-ACCEPT")];
-		acc_val = fields[header.index("IS-ACCEPT")];
-		corr_val = fields[header.index("IS-CORR")];
 		oid=float(fields[header.index("OUT-ID")]);
 		cpt=float(fields[header.index("CORR-VAL")]);
 		ept=float(fields[header.index("VAL")]);
+		n = int(float(fields[header.index("n-regions")]));
+		
+		is_accept = False;
+		for i in range(0,n):
+			idx=header.index(str(i)+".prob");
+			if(idx >= len(fields)):
+				continue;
+			minx = float(fields[header.index(str(i)+".min")]);
+			maxx = float(fields[header.index(str(i)+".max")]);
+			if  ept <= maxx and ept >= minx: 
+				is_accept = True;
+				
 		
 		if not (oid in cumerr):
 			cumerr[oid] = {"total":0.0,"n":0.0};
-		
+			
 		if is_accept:
-			err = abs(cpt - ept);
+			if cpt == 0:
+				abs(cpt - ept)*100;
+			else:
+				err = abs(cpt - ept)/cpt*100;
+				
+			if err > 0:
+				print err
 			#print id,oid,corr_val,acc_val,err	
 		else:
 			err = 0.0

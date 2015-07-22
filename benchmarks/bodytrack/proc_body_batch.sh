@@ -4,7 +4,9 @@ SUMMARY="summary.txt"
 
 cdir=$PWD
 echo "target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
-for folder in `ls output | grep iact`
+OUTPUT=output-nobatch
+
+for folder in `ls $OUTPUT | grep iact`
 do
   PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
   BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
@@ -14,7 +16,7 @@ do
   then 
 	ERRORS=""
 	KIND="normal"
-	for efile in  `ls output/$folder/err*`
+	for efile in  `ls $OUTPUT/$folder/err*`
 	do
 		ERROR=$(cat $efile | grep -E "avg-pct-err=[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 		echo "$efile : $ERROR"
@@ -29,9 +31,10 @@ do
 	RATES=""
 	KIND="ldet"
 	ERRS=""
-	for ldfolder in  `ls output/$folder/ | grep "data"`
+	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
-		cd output/$folder/$ldfolder
+		cd $OUTPUT/$folder/$ldfolder
+		rm det.txt
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."
@@ -56,10 +59,11 @@ do
   if [ "$KIND" = "ltime" ];
   then 
 	RATES=""
+	TRATES=""
 	KIND="ltime"
-	for ldfolder in  `ls output/$folder/ | grep "timers"`
+	for ldfolder in  `ls $OUTPUT/$folder/ | grep "timers"`
 	do
-		cd output/$folder/$ldfolder
+		cd $OUTPUT/$folder/$ldfolder
 		rm energy.txt
 		if [ ! -f "energy.txt" ];
 		then 
@@ -68,11 +72,13 @@ do
 			tpz_energy ../$hwdir . > energy.txt
 			cat energy.txt
 		fi
-		RATE=$(cat energy.txt | grep -E "With Outdet Savings:[ 0-9\.]+$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep -v "Topaz" | grep -o -E "[0-9\.\-]+")
+		TRATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep "Topaz" | grep -o -E "[0-9\.\-]+")
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$PROB,$BS,ltime-tpz$TRATES" >> $SUMMARY
   fi
   #echo $folder
   #echo $PROB $BS kind=$KIND
