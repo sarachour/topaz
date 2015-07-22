@@ -12,7 +12,7 @@ do
   BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
   KIND=$(echo $folder | grep -o -E "[a-z]+$")
   
-  if [ "$KIND" = "ltime" ];
+  if [ "$KIND" = "" ];
   then 
 	ERRORS=""
 	for efile in  `ls $OUTPUT/$folder/err*`
@@ -20,6 +20,7 @@ do
 		ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.\-e]+$" | grep -o -E "[0-9\.\-e]+$")
 		#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 		echo "$efile : $ERROR"
+		cat $efile
 		ERRORS=$ERRORS","$ERROR
 	done
 	echo "$PROB,$BS,normal$ERRORS" >> $SUMMARY
@@ -43,7 +44,7 @@ do
 			echo "detected no stat file... working...."
 			tpz_det_stats ldet.out 0 > stat.txt
 		fi
-		RATE=$(cat det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+		RATE=$(cat det.txt | grep -E "Percent Errors Detected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 		ERR=$(cat stat.txt | grep -E "^TOTAL[ 0-9\.e\-]+$" | grep -o -E "[0-9\.e\-]+")
 		ERRS=$ERRS","$ERR
 		RATES=$RATES","$RATE
