@@ -314,18 +314,25 @@ bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
 	Topaz::topaz->getTimers()->start_active(2);
 	return res;
 }
+
 void Topaz::packAllTaskData(bool doit){
 	Topaz::topaz->config.PACK_FULL_TASK = doit;
+}
+void Topaz::setRefresh(bool doit){
+	Topaz::topaz->config.IS_REFRESH = doit;
 }
 void Topaz::start(TASK_HANDLE tid){
 	this->tasks->nextIID(tid);
 	Topaz::topaz->packAllTaskData(true);
+	Topaz::topaz->setRefresh(true);
 }
 
 bool Topaz::isPackAll(){
 	return Topaz::topaz->config.PACK_FULL_TASK;
 }
-
+bool Topaz::isRefresh(){
+	return Topaz::topaz->config.IS_REFRESH;
+}
 void Topaz::execute(){
 	Topaz::topaz->getTimers()->stop_active(1);
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER); // start whole computation timer
@@ -374,6 +381,7 @@ bool Topaz::send(){
 		}
 		else{
 			this->packAllTaskData(false);
+			this->setRefresh(false);
 			//printf("s: main send to\n");
 			this->machines->sendTo(mach, task);
 			this->isLocalExecute = false;
@@ -448,7 +456,7 @@ bool Topaz::receive(){
 		
 		if(this->output_task->hasFailed()){
 			this->reexecute_failed(id, &ts);
-			this->packAllTaskData(true);
+			this->setRefresh(true);
 			this->timer->stop(TOPAZ_TIMER);
 			Topaz::topaz->getTimers()->start_active(1);
 			return true;
@@ -467,7 +475,7 @@ bool Topaz::receive(){
 				nfails++;
 				//printf("r: main reexecuted\n");
 				if(nfails > NFAILS_BEFORE_RESEND){
-					this->packAllTaskData(true);
+					this->setRefresh(true);
 					nfails = 0;
 				}
 				status = true;

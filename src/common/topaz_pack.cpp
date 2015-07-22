@@ -208,7 +208,7 @@ inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list ar
 	int n = tspec.getNumInputs();
 	Task * t = that->input_task;
 	//send inputs
-	t->update(taskid, tspec.getIID(), rank, 0,false,Topaz::topaz->isPackAll());
+	t->update(taskid, tspec.getIID(), rank, 0,false,Topaz::topaz->isPackAll() || Topaz::topaz->isRefresh());
 	t->startPack();
 	
 	for(int i=0; i < n; i++){
@@ -216,6 +216,7 @@ inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list ar
 		if(targ.isConst()) continue;
 		__pack_entry(t, arguments, targ);
 	}
+	
 	if(Topaz::topaz->isPackAll()){
 		for(int i=0; i < n; i++){
 			TaskArgSpec targ = tspec.getInput(i);
@@ -223,6 +224,7 @@ inline void __pack_inputs(Topaz * that, TASK_HANDLE taskid, int rank, va_list ar
 			__pack_entry(t, arguments, targ);
 		}
 	}
+	
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
 	
 }
@@ -262,21 +264,19 @@ inline void __unpack_inputs(Topaz * that, TASK_HANDLE* TASKID, int * RANK, va_li
 	int n = tspec.getNumInputs();
 	
 	//if we're not on the main machine and this is a refresh packet, refresh the dram.
-	/*
-	if(t->isRefresh() && !that->isMain()){
-		pin_refresh_dram();
-	}
-	*/
+
 	for(int i=0; i < n; i++){
 		TaskArgSpec targ = tspec.getInput(i);
 		if(targ.isConst()) continue;
 		__unpack_entry(t, arguments,targ);
 	}
+	
 	for(int i=0; i < n; i++){
 		TaskArgSpec targ = tspec.getInput(i);
 		if(!targ.isConst()) continue;
 		__unpack_entry(t, arguments,targ);
 	}
+	
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_SERIALIZE);
 }
 

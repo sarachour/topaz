@@ -86,6 +86,10 @@ void Task::startUnpack(){
 	this->parcel.rank = *ptr; ptr++;
 	this->parcel.has_failed = *ptr; ptr++;
 	this->parcel.is_refresh = *ptr; ptr++;
+	
+	if(this->parcel.is_refresh)
+		pin_refresh_dram();
+		
 	if(Topaz::topaz->config.GODMODE_ENABLED){
 		if(Topaz::topaz->isMain()){
 			pin_task_info_t pint;

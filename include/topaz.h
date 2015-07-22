@@ -24,6 +24,7 @@ typedef struct CONFIG_T_M{
 	bool DISCARD_TASK;
 	bool TIMERS_ENABLED;
 	bool PACK_FULL_TASK;
+	bool IS_REFRESH;
 } config_t;
 
 
@@ -46,6 +47,7 @@ class Topaz {
 	//EMUL
 	bool isLocalExecute;
 	void packAllTaskData(bool doit);
+	void setRefresh(bool doit);
 	void reexecute(int id, TaskSpec * ts);
 	void reexecute_log(int id, TaskSpec * ts);
 	void reexecute_failed(int id, TaskSpec * ts);
@@ -61,6 +63,7 @@ class Topaz {
 	~Topaz();
 	bool isPackAll();
 	bool isMain();
+	bool isRefresh();
 	bool isConstDataRefresh();
 	static pin_task_info_t getPinInfo(){return PIN_INFO;};
 	static void setPinInfo(pin_task_info_t pt){PIN_INFO = pt;};
