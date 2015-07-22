@@ -1,0 +1,174 @@
+#include "barnes.h"
+
+extern nbody_t NBODY;
+extern parms_t PARMS;
+
+
+// ------------
+
+void nbody_simulate(int i, nbody_t * t_n, int t_siz, double t_tol, double t_eps, double t_hts, double t_ts, double * vel, double * acc, int * r_siz, double * phi){
+	body_t * body_ptr;
+	*r_siz = t_siz;
+	int ti;
+	for(ti=0; ti < t_siz; ti++){
+		body_ptr = bodyset_get(&t_n->bodies, bodyptr(i+ti));
+		body_swapAcc(body_ptr);
+		body_walksub( bodyptr(i+ti), t_n->BH_tree, t_tol, t_n->size*t_n->size, t_eps,t_n);
+		if(t_n->nstep > 0){
+			body_startVel(body_ptr, t_hts);
+		}
+		body_t send_body = *body_ptr;
+		vecStore(&send_body.vel, &vel[NDIM*ti]);
+		vecStore(&send_body.acc, &acc[NDIM*ti]);
+		phi[ti] = send_body.phi;
+	}
+	
+	//pri
+	
+	
+}
+void nbody_Simulate_orig(nbody_t * t_n, double t_tol, double t_hts, double t_eps, double t_ts){
+		int i=0;
+		body_t * body_ptr;
+		/*
+		for(i=0; i < t_n->nbody; i++){
+			body_ptr = bodyset_get(&t_n->bodies, bodyptr(i));
+			body_swapAcc(body_ptr);
+			body_walksub( bodyptr(i), t_n->BH_tree, t_tol, t_n->size*t_n->size, t_eps,t_n);
+			if(t_n->nstep > 0){
+				body_startVel(body_ptr, t_hts);
+			}
+		}
+		*/
+		for(i=0; i < t_n->nbody; i++){
+			body_ptr = bodyset_get(&t_n->bodies, bodyptr(i));
+			body_swapAcc(body_ptr);
+		}
+		for(i=0; i < t_n->nbody; i++){
+			body_ptr = bodyset_get(&t_n->bodies, bodyptr(i));
+			body_walksub( bodyptr(i), t_n->BH_tree, t_tol, t_n->size*t_n->size, t_eps,t_n);
+		}
+		for(i=0; i < t_n->nbody; i++){
+			body_ptr = bodyset_get(&t_n->bodies, bodyptr(i));
+			if(t_n->nstep > 0){
+				body_startVel(body_ptr, t_hts);
+			}
+		}
+		int q;
+		for(q=0; q < t_n->nbody; q++){
+			body_t * body_ptr = bodyset_get(&t_n->bodies, bodyptr(q));
+			body_advance(body_ptr, t_hts, t_ts);
+		}
+}
+nbody_t * nb = NULL;
+
+#define BATCH 8
+void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double ts){
+    //printf("start simulate\n");
+    #define FREQ 1000
+	taskset nbodysim(i=0; i < n->nbody; i+=BATCH){
+		before {
+			if(i%FREQ == 0)printf("task %d started\n",i);
+		}
+		compute in(
+					int t_siz = n->nbody-i < BATCH ? n->nbody-i : BATCH,
+					double t_tol = tol,
+					double t_eps = eps, 
+					double t_hts = hts,
+					double t_ts = ts, 
+					const char nch[sizeof(nbody_t)] = (char*) n, 
+					const char t_leaves[sizeof(leaf_t)*max_nleaves] = (char *) n->leaves.leaftab,
+					const char t_cells[sizeof(cell_t)*max_ncells] = (char *) n->cells.celltab,
+					const char t_bodies[sizeof(body_t)*max_nbodies] = (char *) n->bodies.bodytab)
+		     out (
+				double vel[NDIM*BATCH],
+				double acc[NDIM*BATCH], 
+				int r_siz,
+				double phi[BATCH]
+				)
+		{
+		    //printf("worker start\n");
+		    nbody_t * t_n = (nbody_t *) nch;
+			t_n->bodies.bodytab = (body_t *) t_bodies;
+			t_n->leaves.leaftab = (leaf_t *) t_leaves;
+			t_n->cells.celltab = (cell_t *) t_cells;
+			body_t * curr_n = (body_t*) bodyset_get(&t_n->bodies, bodyptr(i));
+			
+			nbody_simulate(i,t_n, t_siz, t_tol, t_eps, t_hts, t_ts, vel, acc, &r_siz, phi);
+			//printf("worker done\n");
+					
+		}
+		
+		transform in(char nch, double vel, double acc, double phi) 
+				  out(float ea, float ev,float ephi, int siz)
+		{
+			#define proc_v(v) (v*v)
+			#define proc_a(a) (a*a)
+			ephi=ev=ea=0;
+			int idx = 0;
+			for(int k=0; k < t_siz; k++){
+				for(int d = 0; d < 3; d++){
+					ev +=  proc_v(vel[idx]);
+					ea += proc_a(acc[idx]);
+					idx++;
+				}
+				ephi += phi[k];
+			}
+			siz = r_siz;
+		}
+		combine {
+			body_t * body_ptr;
+			int ri;
+			for(ri =0; ri < r_siz; ri++){
+				body_ptr = bodyset_get(&n->bodies, bodyptr(i+ri));
+				vecLoad(&body_ptr->vel, &vel[ri*NDIM]);
+				vecLoad(&body_ptr->acc, &acc[ri*NDIM]);
+				body_ptr->phi = phi[ri];
+			}
+		}
+		
+	}
+	
+	int q;
+	for(q=0; q < n->nbody; q++){
+		body_t * body_ptr = bodyset_get(&n->bodies, bodyptr(q));
+		body_advance(body_ptr, hts, ts);
+	}
+	printf("taskset completed\n");
+}
+
+void nbody_Simulate(nbody_t * n, double tol, double hts, double eps, double ts){
+	//nbody_Simulate_orig(n, tol, hts, eps, ts);
+	nbody_Simulate_Tpz(n, tol, hts, eps, ts);
+}
+int topaz_main(int argc, char **argv){
+  nbody_init(&NBODY);
+  parms_cons(&PARMS);
+  nbody_startrun(&NBODY,&PARMS);
+  /*
+  max_ncells = NBODY.cells.maxcell;
+  max_nleaves = NBODY.leaves.maxleaf;
+  max_nbodies = NBODY.bodies.maxbody;
+  
+  */
+  nbody_initOutput(&NBODY,&PARMS);
+  nbody_setbound(&NBODY);
+  nbody_clearTiming(&NBODY);
+  nbody_clearStats(&NBODY);
+  printf("start stepsystem \n");
+  nbody_stepsystem(&NBODY,&PARMS);
+  printf("stop stepsystem \n");
+  //  bodyset * bset = Nbody.getbodies();
+  //for (int i = 0; i < bset->size(); i++)
+  //  bset->
+
+  nbody_outputTiming(&NBODY);
+  //Nbody.outputStats();
+  nbody_output(&NBODY, &PARMS);
+  nbody_outputEnergy(&NBODY);
+  //Nbody.dump();
+  
+}
+
+
+
