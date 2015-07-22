@@ -75,6 +75,7 @@ do
 		RATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep -v "Topaz" | grep -o -E "[0-9\.\-]+")
 		TRATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep "Topaz" | grep -o -E "[0-9\.\-]+")
 		RATES=$RATES","$RATE
+		TRATES=$TRATES","$TRATE
 		cd $cdir
 	done
 	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
