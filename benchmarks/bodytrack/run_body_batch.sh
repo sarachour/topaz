@@ -19,7 +19,7 @@ echo "input: $INP" >> tmp.txt
 
 #mutt -s "Bodytrack Started" sarachour@gmail.com < tmp.txt
 
-#sutil_run_script.sh $SCRIPT.sh $INP $i perfect none
+sutil_run_script.sh $SCRIPT.sh $INP 1 perfect none
 for i in $(seq $STARTSEED $NSEEDS);
 do
 

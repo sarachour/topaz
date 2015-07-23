@@ -15,8 +15,9 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Water Started" sarachour@gmail.com  < tmp.txt
+#mutt -s "Water Started" sarachour@gmail.com  < tmp.txt
 
+sutil_run_script.sh run_water.sh $INP perfect none
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
