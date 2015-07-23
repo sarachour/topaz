@@ -34,10 +34,16 @@ do
 			for ldfolder in  `ls $output/$folder/ | grep "data"`
 			do
 				cd $output/$folder/$ldfolder
+				rm det.txt
 				if [ ! -f "det.txt" ];
 				then 
 					echo "detected no detector file... working...."
 					tpz_det ldet.out graph 0 > det.txt
+				fi
+				if [ ! -f "stat.txt" ];
+				then 
+					echo "detected no detector file... working...."
+					tpz_det_stats ldet.out 0 > stat.txt
 				fi
 				RATE=$(cat det.txt | grep -E "Percent Errors Detected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 				RATES=$RATES","$RATE
