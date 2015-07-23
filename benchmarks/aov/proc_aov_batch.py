@@ -23,6 +23,7 @@ def make_path(d,elems, stub):
 	return q
 
 def get_path(d,elems):
+	print elems
 	n = len(elems)
 	for i in range(0,n):
 		e = elems[i]
@@ -71,8 +72,8 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 	filename = filename+".png"
 	
 	fig,ax = plt.subplots()
-	#axes = [ax, ax.twinx(), ax.twinx()]
-	axes = [ax, ax.twinx()]
+	axes = [ax, ax.twinx(), ax.twinx()]
+	#axes = [ax, ax.twinx()]
 
 
 	fig.subplots_adjust(right=0.75);
@@ -95,10 +96,10 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 	axes[i].set_ylabel("Output Quality (Cluster Score)")
 	axes[i].spines['left'].set_color(colors[i]);
 
-	#i+=1;
-	#axes[i].bar(map(lambda x: x + barw*i, idxs),en,barw,label="Energy Savings", color=colors[i],hatch="o");
-	#axes[i].set_ylabel("Energy Savings (%)")
-	#axes[i-1].spines['right'].set_color(colors[i]);
+	i+=1;
+	axes[i].bar(map(lambda x: x + barw*i, idxs),en,barw,label="Energy Savings", color=colors[i],hatch="o");
+	axes[i].set_ylabel("Energy Savings (%)")
+	axes[i-1].spines['right'].set_color(colors[i]);
 
 	i+=1;
 	axes[i].bar(map(lambda x: x + barw*i, idxs),det,barw,label="% Errors Detected",color=colors[i],hatch="-");

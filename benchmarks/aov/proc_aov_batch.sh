@@ -20,7 +20,7 @@ do
 			ERRORS=""
 			for efile in  `ls $output/$folder/err*`
 			do
-				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
+				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.e\-]+$")
 				#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				ERRORS=$ERRORS","$ERROR
 			done
@@ -39,7 +39,7 @@ do
 					echo "detected no detector file... working...."
 					tpz_det ldet.out graph 0 > det.txt
 				fi
-				RATE=$(cat det.txt | grep -E "Percent Errors Undetected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
+				RATE=$(cat det.txt | grep -E "Percent Errors Detected:[ 0-9\.]+%$" | grep -o -E "[0-9\.]+")
 				RATES=$RATES","$RATE
 				cd $cdir
 			done
