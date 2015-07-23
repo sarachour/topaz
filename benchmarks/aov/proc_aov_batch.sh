@@ -20,7 +20,7 @@ do
 			ERRORS=""
 			for efile in  `ls $output/$folder/err*`
 			do
-				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.]+$" | grep -o -E "[0-9\.e\-]+$")
+				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.e\-]+$" | grep -o -E "[e0-9\.\-]+$")
 				#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
 				ERRORS=$ERRORS","$ERROR
 			done

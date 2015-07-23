@@ -58,9 +58,8 @@ def plot_data(pts,name):
 		dy=(maxy-miny)
 		maxy += dy/2;
 		miny -= dy/2;
-		print miny,maxy
 		ey = map(lambda x : max(miny+dy*0.05,min(maxy-dy*0.05,x)), ey);
-		print ey
+		
 		
 		for j in range(0,len(pts['regions'][i])):
 			plt = matplot.subplot(111)
