@@ -87,7 +87,7 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 	idxs = range(0,len(xvals));
 	qual = map(lambda x : get([key,"normal",x,"median"]),xvals) 
 	en = map(lambda x : get([key,"ltime",x,"median"]),xvals) 
-	det = map(lambda x : 100-get([key,"ldet",x,"median"]),xvals) 
+	det = map(lambda x : get([key,"ldet",x,"median"]),xvals) 
 
 	colors = ["#2980b9","#27ae60","#c0392b"];
 	barw = 0.25;

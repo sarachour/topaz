@@ -206,6 +206,10 @@ def analyze(hwstats, timerstats):
 	NOTOPAZ_FACTOR2 = WITHDET/NOTOPAZ_BASELINE
 	
 	
+	CMP1 = (AE*(TA) + PE*(M+TE+D))/NOTOPAZ_BASELINE
+	CMP2 = (AE*(TA+OA) + PE*(OE+M+TE+D))/NOTOPAZ_BASELINE
+	CMP3 = (AE*(TA) + PE*(M))/NOTOPAZ_BASELINE
+	
 	if NOMINAL < BASELINE:
 		NOM_INST_ROOM = BASELINE - NOMINAL
 		NOM_TRADEOFF = 1+NOM_INST_ROOM/D
@@ -247,6 +251,12 @@ def analyze(hwstats, timerstats):
 	print "With Outdet Savings,",(100-FACTOR2*100)
 	print "No Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR1*100)
 	print "With Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR2*100)
+	
+	
+	print "PAPER/NODET+NOTPZ,",(1-CMP3)*100
+	print "PAPER/DET+NOTPZ,",(1-CMP1)*100
+	print "PAPER/DET+TPZ,",(1-CMP2)*100
+	
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	

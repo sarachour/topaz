@@ -11,9 +11,9 @@ do
   PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
   BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
   KIND=$(echo $folder | grep -o -E "[a-z]+$")
-  MACH=$(echo $folder | grep -o -E "iact-[A-Za-z\-]+" | sed "s/iact-//g")
+  MACH=$(echo $folder | grep -o -E "iact-[A-Za-z0-9\-]+" | sed "s/iact-//g")
   
-  if [ "$KIND" = "ltime" ];
+  if [ "$KIND" = "" ];
   then 
 	ERRORS=""
 	for efile in  `ls $OUTPUT/$folder/err*`
@@ -34,8 +34,6 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
-		rm det.txt
-		rm *.png
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."
@@ -78,8 +76,8 @@ do
 		cd $cdir
 	done
 	
-	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
-	echo "$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
 	
 	
   fi
