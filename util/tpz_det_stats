@@ -80,7 +80,7 @@ for line in flog:
 			if cpt == 0:
 				abs(cpt - ept)*100;
 			else:
-				err = abs(cpt - ept)/cpt*100;
+				err = abs(cpt - ept)/abs(cpt)*100;
 				
 			if err > 0:
 				print err
