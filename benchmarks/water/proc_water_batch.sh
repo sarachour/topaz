@@ -9,6 +9,7 @@ OUTPUT=output-batch5
 
 for folder in `ls $OUTPUT | grep iact`
 do
+  MACH=$(echo $folder | grep -o -E "iact-[A-Za-z\-]+" | sed "s/iact-//g")
   PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
   BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
   KIND=$(echo $folder | grep -o -E "[a-z]+$")
@@ -22,7 +23,7 @@ do
 		echo "$efile : $ERROR"
 		ERRORS=$ERRORS","$ERROR
 	done
-	echo "$PROB,$BS,normal$ERRORS" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,normal$ERRORS" >> $SUMMARY
   fi
   
   if [ "$KIND" = "ldet" ];
@@ -55,8 +56,8 @@ do
 		RATES=$RATES","$RATE
 		cd $cdir
 	done
-	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
-	echo "$PROB,$BS,ldeterr$ERRS" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,ldeterr$ERRS" >> $SUMMARY
   fi
   
   if [ "$KIND" = "ltime" ];
@@ -80,8 +81,8 @@ do
 		TOPRATES=$TOPRATES","$TRATE
 		cd $cdir
 	done
-	echo "$PROB,$BS,$KIND$RATES" >> $SUMMARY
-	echo "$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
 	
   fi
   #echo $folder
