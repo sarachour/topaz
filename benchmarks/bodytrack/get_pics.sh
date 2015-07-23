@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PARDIR=output-batch5
+PARDIR=output-nobatch
 mkdir -p pics
 rm -rf pics/*
 
