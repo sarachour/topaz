@@ -67,59 +67,75 @@ def get(path):
 	return get_path(plot,path);
 
 def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
-	title = title
-	xlab = axis
-	filename = filename+".png"
-	
-	fig,ax = plt.subplots()
-	axes = [ax, ax.twinx(), ax.twinx()]
-	#axes = [ax, ax.twinx()]
-
-
-	fig.subplots_adjust(right=0.75);
-
-	axes[-1].spines['right'].set_position(('axes',1.2))
-	axes[-1].set_frame_on(True);
-	axes[-1].patch.set_visible(False);
-
-	plt.margins(0.05, 0.05)
-	plt.title(title,fontsize=14)
-	idxs = range(0,len(xvals));
-	qual = map(lambda x : get([key,"normal",x,"median"]),xvals) 
-	en = map(lambda x : get([key,"ltime",x,"median"]),xvals) 
-	det = map(lambda x : get([key,"ldet",x,"median"]),xvals) 
-
-	colors = ["#2980b9","#27ae60","#c0392b"];
-	barw = 0.25;
-	i=0;
-	axes[i].bar(map(lambda x: x + barw*i, idxs),qual,barw,label="Output Quality",color=colors[i],hatch="/");
-	axes[i].set_ylabel("Output Quality (Cluster Score)")
-	axes[i].spines['left'].set_color(colors[i]);
-
-	i+=1;
-	axes[i].bar(map(lambda x: x + barw*i, idxs),en,barw,label="Energy Savings", color=colors[i],hatch="o");
-	axes[i].set_ylabel("Energy Savings (%)")
-	axes[i-1].spines['right'].set_color(colors[i]);
-
-	i+=1;
-	axes[i].bar(map(lambda x: x + barw*i, idxs),det,barw,label="% Errors Detected",color=colors[i],hatch="-");
-	axes[i].set_ylim(0,axes[i].get_ylim()[1]);
-	axes[i].set_ylabel("% Errors Detected (%)")
-	axes[i].spines['right'].set_color(colors[i]);
-
-	axes[0].set_xlabel(xlab)
-	
-	if(is_tiny):
-		axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
-		axes[0].set_xticklabels(xticks,rotation=45);
-		axes[0].tick_params(axis="x",labelsize=8);
-	
-	else:
-		axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
-		axes[0].set_xticklabels(xticks,rotation=0);
+	try:
+		title = title
+		xlab = axis
+		filename = filename+".png"
 		
-	plt.savefig(filename)
+		fig,ax = plt.subplots()
+		axes = [ax, ax.twinx(), ax.twinx()]
+		#axes = [ax, ax.twinx()]
 
+
+		fig.subplots_adjust(right=0.75);
+
+		axes[-1].spines['right'].set_position(('axes',1.2))
+		axes[-1].set_frame_on(True);
+		axes[-1].patch.set_visible(False);
+
+		plt.margins(0.05, 0.05)
+		plt.title(title,fontsize=14)
+		idxs = range(0,len(xvals));
+		qual = map(lambda x : get([key,"normal",x,"median"]),xvals) 
+		en = map(lambda x : get([key,"ltime-tpz",x,"median"]),xvals) 
+		det = map(lambda x : get([key,"ldet",x,"median"]),xvals) 
+
+		colors = ["#2980b9","#27ae60","#c0392b"];
+		lw=5
+		i=0;
+		axes[i].plot(idxs,qual,label="Output Quality",linewidth=lw,linestyle="-",color=colors[i],marker="^");
+		axes[i].set_ylabel("Output Quality (Percent Price Error)")
+
+		i+=1;
+		axes[i].plot(idxs,en,label="Energy Savings", linewidth=lw,linestyle="--",color=colors[i],marker="h");
+		axes[i].set_ylabel("Energy Savings (%)")
+
+		i+=1;
+		axes[i].plot(idxs,det,label="% Errors Detected",linewidth=lw,linestyle=":",color=colors[i],marker="o");
+		axes[i].set_ylim(0,axes[i].get_ylim()[1]);
+		axes[i].set_ylabel("% Errors Detected (%)")
+
+		axes[0].set_xlabel(xlab)
+		
+		handles = [];
+		labels = [];
+		h, l = axes[0].get_legend_handles_labels()
+		handles = handles + h
+		labels = labels+l
+		h, l = axes[1].get_legend_handles_labels()
+		handles = handles + h
+		labels = labels+l
+		h, l = axes[2].get_legend_handles_labels()
+		handles = handles + h
+		labels = labels+l
+		
+		print handles,labels
+		lgd = plt.legend(handles, labels,loc="upper center", bbox_to_anchor=(0.5,-0.1),ncol=3)
+		
+		
+		if(is_tiny):
+			axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
+			axes[0].set_xticklabels(xticks,rotation=45);
+			axes[0].tick_params(axis="x",labelsize=8);
+		
+		else:
+			axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
+			axes[0].set_xticklabels(xticks,rotation=0);
+		
+		plt.savefig(filename, bbox_extra_artists=(lgd,), bbox_inches='tight')
+		
+	except KeyError:
+		print "Skipping"
 print plot
 
 indep = ["out","inout","rateout","strikeout","typeout","volout","timeout","all"]
@@ -131,8 +147,8 @@ produce_tuple_plot("tradeoff_selection",title,"selection",indep,labels,xaxis,Tru
 
 indep = ["batch1","batch2","batch4","batch8"]
 labels = ["1", "2", "4","8"]
-xaxis="Number of Prices per AOV element"
-title="Effect of Batching Outputs"
+xaxis="Dimensionality of AOV"
+title="Effect of Reducing Outputs"
 produce_tuple_plot("tradeoff_batching",title,"batching",indep,labels,xaxis,False)
 
 

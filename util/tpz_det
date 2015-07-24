@@ -145,7 +145,24 @@ for line in flog:
 		#randomly sample regions and consolidate points
 		tregions=[];
 		
-		is_accept = False;
+		if out_id == 0:
+			# count
+			if t > 0:
+				if is_accept and is_correct:
+					true_accept+=1;
+				elif is_accept and (not is_correct):
+					false_accept+=1;
+				elif (not is_accept) and is_correct:
+					false_reject+=1;
+				elif (not is_accept) and (not is_correct):
+					true_reject+=1;
+				
+				total += 1;
+		
+			is_accept = True;
+			is_correct = True;
+		
+		is_correct = is_correct and is_corr;
 		for i in range(0,n):
 			idx=header.index(str(i)+".prob");
 			
@@ -155,8 +172,9 @@ for line in flog:
 			miny = float(fields[header.index(str(i)+".min")]);
 			maxy = float(fields[header.index(str(i)+".max")]);
 			cy = float(fields[header.index(str(i)+".center")]);
-			if  ept <= maxy and ept >= miny: 
-				is_accept = True;
+			
+			if  ept > maxy or ept < miny: 
+				is_accept = False;
 				
 			pts['regions'][out_id][i]['ymin'].append(miny);
 			pts['regions'][out_id][i]['ymax'].append(maxy);
@@ -175,17 +193,7 @@ for line in flog:
 		cpts[out_id]=[];
 		epts[out_id]=[];
 		
-		# count
-		if is_accept and is_corr:
-			true_accept+=1;
-		elif is_accept and (not is_corr):
-			false_accept+=1;
-		elif (not is_accept) and is_corr:
-			false_reject+=1;
-		elif (not is_accept) and (not is_corr):
-			true_reject+=1;
 		
-		total += 1;
 		
 		t+=1;
 		

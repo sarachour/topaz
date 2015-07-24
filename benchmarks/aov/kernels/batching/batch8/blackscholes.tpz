@@ -236,11 +236,33 @@ int BlkSchlsEqEuroNoDiv() {
 				tfprice[q] = r1;
 			}
 		}
-		transform in(float tsptprice, float tfprice) out(float r){
+		transform in(float tsptprice, float tfprice) out(float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8){
 			int j=0;
-			r = 0;
-			for(int j=0; j < NELEMS; j++){
-				r += tfprice[j]/NELEMS;
+			r1 = r2 = r3 =r4 = 0;
+			r5 = r6 = r7 =r8 = 0;
+			for(int j=0; j < NELEMS/8; j++){
+				r1 += tfprice[j]/NELEMS;
+			}
+			for(int j=NELEMS/8; j < 2*NELEMS/8; j++){
+				r2 += tfprice[j]/NELEMS;
+			}
+			for(int j=2*NELEMS/8; j < 3*NELEMS/8; j++){
+				r3 += tfprice[j]/NELEMS;
+			}
+			for(int j=3*NELEMS/8; j < 4*NELEMS/8; j++){
+				r4 += tfprice[j]/NELEMS;
+			}
+			for(int j=4*NELEMS/8; j < 5*NELEMS/8; j++){
+				r5 += tfprice[j]/NELEMS;
+			}
+			for(int j=5*NELEMS/8; j < 6*NELEMS/8; j++){
+				r6 += tfprice[j]/NELEMS;
+			}
+			for(int j=6*NELEMS/8; j < 7*NELEMS/8; j++){
+				r7 += tfprice[j]/NELEMS;
+			}
+			for(int j=7*NELEMS/8; j < NELEMS; j++){
+				r8 += tfprice[j]/NELEMS;
 			}
 		}
 		combine {

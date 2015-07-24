@@ -4,12 +4,14 @@ SUMMARY="summary.txt"
 
 cdir=$PWD
 echo "category,kind,target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
-for category in `ls output`
+OUTPUT=output
+
+for category in `ls $OUTPUT`
 do 
-	for kind in `ls output/$category`
+	for kind in `ls $OUTPUT/$category`
 	do
-		output="output/$category/$kind"
-		for folder in `ls output/$category/$kind | grep iact`
+		LDIR="$OUTPUT/$category/$kind"
+		for folder in `ls $OUTPUT/$category/$kind | grep iact`
 		do
 		  PROB=$(echo $folder | grep -o -E "p[0-9]+(\.[0-9]*)?" | sed s/p//g)
 		  BS=$(echo $folder | grep -o -E "b[0-9]+" | sed s/b//g)
@@ -18,7 +20,7 @@ do
 		  if [ "$KIND" = "ltime" ];
 		  then 
 			ERRORS=""
-			for efile in  `ls $output/$folder/err*`
+			for efile in  `ls $LDIR/$folder/err*`
 			do
 				ERROR=$(cat $efile | grep -E "Percent Price:[ 0-9\.e\-]+$" | grep -o -E "[e0-9\.\-]+$")
 				#ERROR=$(cat $efile | grep -E "Number Errors:[ 0-9\.]+$" | grep -o -E "[0-9\.]+$")
@@ -31,9 +33,10 @@ do
 		  then 
 			RATES=""
 			KIND="ldet"
-			for ldfolder in  `ls $output/$folder/ | grep "data"`
+			for ldfolder in  `ls $LDIR/$folder/ | grep "data"`
 			do
-				cd $output/$folder/$ldfolder
+				cd $LDIR/$folder/$ldfolder
+				rm det.txt
 				if [ ! -f "det.txt" ];
 				then 
 					echo "detected no detector file... working...."
@@ -56,9 +59,9 @@ do
 			RATES=""
 			KIND="ltime"
 			TRATES=""
-			for ldfolder in  `ls $output/$folder/ | grep "timers"`
+			for ldfolder in  `ls $LDIR/$folder/ | grep "timers"`
 			do
-				cd $output/$folder/$ldfolder
+				cd $LDIR/$folder/$ldfolder
 				if [ ! -f "energy.txt" ];
 				then 
 					echo "detected no energy file... working...."

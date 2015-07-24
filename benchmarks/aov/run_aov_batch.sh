@@ -15,25 +15,23 @@ echo "starting run"
 for SEED in $(seq $STARTSEED $NSEEDS);
 do
 	echo "seed $SEED"
-	./run_aov.sh normalization naive $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh normalization subtract $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh normalization arbitrarge $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh normalization naive $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh normalization subtract $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh normalization arbitrarge $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
 
-	./run_aov.sh batching batch1 $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh batching batch2 $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh batching batch4 $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh batching batch8 $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh batching batch64 $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection out $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection inout $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection all $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection strikeout $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection timeout $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection rateout $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	./run_aov.sh selection typeout $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
 
-
-	./run_aov.sh selection out $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection inout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection all $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection strikeout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection volout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection timeout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection rateout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
-	./run_aov.sh selection typeout $INPUT $SEED reexec:t=scar,b=2,p=0.01 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch1 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch2 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch4 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch8l $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch64 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
 
 done
 
