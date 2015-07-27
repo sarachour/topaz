@@ -47,13 +47,14 @@ float fastabs(float f){
 }
 
 
-#define BATCH 5
+#define BATCH 8
 
 //improve by calculating by block.simparm
 void ensemble_interfLoop1(ensemble * e){
 	int i, j;
 	int n = e->numMol/BATCH;
 	int ntasks = n*n;
+	skratch_pad MOLECS[BATCH*2];
 	i=0;
 	j=0;
 	//const char instead of char for parms
@@ -62,6 +63,10 @@ void ensemble_interfLoop1(ensemble * e){
 			i = (k/n)*BATCH;
 			j = (k%n)*BATCH;
 			if(j < i) continue;
+			for(int v=0; v < BATCH; v++){
+				MOLECS[v] = e->pad[i+v];
+				MOLECS[v+BATCH] = e->pad[j+v];
+			}
 			//printf("before %d, %d, t=%d\n", i ,j, k);
 			//printf("%d,%d\n",i,j);
 		}
@@ -69,7 +74,7 @@ void ensemble_interfLoop1(ensemble * e){
 			in (
 			   int ti=i,
 			   int tj=j,
-			   const char cmolec[sizeof(skratch_pad)*MAX_MOLEC]= (char *) e->pad,
+			   char cmolec[sizeof(skratch_pad)*BATCH*2]= (char *) MOLECS,
 			   const char tparms[sizeof(simparm_t)]= (char *) parms
 			   )
 			   
@@ -100,8 +105,8 @@ void ensemble_interfLoop1(ensemble * e){
 				for(int kd = start; kd < BATCH; kd++){
 					//printf("	index: %d %d\n", ti+k,tj+kd);
 					//get molecules we're comparing
-					skratch_pad * P1 = (skratch_pad *) &molecs[ti+k];
-					skratch_pad * P2 = (skratch_pad *) &molecs[tj+kd];
+					skratch_pad * P1 = (skratch_pad *) &molecs[k];
+					skratch_pad * P2 = (skratch_pad *) &molecs[BATCH+kd];
 					//updating forces is simply addition
 					
 					for(int pi=0; pi < 9; pi++){
@@ -217,19 +222,25 @@ void ensemble_poteng_topaz(ensemble * e){
 	int isiz, jsiz;
 	int n = e->numMol/BATCH;
 	int ntasks = n*n;
+	skratch_pad MOLECS[BATCH*2];
 	i=0;
 	j=0;
+    
     taskset poteng(k=0; k < ntasks; k+=1){
 		before {
 			i = k/n*BATCH;
 			j = k%n*BATCH;
 			if(j < i) continue;
+			for(int v=0; v < BATCH; v++){
+				MOLECS[v] = e->pad[i+v];
+				MOLECS[v+BATCH] = e->pad[j+v];
+			}
 		}
 		compute 
 			in(
 			   int ti=i,
 			   int tj=j,
-			   const char cmolecs[sizeof(skratch_pad)*MAX_MOLEC]= (char *) e->pad,
+			   char cmolecs[sizeof(skratch_pad)*BATCH*2]= (char *) MOLECS,
 			   const char tparms[sizeof(simparm_t)]= (char *) parms)
 			out(double res[3])
 		{
@@ -245,8 +256,8 @@ void ensemble_poteng_topaz(ensemble * e){
 				for(int kd = start; kd < BATCH; kd++){
 					//printf("	index: %d %d\n", ti+k,tj+kd);
 					//get molecules we're comparing
-					skratch_pad * P1 = (skratch_pad *) &molecs[ti+k];
-					skratch_pad * P2 = (skratch_pad *) &molecs[tj+kd];
+					skratch_pad * P1 = (skratch_pad *) &molecs[k];
+					skratch_pad * P2 = (skratch_pad *) &molecs[BATCH+kd];
 					ensemble_interPoteng2Aux(P1,P2,tmp);
 					res[0] += tmp[0];
 					res[1] += tmp[1];

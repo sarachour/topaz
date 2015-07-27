@@ -260,13 +260,17 @@ def analyze(hwstats, timerstats):
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
 	
-if len(sys.argv) < 3:
+if len(sys.argv) < 2:
 	print "USAGE: tpz_energy2 hw_stats_dir timer_dir"
 
-hw_stats_path = sys.argv[1]
-timer_path = sys.argv[2];
-tim = read_timer(timer_path)
-#tim = read_time_from_profile(hw_stats_path)
-hw = read_profile(hw_stats_path)
-
+if len(sys.argv) >= 3:
+	hw_stats_path = sys.argv[1]
+	timer_path = sys.argv[2];
+	tim = read_timer(timer_path)
+	hw = read_profile(hw_stats_path)
+else:
+	timer_path = sys.argv[1];
+	tim = read_timer(timer_path)
+	hw = {"l1":{"lines":100.0},"l2":{"lines":100.0}}
+	
 analyze(hw,tim)
