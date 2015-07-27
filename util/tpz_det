@@ -109,7 +109,7 @@ if(len(sys.argv) < 4):
 	
 log = sys.argv[1];
 graph = sys.argv[2];
-sel_id = sys.argv[3];
+sel_id = int(sys.argv[3]);
 flog = open(log);
 ssel_id = str(sel_id);
 
@@ -139,6 +139,10 @@ for line in flog:
 		id = float(fields[header.index("ID")])
 		iid = float(fields[header.index("IID")])
 		rank = float(fields[header.index("RANK")])
+		
+		if id != sel_id:
+			continue;
+			
 		is_refresh = "refresh" in fields[header.index("IS-REFRESH")]
 		is_accept = "accept" in fields[header.index("IS-ACCEPT")]
 		is_failed = "failed" in fields[header.index("IS-FAILED")] 
@@ -151,7 +155,7 @@ for line in flog:
 		means =  string_to_array(fields[header.index("MEANS")])
 		is_corr = check_corr(output,key);
 		is_corr_abs = check_corr(oabs,cabs);
-		nabs = len(oabs);
+		nabs = max(nabs,len(oabs));
 		
 		mkseries(data,["t_dist","t_err"],len(output),{"x":[],"y":[]});
 		mkseries(data,["abs_dist","abs_err"],nabs,{"x":[],"y":[]});
@@ -164,8 +168,9 @@ for line in flog:
 			data["t_dist"][i]["x"].append(t);
 			data["t_dist"][i]["y"].append(key[i]);
 			
-			data["t_err"][i]["x"].append(t);
-			data["t_err"][i]["y"].append(output[i]);
+			if not is_corr:
+				data["t_err"][i]["x"].append(t);
+				data["t_err"][i]["y"].append(output[i]);
 		
 		for i in range(0, len(oabs)):
 			data["abs_dist"][i]["x"].append(t);
@@ -175,18 +180,18 @@ for line in flog:
 				data["abs_err"][i]["x"].append(t);
 				data["abs_err"][i]["y"].append(oabs[i]);
 		
-		#traverse over regions
+		#traverse over outputs
 		for i in range(0, len(means)):
-			# traverse over outputs
+			# traverse over regions
 			for j in range(0, len(means[i])):
-				data["regions"][j]["mean"][i]["x"].append(t);
-				data["regions"][j]["mean"][i]["y"].append(means[i][j]);
+				data["regions"][i]["mean"][j]["x"].append(t);
+				data["regions"][i]["mean"][j]["y"].append(means[i][j]);
 					
-				data["regions"][j]["min"][i]["x"].append(t);
-				data["regions"][j]["min"][i]["y"].append(mins[i][j]);
+				data["regions"][i]["min"][j]["x"].append(t);
+				data["regions"][i]["min"][j]["y"].append(mins[i][j]);
 					
-				data["regions"][j]["max"][i]["x"].append(t);
-				data["regions"][j]["max"][i]["y"].append(maxs[i][j]);
+				data["regions"][i]["max"][j]["x"].append(t);
+				data["regions"][i]["max"][j]["y"].append(maxs[i][j]);
 					
 			
 		if is_corr and is_accept:

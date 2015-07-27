@@ -67,10 +67,18 @@ void print_task_outputs(FILE * f, TaskSpec * ts, Task * t){
 	for(int i=0; i < ts->getNumOutputs(); i++){
 		TaskArgSpec tsa = ts->getOutput(i);
 		int n = tsa.getNumberElements();
+		task_arg_type_enum atype = tsa.getTaskArgType();
 		
 		#define print_arr(TYP) { \
-			TYP * ptr;\
-			t->unpack(&ptr); \
+			TYP * ptr; \
+			TYP q; \
+			if(atype == TASK_ARG_CONST_ARRAY || atype == TASK_ARG_ARRAY){ \
+				t->unpack(&ptr); \
+			} \
+			else { \
+				t->unpack(&q); \
+				ptr = &q; \
+			} \
 			for(int k=0; k < n; k++){ \
 				if(idx > 0) fprintf(f,",%f", static_cast<float>(ptr[k])); \
 				else fprintf(f,"%f", static_cast<float>(ptr[k])); \
@@ -116,7 +124,7 @@ void RealDetectorLogInfo::add_entry(TaskSpec * ts, AbsDetectorManager * det, Tas
 		is_ref ? "refresh" : "none", 
 		is_failed ? "failed" : "none",
 		is_accepted ? "accept" : "reject");
-		
+	
 	print_task_outputs(f,ts,orig);
 	fprintf(f,"\t");
 	
