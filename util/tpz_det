@@ -219,7 +219,7 @@ for i in range(0,nabs):
 	pts = data["abs_dist"][i];
 	errs = data["abs_err"][i];
 	regions = data["regions"][i];
-	filename = "output"+str(i)+".png"
+	filename = graph+"-"+str(i)+".png"
 	draw_plot(pts,errs,regions,filename)
 	
 print_det_stats("actual",stats["act"]);

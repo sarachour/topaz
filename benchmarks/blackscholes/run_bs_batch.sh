@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INP=16K
+INP=64K
 #TYP=med-static2
 #TYP=med-static
 TYP=med-static
@@ -11,7 +11,6 @@ BLOCKSIZE=2
 # usually 7
 STARTSEED=7
 NSEEDS=7
-FLAGS=d
 
 echo "blacscholes is beginning execution." > tmp.txt
 echo "flags used: $FLAGS" >> tmp.txt
@@ -26,8 +25,11 @@ for i in $(seq $STARTSEED $NSEEDS);
 do
 
 
-sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP t
-sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP d
+FLAGS=t
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
+
+FLAGS=d
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
 
 
 FLAGS=d
