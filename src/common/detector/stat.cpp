@@ -60,16 +60,6 @@ void RegionStats::print(){
 			this->p_test_n, this->p_test_total,
 			this->p_test_err/this->p_test_n, this->p_test_corr/this->p_test_n);
 }
-int RegionStats::log(DetectorLogInfo * l, int r, int i){
-	char name[255];
-	float prob, tr_prob, te_prob;
-	tr_prob = this->p_train_corr/this->p_train_n; 
-	te_prob = this->p_test_corr/this->p_test_n;
-	prob = tr_prob*te_prob;
-	sprintf(name, "%d.prob", r); 
-	l->set(i,name,prob); i++;
-	return i;
-}
 
 
 
@@ -124,10 +114,4 @@ void GlobalStats::print(){
 	printf("accept:%f reject%f total:%f\n", this->n_acc/this->n_total_test, this->n_rej/this->n_total_test, this->n_total_test);
 	printf("true-rej:%f false-rej:%f total-rej:%f\n", this->n_true/this->n_total_train, this->n_false/this->n_total_train, this->n_total_train);
 }
-int GlobalStats::log(DetectorLogInfo * l, int i){
-	l->set(i,"pct_rej", this->n_acc/this->n_total_test); i++;
-	l->set(i,"pct_acc",this->n_rej/this->n_total_test); i++;
-	l->set(i,"pct_true_rej",this->n_true/this->n_total_train); i++;
-	l->set(i,"pct_false_rej",this->n_false/this->n_total_train); i++;
-	return i;
-}
+

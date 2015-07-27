@@ -46,7 +46,6 @@ class AbsSolidRegionDetector : public AbsDetector {
 		~AbsSolidRegionDetector();
 		bool test();
 		bool train();
-		void log();
 		void print();
 };
 

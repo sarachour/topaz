@@ -6,35 +6,6 @@
 #include "ctrl_system.h"
 //FIXME: Must leave index 0 open for err-value
 
-void AbsScarRegionDetector::log(){
-	DetectorLogInfo * l = Topaz::topaz->getDLog();
-	bool isaccepted = DetectorLogInfo::getAccepted();
-	bool iscorr = this->compare();
-	int tid = DetectorLogInfo::getTaskId();
-	int rank = DetectorLogInfo::getRank();
-	int iid = DetectorLogInfo::getIID();
-	for(int v=0; v < this->dim; v++){
-		int i=1;
-		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 
-		i=this->stats->log(l, i);
-		l->set(i,"n-regions", this->n_regions); i++;
-		for(int r=0; r < this->n_regions; r++){
-			char name[128];
-			region_t * q = this->regions[r];
-			
-			sprintf(name, "%d.min", r); 
-			l->set(i,name, q->min[v]); i++;
-			sprintf(name, "%d.max", r); 
-			l->set(i,name,q->max[v]); i++;
-			sprintf(name, "%d.center", r); 
-			l->set(i,name,q->center[v]); i++;
-			i=q->stats.log(l,r,i);
-		}
-		l->end_entry();
-	}
-
-	
-}
 AbsScarRegionDetector::AbsScarRegionDetector(int n) : AbsDetector(n){
 	this->dim = n;
 	this->n_regions = 0;

@@ -6,8 +6,7 @@
 
 
 class AbsScarRegionDetector : public AbsDetector {
-	protected:
-		const float CENTER_WINDOW = 1000;
+	public:
 		typedef struct REGION_T{
 			float * min;
 			float * max;
@@ -16,6 +15,9 @@ class AbsScarRegionDetector : public AbsDetector {
 			//the error probability of training data
 			RegionStats stats;
 		} region_t;
+	protected:
+		const float CENTER_WINDOW = 1000;
+		
 		
 		region_t * regions[MAX_REGIONS]; //regions from the distribution
 		ControlSystem * ctrl;
@@ -44,11 +46,14 @@ class AbsScarRegionDetector : public AbsDetector {
 		virtual void set_control_target();
 		
 	public:
+		
 		AbsScarRegionDetector(int n);
 		~AbsScarRegionDetector();
+		int getNRegions(){return n_regions;}
+		region_t * getRegion(int i){return regions[i];}
+		int getDim(){return dim;}
 		bool test();
 		bool train();
-		void log();
 		void print();
 };
 

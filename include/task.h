@@ -117,11 +117,11 @@ class TaskSpec {
 		void nextIID(){
 			this->iid++;
 		}
+		void abs(Task * inputs, Task * outputs); //invoke this on not-learning
 		//determine if you want to learn or not.
 		bool test(Task * inputs, Task * outputs); //invoke this on not-learning
 		//train output.
 		bool train(Task * inputs, Task * outputs, Task * key);
-		void log(bool is_accept, Task * inputs, Task * outputs, Task * key);
 		int getNumAbstractedOutputs(){
 			return this->nTrans;
 		}

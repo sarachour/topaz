@@ -40,6 +40,19 @@ int TaskSpec::getInputBufferSize(){
 int TaskSpec::getOutputBufferSize(){
 	return this->__obuf_size;
 }
+void TaskSpec::abs(Task * inputs, Task * outputs){
+	if(this->transform != NULL){
+		//Topaz::topaz->getTimers()->start(TASK_TIMER);
+		AbsDetector::setMode(ABS_DETECTOR_LOG);
+		Topaz::topaz->getTimers()->stop_active(5);
+		Topaz::topaz->getTimers()->start(TOPAZ_TIMER_ABS); 
+		this->transform(inputs, outputs);
+		Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_ABS);
+		Topaz::topaz->getTimers()->start_active(5);
+		
+		//Topaz::topaz->getTimers()->stop(TASK_TIMER);
+	}
+}
 bool TaskSpec::test(Task * inputs, Task * outputs){
 	if(this->transform != NULL){
 		//Topaz::topaz->getTimers()->start(TASK_TIMER);
@@ -71,27 +84,7 @@ bool TaskSpec::train(Task * inputs, Task * outputs, Task * key){
 	}
 	return res;
 }
-void TaskSpec::log(bool is_reexec, Task * inputs, Task * outputs, Task * key){
-	if(this->transform != NULL){
-		//set detector info to key
-		Topaz::topaz->getTimers()->stop_active(5);
-		Topaz::topaz->getTimers()->start(TOPAZ_TIMER_ABS); 
-		AbsDetector::setMode(ABS_DETECTOR_KEY);
-		this->transform(inputs, key); //record key.
-		//set detector info to train
-		inputs->startUnpack();
-		DetectorLogInfo::setTaskId(inputs->getId());
-		DetectorLogInfo::setRank(inputs->getRank());
-		DetectorLogInfo::setAccepted(is_reexec);
-		DetectorLogInfo::setIID(0);
-		
-		AbsDetector::setMode(ABS_DETECTOR_LOG);
-		this->transform(inputs, outputs); //record outputs.
-		AbsDetector::setMode(ABS_DETECTOR_TEST);
-		Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_ABS);
-		Topaz::topaz->getTimers()->start_active(5);
-	}
-}
+
 void TaskSpec::execute(Task * inputs, Task * outputs){
 	if(this->function != NULL){
 		Topaz::topaz->getTimers()->stop_active(4);

@@ -1,40 +1,30 @@
 #!/usr/bin/python
+
 import matplotlib.pyplot as matplot
 
 import sys
-from os import listdir
-from os.path import isfile, join
-import random
 import math
-from numpy import array
-import subprocess
+import numpy as np
+import json
+import copy
 
-total=0.0;
-true_accept=0.0;
-false_accept=0.0;
-true_reject=0.0;
-false_reject=0.0;
+def string_to_array(str):
+	str = str.replace("inf","Infinity");
+	str = str.replace("-nan","nan");
+	str = str.replace("nan","NaN");
+	k = json.loads(str);
+	return k
 
+def check_corr(err,corr):
+	EPS = 1e-3
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	if(terr < EPS):
+		return True;
+	else:
+		return False;
 
-regions = [];
-pts = {'err':[], 'corr':[], 'actual':[],'regions':[]};
-
-
-
-
-def pct(n,t):
-	if(t==0):
-		return "div-by-zero"
-	return str(round(n/t*100.0,5))+"%";
-
-def calc_length(s,line,n):
-	if(line.startswith(s+"\t")):
-		return n+1;
-	return n;
-
-
-def plot_data(pts,name):
-	
+def draw_plot(corr, err, regions, filename):
 	bound_color="#2980b9"
 	bound_thickness=2;
 	mean_color="black"
@@ -44,173 +34,193 @@ def plot_data(pts,name):
 	dist_color="#bdc3c7"
 	dist_size=20;
 	
-	for i in range(0, len(pts['corr'])):
-		print "Plotting Output "+str(i)
-		px = pts['corr'][i]['x']
-		py = pts['corr'][i]['y']
-		ex = pts['err'][i]['x']
-		ey = pts['err'][i]['y']
+	px = corr['x']
+	py = corr['y']
+	ex = err['x']
+	ey = err['y']
+	
+	miny = min(py);
+	maxy = max(py);
+	minx = min(px);
+	maxx = max(px);
+	dy=(maxy-miny)
+	maxy += dy/2;
+	miny -= dy/2;
+	ey = map(lambda x : max(miny+dy*0.05,min(maxy-dy*0.05,x)), ey);
+	
+	matplot.clf();
+	plt = matplot.subplot(111)
+	
+	plt.set_title("Region Evolution over Time")
+	plt.set_xlim((minx,maxx))
+	plt.set_ylim((miny,maxy))
+	plt.set_xlabel("time elapsed");
+	plt.set_ylabel("AOV Index Value");
+	plt.spines['right'].set_visible(False)
+	plt.spines['top'].set_visible(False)
+	plt.yaxis.set_ticks_position('left')
+	plt.xaxis.set_ticks_position('bottom')
+	
+	plt.scatter(px,py,marker="o", c=dist_color, s=dist_size, edgecolors="none", alpha=0.33);
+	plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
 		
-		miny = min(py);
-		maxy = max(py);
-		minx = min(px);
-		maxx = max(px);
-		dy=(maxy-miny)
-		maxy += dy/2;
-		miny -= dy/2;
-		ey = map(lambda x : max(miny+dy*0.05,min(maxy-dy*0.05,x)), ey);
-		
-		
-		for j in range(0,len(pts['regions'][i])):
-			plt = matplot.subplot(111)
-			rmin = array(pts['regions'][i][j]['ymin'])
-			rmax = array(pts['regions'][i][j]['ymax'])
-			rx = array(pts['regions'][i][j]['x'])
-			cx = pts['regions'][i][j]['x']
-			cy = pts['regions'][i][j]['cy']
-			
-			plt.set_title("Region Evolution over time for AOV["+str(i)+"]")
-			plt.set_xlim((minx,maxx))
-			plt.set_ylim((miny,maxy))
-			plt.set_xlabel("time elapsed");
-			plt.set_ylabel("AOV Index Value");
-			plt.spines['right'].set_visible(False)
-			plt.spines['top'].set_visible(False)
-			plt.yaxis.set_ticks_position('left')
-			plt.xaxis.set_ticks_position('bottom')
 
-			
-			plt.scatter(px,py,marker="o", c=dist_color, s=dist_size, edgecolors="none", alpha=0.33);
-			plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
-			
-			plt.plot(rx,rmin,rx,rmax,linestyle="-",c=bound_color,linewidth=bound_thickness);
-			plt.plot(cx,cy,linestyle=":",c=mean_color,linewidth=mean_thickness);
-			
-			matplot.savefig(prefix+'.'+str(i)+".region."+str(j)+".png");
-			matplot.clf();
+	for j in range(0,len(regions)):
+		minx = regions["min"][j]["x"];
+		miny = regions["min"][j]["y"];
+		maxx = regions["max"][j]["x"];
+		maxy = regions["max"][j]["y"];
+		meanx = regions["mean"][j]["x"];
+		meany = regions["mean"][j]["y"];
+		
+		plt.plot(minx,miny,maxx,maxy,linestyle="-",c=bound_color,linewidth=bound_thickness);
+		plt.plot(meanx,meany,linestyle=":",c=mean_color,linewidth=mean_thickness);
+		
+	matplot.savefig(filename);
+	matplot.clf();
 			
 	
-if(len(sys.argv) < 3):
-	print "logname graph-prefix task-id"
-	exit(1);
-
- 
+def print_det_stats(hdr,e):
+	n = e["n"]
+	to_pct = lambda x : x/float(n)*100;
+	
+	if e["tr"] + e["fa"] > 0:
+		frac_caught = float(e["tr"])/float(e["tr"] + e["fa"])
+	else:
+		frac_caught = 1;
+	
+	if e["tr"] + e["fr"] > 0:
+		frac_rej = float(e["tr"])/float(e["tr"] + e["fr"])
+	else:
+		frac_rej = 100;
+	
+	print "%s,n,%d" % (hdr,n)
+	print "%s,true-accepts,%f" % (hdr,to_pct(e["ta"]))
+	print "%s,false-accepts,%f" % (hdr,to_pct(e["fa"]))
+	print "%s,true-rejects,%f" % (hdr,to_pct(e["tr"]))
+	print "%s,false-rejects,%f" % (hdr,to_pct(e["fr"]))
+	print "%s,errors-caught,%f" % (hdr, frac_caught*100)
+	print "%s,false-rejects,%f" % (hdr, frac_rej*100)
+	print "%s,rej-rate,%f" % (hdr, to_pct(e["fr"] + e["tr"]))
+	
+if(len(sys.argv) < 4):
+	print "Usage: logname graph selid"
+	sys.exit(1)
+	
 log = sys.argv[1];
-prefix = sys.argv[2];
-sel_id = int(sys.argv[3]);
-
+graph = sys.argv[2];
+sel_id = sys.argv[3];
 flog = open(log);
 ssel_id = str(sel_id);
-flog = open(log);
-epts = [];
-cpts = [];
+
+header = flog.readline().split('\n')[0].split('\t');
+
+#['ID', 'IID', 'RANK', 'IS-REFRESH', 'IS-FAILED', 'IS-ACCEPT', 'OUTPUT', 'CORR', 'OABS', 'CABS', 'MINS', 'MAXS', 'MEANS']
+stats = {};
+stats["abs"] = {"ta":0,"fa":0,"tr":0,"fr":0,"n":0};
+stats["act"] = {"ta":0,"fa":0,"tr":0,"fr":0,"n":0};
+data = {};
+
+
+def mkseries(d,flds,l,vl):
+	
+	for i in range(0,len(flds)):
+		fld = flds[i];
+		if not(fld in d):
+			d[fld] = [];
+		while(len(d[fld]) < l):
+			d[fld].append(copy.deepcopy(vl));
+			
 t=0;
-header = flog.readline().split('\t');
-print header;
-
-
+nabs = 0;
 for line in flog:
 	try:
-		fields=line.split('\t')
-		id = int(fields[header.index("ID")]);
+		fields = line.split('\n')[0].split('\t');
+		id = float(fields[header.index("ID")])
+		iid = float(fields[header.index("IID")])
+		rank = float(fields[header.index("RANK")])
+		is_refresh = "refresh" in fields[header.index("IS-REFRESH")]
+		is_accept = "accept" in fields[header.index("IS-ACCEPT")]
+		is_failed = "failed" in fields[header.index("IS-FAILED")] 
+		output = string_to_array(fields[header.index("OUTPUT")])
+		key = string_to_array(fields[header.index("CORR")])
+		oabs = string_to_array(fields[header.index("OABS")])
+		cabs = string_to_array(fields[header.index("CABS")])
+		mins =  string_to_array(fields[header.index("MINS")])
+		maxs =  string_to_array(fields[header.index("MAXS")])
+		means =  string_to_array(fields[header.index("MEANS")])
+		is_corr = check_corr(output,key);
+		is_corr_abs = check_corr(oabs,cabs);
+		nabs = len(oabs);
 		
-		if(id != sel_id):
-			continue;
+		mkseries(data,["t_dist","t_err"],len(output),{"x":[],"y":[]});
+		mkseries(data,["abs_dist","abs_err"],nabs,{"x":[],"y":[]});
 		
-		#is_accept = "y" in fields[header.index("IS-ACCEPT")];
-		is_corr = "y" in fields[header.index("IS-CORR")];
-		out_id = int(float(fields[header.index("OUT-ID")]));
-		n = int(float(fields[header.index("n-regions")]));
+		el = {};
+		mkseries(el,["min","max","mean"],10,{"x":[],"y":[]})
+		mkseries(data,["regions"],nabs, el);
 		
-		
-		
-		while out_id >= len(cpts):
-			cpts.append([]);
-			epts.append([]);
-			pts['err'].append({'x':[],'y':[]});
-			pts['corr'].append({'x':[],'y':[]});
-			pts['regions'].append([]);
-		
-		while n >= len(pts['regions'][out_id]):
-			pts['regions'][out_id].append({'ymin':[],'ymax':[],'x':[], 'cy':[]})
-		
-		cpt=float(fields[header.index("CORR-VAL")])
-		ept=float(fields[header.index("VAL")])
-		#print len(cpts[out_id]),len(pts['corr'][out_id]['x'])
-		if(abs(ept - cpt) < 1e-4):	
-			cpts[out_id].append(cpt);
-		else:
-			epts[out_id].append(ept);
-		
-		#randomly sample regions and consolidate points
-		tregions=[];
-		
-		if out_id == 0:
-			# count
-			if t > 0:
-				if is_accept and is_correct:
-					true_accept+=1;
-				elif is_accept and (not is_correct):
-					false_accept+=1;
-				elif (not is_accept) and is_correct:
-					false_reject+=1;
-				elif (not is_accept) and (not is_correct):
-					true_reject+=1;
-				
-				total += 1;
-		
-			is_accept = True;
-			is_correct = True;
-		
-		is_correct = is_correct and is_corr;
-		for i in range(0,n):
-			idx=header.index(str(i)+".prob");
+		for i in range(0, len(output)):
+			data["t_dist"][i]["x"].append(t);
+			data["t_dist"][i]["y"].append(key[i]);
 			
-			if(idx >= len(fields)):
-				continue;
-				
-			miny = float(fields[header.index(str(i)+".min")]);
-			maxy = float(fields[header.index(str(i)+".max")]);
-			cy = float(fields[header.index(str(i)+".center")]);
+			data["t_err"][i]["x"].append(t);
+			data["t_err"][i]["y"].append(output[i]);
+		
+		for i in range(0, len(oabs)):
+			data["abs_dist"][i]["x"].append(t);
+			data["abs_dist"][i]["y"].append(cabs[i]);
 			
-			if  ept > maxy or ept < miny: 
-				is_accept = False;
-				
-			pts['regions'][out_id][i]['ymin'].append(miny);
-			pts['regions'][out_id][i]['ymax'].append(maxy);
-			pts['regions'][out_id][i]['x'].append(t);
-			pts['regions'][out_id][i]['cy'].append(cy);
+			if not is_corr:
+				data["abs_err"][i]["x"].append(t);
+				data["abs_err"][i]["y"].append(oabs[i]);
+		
+		#traverse over regions
+		for i in range(0, len(means)):
+			# traverse over outputs
+			for j in range(0, len(means[i])):
+				data["regions"][j]["mean"][i]["x"].append(t);
+				data["regions"][j]["mean"][i]["y"].append(means[i][j]);
+					
+				data["regions"][j]["min"][i]["x"].append(t);
+				data["regions"][j]["min"][i]["y"].append(mins[i][j]);
+					
+				data["regions"][j]["max"][i]["x"].append(t);
+				data["regions"][j]["max"][i]["y"].append(maxs[i][j]);
+					
 			
-		#print len(cpts),num_lines,YPROB,PDENS
-		for c in cpts[out_id]:
-			pts['corr'][out_id]['x'].append(t);
-			pts['corr'][out_id]['y'].append(c);
-				
-		for e in epts[out_id]:
-			pts['err'][out_id]['x'].append(t);
-			pts['err'][out_id]['y'].append(e);
-				
-		cpts[out_id]=[];
-		epts[out_id]=[];
+		if is_corr and is_accept:
+			stats["act"]["ta"]+=1;
+		elif is_corr and not is_accept:
+			stats["act"]["fr"]+=1;
+		elif not is_corr and is_accept:
+			stats["act"]["fa"]+=1;
+		elif not is_corr and  not is_accept:
+			stats["act"]["tr"]+=1;
 		
+		if is_corr_abs and is_accept:
+			stats["abs"]["ta"]+=1;
+		elif is_corr_abs and not is_accept:
+			stats["abs"]["fr"]+=1;
+		elif not is_corr_abs and is_accept:
+			stats["abs"]["fa"]+=1;
+		elif not is_corr_abs and  not is_accept:
+			stats["abs"]["tr"]+=1;
 		
-		
+		stats["abs"]["n"]+=1;
+		stats["act"]["n"]+=1;
 		t+=1;
 		
-	except ValueError:
-		print "skipping.."
+	except ValueError: 
+		print "skipping...",line
+		continue
 
-print true_accept,false_accept,true_reject,false_reject
-print "Percent True Accepts:",pct(true_accept,total)
-print "Percent False Accepts:",pct(false_accept,total)
-print "Percent True Rejects:",pct(true_reject,total)
-print "Percent False Rejects:",pct(false_reject,total)
-print "------------------------------------"
-print "Percent Errors:",pct(false_accept + true_reject,total)
-print "Percent Detections That Are Errors:", pct(true_reject, false_reject + true_reject)
-print "Percent Errors Detected:", pct(true_reject, false_accept + true_reject)
-print "Percent Errors Undetected:", pct(false_accept, false_accept + true_reject)
-print "Percent Rejects:",pct(true_reject + false_reject,total)
-
-plot_data(pts, prefix);
-#print regions[0];
+for i in range(0,nabs):
+	pts = data["abs_dist"][i];
+	errs = data["abs_err"][i];
+	regions = data["regions"][i];
+	filename = "output"+str(i)+".png"
+	draw_plot(pts,errs,regions,filename)
+	
+print_det_stats("actual",stats["act"]);
+print_det_stats("abs",stats["abs"]);

@@ -34,6 +34,7 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
+		rm det.txt
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."

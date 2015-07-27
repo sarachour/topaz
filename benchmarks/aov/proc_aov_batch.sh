@@ -4,7 +4,7 @@ SUMMARY="summary.txt"
 
 cdir=$PWD
 echo "category,kind,target-prob,block-size,kind,seed1,seed2,seed3" > $SUMMARY
-OUTPUT=output
+OUTPUT=output-med
 
 for category in `ls $OUTPUT`
 do 

@@ -27,7 +27,6 @@ class AbsDetector{
 		int n;
 	public:
 		static int MODE;
-		static bool LOG_ACCEPTED;
 		AbsDetector(int nelems){
 			this->data_key = new float[nelems];
 			this->data = new float[nelems];
@@ -44,11 +43,11 @@ class AbsDetector{
 			delete data_key;
 			delete data;
 		}
-		static void setLog_Accepted(bool is_accept){
-			AbsDetector::LOG_ACCEPTED = is_accept;
-		}
 		static void setMode(int m);
 		static int getMode();
+		int getDim(){return n;}
+		float * getKeyVector(){return data_key;}
+		float * getOutputVector(){return data;}
 		void setTarget(float t){
 			this->target = t;
 		}
@@ -67,11 +66,9 @@ class AbsDetector{
 				return this->train();
 			}
 			else{
-				this->log();
 				return true;
 			}
 		}
-		virtual void log() = 0;
 		virtual bool test() = 0;
 		virtual bool train() = 0;
 		virtual void print(){}
@@ -92,6 +89,7 @@ class AbsDetectorManager {
 	    void print();
 	    void init(int siz);
 		void add(int taskid, int nouts);
+		AbsDetector * getDetector(int id){return this->detectors[id];}
 		void setTarget(int id, float val){this->detectors[id]->setTarget(val);}
 		//train particular output for task
 		void set(int taskid, int i, float v){this->detectors[taskid]->set(i,v);}

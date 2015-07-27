@@ -10,6 +10,6 @@ if [ ! -d output ]; then
 	echo "no output directory"
 	exit 1
 fi
-./run_bs_batch_grand.sh
+./run_bs_batch.sh
 rm -rf output-$TAG
 mv output output-$TAG

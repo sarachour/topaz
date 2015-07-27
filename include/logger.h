@@ -4,12 +4,15 @@
 #include <vector>
 #include <iostream>
 #include "pin_util.h"
+#include "task.h"
 //#define MAX_PROPS 16
 
-#define DLOG_CAT_TRAIN 0 //use both values
-#define DLOG_CAT_TEST_OK 1 //don't use both values
-#define DLOG_CAT_TEST_BAD 2
-#define DLOG_CAT_CORRECT 3
+class TaskSpec;
+class AbsDetectorManager;
+//#define DLOG_CAT_TRAIN 0 //use both values
+//#define DLOG_CAT_TEST_OK 1 //don't use both values
+//#define DLOG_CAT_TEST_BAD 2
+//#define DLOG_CAT_CORRECT 3
 typedef struct TIMER_INFO_T {
 	int idx; //identifier
 	double inst;
@@ -231,78 +234,35 @@ class RealLogInfo: public LogInfo {
 	void print();
 };
 
+
+
 class DetectorLogInfo {
-	protected:
-		static ldetector_id_t CURR_ID;
-		static bool IS_ACCEPTED;
 	public:
-		static void setAccepted(bool a){DetectorLogInfo::IS_ACCEPTED = a;}
-		static void setTaskId(int a){DetectorLogInfo::CURR_ID.task_id = a;}
-		static void setRank(int a){DetectorLogInfo::CURR_ID.task_rank = a;}
-		static void setIID(int a){DetectorLogInfo::CURR_ID.task_inst = a;}
-		
-		static bool getAccepted(){return DetectorLogInfo::IS_ACCEPTED;}
-		static int getTaskId(){return DetectorLogInfo::CURR_ID.task_id;}
-		static int getRank(){return DetectorLogInfo::CURR_ID.task_rank;}
-		static int getIID(){return DetectorLogInfo::CURR_ID.task_inst;}
-		
-		virtual void start() =0;
-		virtual void start_entry(int task_id, int inst_id, int task_rank, int out_id, bool is_outlier, bool is_error, double val, double cval) = 0; //topaz
-		virtual void end_entry() = 0;
-		virtual void set(int idx,const char * prop, double value) =0;
-		virtual void stop() =0;
-		virtual void print() =0;
+		virtual void add_entry(TaskSpec * ts, AbsDetectorManager * det, Task * input, Task* orig, Task* key, bool is_rejected) = 0;
 };
+
+
 class DummyDetectorLogInfo : public DetectorLogInfo {
 	public:
 	DummyDetectorLogInfo(){
 		
 	}
-	void start(){
+	void add_entry(TaskSpec * ts,AbsDetectorManager * det, Task * input, Task* orig, Task* key, bool is_rejected){
 		
 	}
-	void start_entry(int task_id, int inst_id, int task_rank, int out_id, bool is_outlier, bool is_error, double val, double cval){
-		
-	}
-	void end_entry(){
-		
-	}
-	void set(int idx, const char * prop, double value){
-		
-	}
-	void stop(){
-		
-	}
-	void print(){
-		
-	}
+	
 };
 
 class RealDetectorLogInfo : public DetectorLogInfo {
 	protected:
 	//data
-	int ndumps;
-	ldetector_id_t id_info;
-	char** prop_hdrs; 
-	ldetector_node_t * ldetectors; 
-	ldetector_node_t * LDET_LAST;
-	long int LDET_SIZE; 
 	FILE * file;
-	//internal functions
-	void init_logs();
-	void add_log(ldetector_info_t l);
-	ldetector_info_t * last_log();
-	void del_logs();
-	int n;
-	public:
-	RealDetectorLogInfo(const char * prop, int nprops);
-	~RealDetectorLogInfo();
-	void start_entry(int task_id, int inst_id, int task_rank, int out_id, bool is_outlier, bool is_error, double val, double cval);
-	void end_entry();
-	void start();
-	void set(int idx, const char * prop, double value);
-	void stop();
 	void print();
+	
+	public:
+	RealDetectorLogInfo(const char * filename);
+	~RealDetectorLogInfo();
+	void add_entry(TaskSpec * ts,AbsDetectorManager * det,  Task * input, Task * orig, Task * key, bool is_rejected);
 };
 
 

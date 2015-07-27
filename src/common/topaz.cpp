@@ -101,7 +101,7 @@ Topaz::Topaz(int argc, char ** argv){
 	if(this->config.DETECTOR_ENABLED){
 		this->detector = new AbsDetectorManager(MAX_TASKS);
 		if(this->config.LOG_DETECTORS_ENABLED){
-			this->logdetector = new RealDetectorLogInfo("ldet.out", 160);
+			this->logdetector = new RealDetectorLogInfo("ldet.out");
 		}
 		else{
 			this->logdetector = new DummyDetectorLogInfo();
@@ -260,9 +260,6 @@ void Topaz::finalize(){
 		
 		if(this->config.DETECTOR_ENABLED){
 			this->detector->print();
-			if(this->config.LOG_DETECTORS_ENABLED && this->isMain()){
-				this->logdetector->print();
-			}
 		}
 	
 		printf("++ Writing Timer to Log\n");
@@ -404,35 +401,56 @@ Task * spare = NULL;
 
 void Topaz::reexecute_failed(int id, TaskSpec * ts){
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); //backup task
+	}
 	//swap task payloads
 	this->output_task = spare; 
-	spare = incorr;
+	Task * corr = this->output_task;
 	this->tasks->execute(id, this->input_task, this->output_task);
+	
+	if(this->config.LOG_DETECTORS_ENABLED) 
+		this->getDLog()->add_entry(ts, this->detector, this->input_task, incorr, corr, false);
+		
+	this->output_task = corr;
+	spare = incorr;
 }
 void Topaz::reexecute(int id, TaskSpec * ts){
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); //backup task
+	}
 	//swap task payloads
 	this->output_task = spare; 
-	spare = incorr;
+	Task * corr = this->output_task;
+	
 	this->tasks->execute(id, this->input_task, this->output_task);
 	ts->train(this->input_task, incorr, this->output_task);
-	//input task, output task
+	
 	if(this->config.LOG_DETECTORS_ENABLED) 
-		// accepted, input, bad-output, key-output
-		ts->log(false,this->input_task, incorr, this->output_task);
+		this->getDLog()->add_entry(ts, this->detector, this->input_task, incorr, corr, false);
+	//input task, output task
+	
+	this->output_task = corr;
+	spare = incorr;
 }
 // by assumption, the detector is enabled.
 void Topaz::reexecute_log(int id, TaskSpec * ts){
+	if(!this->config.LOG_DETECTORS_ENABLED) return;
+	
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); 
+	}//backup task
 	this->output_task = spare;
-	spare = incorr;
+	Task * corr = this->output_task;
 	this->tasks->execute(id, this->input_task, this->output_task);
 	//change back to incorrect task
 	this->output_task = incorr;
-	ts->log(true,this->input_task, incorr, this->output_task);
+	this->getDLog()->add_entry(ts, this->detector,this->input_task, incorr, corr, true);
+	
+	this->output_task = incorr;
+	spare = corr;
 }
 int nticks = 0;
 int nfails = 0;
@@ -481,11 +499,8 @@ bool Topaz::receive(){
 				status = true;
 			}
 			//if we're logging, reexecute anyway.
-			else if(this->config.LOG_DETECTORS_ENABLED){
+			else{
 				this->reexecute_log(id,&ts);
-				nfails = 0;
-			}
-			else {
 				nfails = 0;
 			}
 		}
