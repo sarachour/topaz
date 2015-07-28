@@ -135,9 +135,7 @@ void AbsScarRegionDetector::merge_regions(int id1, int id2){
 		if(r2->max[i] > r1->max[i]){
 			r1->max[i] = r2->max[i];
 		}
-		printf("%f %f\n", r1->center[i], r2->center[i]);
 		r1->center[i] = (r1->center[i]*(n1+1)+ r2->center[i]*(1+n2))/(n1+n2+2);
-		printf("%f\n", r1->center[i]);
 	}
 	r1->stats.merge(&r2->stats);
 	

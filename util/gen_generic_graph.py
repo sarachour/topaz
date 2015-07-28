@@ -136,15 +136,14 @@ plt.margins(0.05, 0.05)
 plt.title(title,fontsize=14)
 idxs = range(0,len(xvals));
 qual = map(lambda x : get(["normal",blocks,x,"median"]),xvals) 
-qual_err = map(lambda x : get(["normal",blocks,x,"low"]),xvals) 
-task = map(lambda x : get(["ldeterr",blocks,x,"median"]),xvals) 
-task_err = map(lambda x : get(["ldeterr",blocks,x,"low"]),xvals) 
+task = map(lambda x : get(["ldet-task-err",blocks,x,"median"]),xvals) 
+aov = map(lambda x : get(["ldet-aov-err",blocks,x,"median"]),xvals) 
 
 colors = ["#2980b9","#c0392b","#27ae60"];
 w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
-axes[i].errorbar(idxs,qual,label="Output Quality",yerr=qual_err,linewidth=w,color=colors[i],marker="o",linestyle="--");
+axes[i].errorbar(idxs,qual,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
 axes[i].set_ylabel("Output Quality (% Price Error)")
 #axes[i].spines['right'].set_color(colors[i]);
 
