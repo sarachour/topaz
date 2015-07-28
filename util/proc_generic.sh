@@ -82,14 +82,14 @@ do
 			echo "no energy file... working...."
 			tpz_energy ../$hwdir . > energy.txt
 		fi
-		RATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep -v "Topaz" | grep -o -E "[0-9\.\-]+")
+		RATE=$(cat energy.txt | grep "^PAPER/DET+NOTPZ" | grep -o -E "[0-9\.\-]+")
 		RATES=$RATES","$RATE
-		RATE=$(cat energy.txt | grep -E "^With Outdet Savings" | grep "Topaz" | grep -o -E "[0-9\.\-]+")
+		RATE=$(cat energy.txt | grep "^PAPER/DET+TPZ" | grep -o -E "[0-9\.\-]+")
 		TOPRATES=$TOPRATES","$RATE
 		cd $cdir
 	done
 	
-	echo "$MACH,$PROB,$BS,$KIND$RATES" >> $SUMMARY
+	echo "$MACH,$PROB,$BS,ltime$RATES" >> $SUMMARY
 	echo "$MACH,$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
 	
 	
