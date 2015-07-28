@@ -19,18 +19,17 @@ echo "input: $INP" >> tmp.txt
 
 #mutt -s "Blackscholes Started" sarachour@gmail.com < tmp.txt
 
-
-sutil_run_script.sh run_bs.sh $INP 1 none perfect
+#sutil_run_script.sh run_bs.sh $INP 1 none perfect
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
 
-FLAGS=t
-sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
 
 FLAGS=d
 sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
 
+FLAGS=t
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
 
 #FLAGS=d
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-$TYP $FLAGS
@@ -40,13 +39,13 @@ sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TY
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-$TYP $FLAGS
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.16 iact-$TYP $FLAGS
 
-#FLAGS=t
+FLAGS=t
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-$TYP $FLAGS
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.02 iact-$TYP $FLAGS
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.04 iact-$TYP $FLAGS
-#sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-$TYP $FLAGS
-#sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.11 iact-$TYP $FLAGS
-#sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.16 iact-$TYP $FLAGS
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-$TYP $FLAGS
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.11 iact-$TYP $FLAGS
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.16 iact-$TYP $FLAGS
 
 
 

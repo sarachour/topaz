@@ -17,6 +17,7 @@ class RegionStats {
 		void update_accept_rate(bool iselem, bool is_acc);
 		void update_accuracy_rate(bool iselem, bool is_true);
 		void merge(RegionStats * o);
+		float getNTestPoints(){return p_test_n;}
 		void print();
 };
 

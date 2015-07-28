@@ -125,6 +125,9 @@ int AbsScarRegionDetector::find_region(float * d){
 void AbsScarRegionDetector::merge_regions(int id1, int id2){
 	region_t * r1 =	this->regions[id1];
 	region_t * r2 = this->regions[id2];
+	float n1 = r1->stats.getNTestPoints();
+	float n2 = r2->stats.getNTestPoints();
+	
 	for(int i=0; i < this->dim; i++){
 		if(r2->min[i] < r1->min[i]){
 			r1->min[i] = r2->min[i];
@@ -132,7 +135,9 @@ void AbsScarRegionDetector::merge_regions(int id1, int id2){
 		if(r2->max[i] > r1->max[i]){
 			r1->max[i] = r2->max[i];
 		}
-		r1->center[i] = (r1->center[i] + r1->center[i])/2;
+		printf("%f %f\n", r1->center[i], r2->center[i]);
+		r1->center[i] = (r1->center[i]*(n1+1)+ r2->center[i]*(1+n2))/(n1+n2+2);
+		printf("%f\n", r1->center[i]);
 	}
 	r1->stats.merge(&r2->stats);
 	

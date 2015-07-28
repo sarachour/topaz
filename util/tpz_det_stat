@@ -1,0 +1,74 @@
+#!/usr/bin/python
+import matplotlib.pyplot as matplot
+
+import sys
+import math
+import numpy as np
+import json
+import copy
+
+def string_to_array(str):
+	str = str.replace("inf","Infinity");
+	str = str.replace("-nan","nan");
+	str = str.replace("nan","NaN");
+	k = json.loads(str);
+	return k
+
+def check_corr(err,corr):
+	EPS = 1e-3
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	if(terr < EPS):
+		return True;
+	else:
+		return False;
+
+if(len(sys.argv) < 3):
+	print "Usage: logname graph selid"
+	sys.exit(1)
+	
+log = sys.argv[1];
+sel_id = int(sys.argv[2]);
+flog = open(log);
+ssel_id = str(sel_id);
+
+header = flog.readline().split('\n')[0].split('\t');
+
+def compute_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	return terr
+
+def compute_rel_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c)/abs(c) if c != 0 else 0, zip(err,corr));
+	terr = np.sum(errs);
+	return terr
+
+abs_err = 0.0;
+act_err = 0.0;
+n = 0;
+for line in flog:
+	try:
+		fields = line.split('\n')[0].split('\t');
+		id = float(fields[header.index("ID")])
+		is_accept = "accept" in fields[header.index("IS-ACCEPT")]
+		
+		if (not is_accept) or id != sel_id:
+			continue
+		
+			
+		output = string_to_array(fields[header.index("OUTPUT")])
+		key = string_to_array(fields[header.index("CORR")])
+		oabs = string_to_array(fields[header.index("OABS")])
+		cabs = string_to_array(fields[header.index("CABS")])
+		
+		act_err += compute_err(output,key);
+		abs_err += compute_err(oabs,cabs);
+		n+=1
+		
+	except ValueError: 
+		print "skipping..."
+		continue
+
+print "abs,err,"+str(abs_err/n*100)
+print "act,err,"+str(act_err/n*100)

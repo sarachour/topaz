@@ -32,7 +32,7 @@ def draw_plot(corr, err, regions, filename):
 	error_color="#c0392b"
 	error_size=20;
 	dist_color="#bdc3c7"
-	dist_size=20;
+	dist_size=40;
 	
 	px = corr['x']
 	py = corr['y']
@@ -72,7 +72,8 @@ def draw_plot(corr, err, regions, filename):
 		maxy = regions["max"][j]["y"];
 		meanx = regions["mean"][j]["x"];
 		meany = regions["mean"][j]["y"];
-		
+		plt.fill_between(minx, miny, maxy, facecolor=bound_color, alpha=0.15)
+
 		plt.plot(minx,miny,maxx,maxy,linestyle="-",c=bound_color,linewidth=bound_thickness);
 		plt.plot(meanx,meany,linestyle=":",c=mean_color,linewidth=mean_thickness);
 		
@@ -100,7 +101,7 @@ def print_det_stats(hdr,e):
 	print "%s,true-rejects,%f" % (hdr,to_pct(e["tr"]))
 	print "%s,false-rejects,%f" % (hdr,to_pct(e["fr"]))
 	print "%s,errors-caught,%f" % (hdr, frac_caught*100)
-	print "%s,false-rejects,%f" % (hdr, frac_rej*100)
+	print "%s,rejs-errors,%f" % (hdr, frac_rej*100)
 	print "%s,rej-rate,%f" % (hdr, to_pct(e["fr"] + e["tr"]))
 	
 if(len(sys.argv) < 4):
@@ -217,7 +218,7 @@ for line in flog:
 		t+=1;
 		
 	except ValueError: 
-		print "skipping...",line
+		print "skipping..."
 		continue
 
 for i in range(0,nabs):
