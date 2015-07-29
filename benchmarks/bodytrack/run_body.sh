@@ -5,7 +5,7 @@
 #src/TrackingBenchmark/bodytrack inputs/sequenceB_1 4 1 4000 5 0 0 1
 #!/bin/bash
 NFRAMES=1
-NPOSES=4000
+NPOSES=8000
 PIN_ARGS=$1
 TOPAZ_ARGS=$2
 TAGS=$3
