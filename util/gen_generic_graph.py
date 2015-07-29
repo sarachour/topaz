@@ -7,6 +7,8 @@ import sys
 filename=sys.argv[1]+".txt"
 bmark=sys.argv[2]
 qualunit=sys.argv[3]
+nblocks=int(sys.argv[4])
+
 file=open(filename,"r")
 
 plot={}
@@ -25,10 +27,13 @@ def make_path(d,elems, stub):
 	return q
 
 def get_path(d,elems):
-	n = len(elems)
-	for i in range(0,n):
-		e = elems[i]
-		d = d[e]
+	try:
+		n = len(elems)
+		for i in range(0,n):
+			e = elems[i]
+			d = d[e]
+	except KeyError:
+		print "failed to get:",elems
 	return d;
 	
 
@@ -36,13 +41,13 @@ for line in file:
 	try:
 		fields=line.split(",");
 		
-		typ=fields[2]
-		bs=int(fields[1])
-		prob=float(fields[0])
+		typ=fields[3]
+		bs=int(fields[2])
+		prob=float(fields[1])
 		data=[]
 		
 		
-		for i in range(3,len(fields)):
+		for i in range(4,len(fields)):
 			try:
 				data.append(float(fields[i]))
 			except ValueError:
@@ -64,12 +69,12 @@ def get(path):
 	return get_path(plot,path);
 
 print plot
-blocks = 2
-title = "Tradeoff Curve for Blackscholes"
+blocks = nblocks
+title = "Tradeoff Curve for "+bmark
 xlab = "Target Re-execution Rate"
 ylab = "Relative Value"
-xvals = [0,0.01,0.02,0.04,0.08,0.11,0.16]
-filename = "tradeoff_curve_bs.png"
+xvals = [0,0.01,0.02,0.04,0.08,0.16]
+filename = "tradeoff_curve.png"
 
 fig,ax = plt.subplots()
 axes = [ax, ax.twinx(), ax.twinx()]
@@ -96,7 +101,7 @@ i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
 axes[i].plot(idxs,qual,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
 axes[i].errorbar(idxs,qual,yerr=err,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
-axes[i].set_ylabel("Output Quality (% Error)")
+axes[i].set_ylabel("Output Quality ("+qualunit+")")
 #axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;
@@ -116,7 +121,7 @@ plt.xticks(idxs,xvals);
 plt.savefig(filename)
 
 
-title = "Output Quality / Taskset Quality Correlation for BlackScholes"
+title = "Output Quality / Taskset Quality Correlation for "+bmark
 xlab = "Target Re-execution Rate"
 ylab = "Relative Value"
 filename = "correl_bs.png"
@@ -144,7 +149,7 @@ w=3
 i=0;
 #axes[i].plot(idxs,qual,label="Output Quality",color=colors[i],marker="o",linestyle="--");
 axes[i].errorbar(idxs,qual,label="Output Quality",linewidth=w,color=colors[i],marker="o",linestyle="--");
-axes[i].set_ylabel("Output Quality (% Price Error)")
+axes[i].set_ylabel("Output Quality ("+qualunit+")")
 #axes[i].spines['right'].set_color(colors[i]);
 
 i+=1;

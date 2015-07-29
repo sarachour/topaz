@@ -189,7 +189,7 @@ void ParticleFilter::InitializeParticles(int n)
 			AddGaussianNoise(p, mModel->StdDevs()[0], mRnd[i]);			//distribute particles randomly about the initial vector
 		}
 		printf("Calculating weights...\n");
-		MainCalcWeights(mParticles);		
+		CalcWeights(mParticles);		
 		printf("Calculated weights...\n");								//calculate initial weights and remove any particles that are invalid by model prior
 		minValid = (int)mParticles.size() >= mMinParticles;				//repeat until minimum number of valid particles is met
 		if(!minValid)							
