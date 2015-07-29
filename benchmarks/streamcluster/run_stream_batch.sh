@@ -18,6 +18,9 @@ echo "input: $INP" >> tmp.txt
 
 mutt -s "Streamcluster Started" sarachour@gmail.com  < tmp.txt
 
+
+sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
+
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
@@ -34,7 +37,7 @@ sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-me
 
 SEED=7
 FLAGS=d
-#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
+sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
 
 
 #tried 6,7,8,4
