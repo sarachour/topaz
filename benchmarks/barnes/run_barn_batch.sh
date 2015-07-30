@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INP=16K
-TYP=dynamic
+TYP=static
 PROB=0.01
 BLOCKSIZE=2
 #STARTSEED=1

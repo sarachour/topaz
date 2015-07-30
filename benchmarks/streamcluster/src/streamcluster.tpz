@@ -329,7 +329,7 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
         //taskset
         taskset pfl(i=0; i < iter; i+=1){
 			before{
-				printf("task\n");
+				//printf("task\n");
 			}
             compute in(
 				int tx = feasible[i%numfeasible],
