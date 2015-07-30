@@ -20,7 +20,7 @@ echo "input: $INP" >> tmp.txt
 #mutt -s "Barnes Started" sarachour@gmail.com  < tmp.txt
 
 
-#sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
+sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
 for i in $(seq $STARTSEED $NSEEDS);
 do
 
