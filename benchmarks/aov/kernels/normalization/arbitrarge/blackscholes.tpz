@@ -214,7 +214,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
 //16: 69%
 //128: 71%
 //63% kernel
-#define NELEMS 1
+#define NELEMS 64
 
 int BlkSchlsEqEuroNoDiv() {
 	
@@ -236,28 +236,32 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float result){
-			float delta = 1.0;
-			float normalized_price;
-			float expo = tstrike[0]*exp((0-trate[0])*(ttime[0] - 0));
-			float old_price = tsptprice[0] - delta;
-			float min_bound;
-			float max_bound;
-			if(totype[0] == 0) { //call
-				min_bound = old_price- expo;
-				if(min_bound < 0.0) {
-					min_bound=0;
+			result = 0;
+			for(int q = 0 ; q < NELEMS; q++){
+				float res = 0;
+				float delta = 1.0;
+				float normalized_price;
+				float expo = tstrike[q]*exp((0-trate[q])*(ttime[q] - 0));
+				float old_price = tsptprice[q] - delta;
+				float min_bound;
+				float max_bound;
+				if(totype[q] == 0) { //call
+					min_bound = old_price- expo;
+					if(min_bound < 0.0) {
+						min_bound=0;
+					}
+					max_bound = (float) tsptprice[q];
 				}
-				max_bound = (float) tsptprice[0];
-			}
-			else { //put
-				min_bound = expo - old_price;
-				if(min_bound < 0.0) {
-					min_bound=0;
+				else { //put
+					min_bound = expo - old_price;
+					if(min_bound < 0.0) {
+						min_bound=0;
+					}
+					max_bound = expo;
 				}
-				max_bound = expo;
+				res = (tfprice[q] - min_bound)/(max_bound);
+				result += res;
 			}
-			normalized_price = (tfprice[0] - min_bound)/(max_bound);
-			result=normalized_price;
 		}
 		combine {
 			float priceDelta;

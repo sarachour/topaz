@@ -211,7 +211,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
     return OptionPrice;
 }
 
-#define NELEMS 1
+#define NELEMS 64
 
 /////////////
 //16: 69%
@@ -237,13 +237,16 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float input, float output, float strike, float rate, float volatility, float time, float type){
-			input = tsptprice[0];
-			output = tfprice[0];
-			strike=tstrike[0];
-			rate=trate[0];
-			volatility=tvolatility[0];
-			time=ttime[0];
-			type=totype[0];
+			input = output = strike = rate = volatility = time = type = 0;
+			for(int q=0; q < NELEMS; q++){
+				input += tsptprice[q];
+				output += tfprice[q];
+				strike += tstrike[q];
+				rate += trate[q];
+				volatility += tvolatility[q];
+				time += ttime[q];
+				type += totype[q];
+			}
 		}
 		combine {
 			float priceDelta;

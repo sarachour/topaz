@@ -211,7 +211,7 @@ fptype BlkSchlsEqEuroNoDiv_SINGLE( fptype sptprice,
     return OptionPrice;
 }
 
-#define NELEMS 1
+#define NELEMS 64
 
 /////////////
 //16: 69%
@@ -237,8 +237,11 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float input,float output){
-			input = tsptprice[0];
-			output = tfprice[0];
+			input = output = 0;
+			for(int q = 0; q < NELEMS; q++){
+				input += tsptprice[q];
+				output += tfprice[q];
+			}
 		}
 		combine {
 			float priceDelta;
