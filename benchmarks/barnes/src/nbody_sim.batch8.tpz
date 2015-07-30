@@ -6,9 +6,8 @@ extern parms_t PARMS;
 
 // ------------
 
-void nbody_simulate(int i, nbody_t * t_n, int t_siz, double t_tol, double t_eps, double t_hts, double t_ts, double * vel, double * acc, int * r_siz, double * phi){
+void nbody_simulate(int i, nbody_t * t_n, int t_siz, double t_tol, double t_eps, double t_hts, double t_ts, double * vel, double * acc, double * phi){
 	body_t * body_ptr;
-	*r_siz = t_siz;
 	int ti;
 	for(ti=0; ti < t_siz; ti++){
 		body_ptr = bodyset_get(&t_n->bodies, bodyptr(i+ti));
@@ -71,7 +70,6 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 			if(i%FREQ == 0)printf("task %d started\n",i);
 		}
 		compute in(
-					int t_siz = n->nbody-i < BATCH ? n->nbody-i : BATCH,
 					double t_tol = tol,
 					double t_eps = eps, 
 					double t_hts = hts,
@@ -83,30 +81,28 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 		     out (
 				double vel[NDIM*BATCH],
 				double acc[NDIM*BATCH], 
-				int r_siz,
 				double phi[BATCH]
 				)
 		{
-		    //printf("worker start\n");
+			
 		    nbody_t * t_n = (nbody_t *) nch;
 			t_n->bodies.bodytab = (body_t *) t_bodies;
 			t_n->leaves.leaftab = (leaf_t *) t_leaves;
 			t_n->cells.celltab = (cell_t *) t_cells;
 			body_t * curr_n = (body_t*) bodyset_get(&t_n->bodies, bodyptr(i));
 			
-			nbody_simulate(i,t_n, t_siz, t_tol, t_eps, t_hts, t_ts, vel, acc, &r_siz, phi);
-			//printf("worker done\n");
+			nbody_simulate(i,t_n, BATCH, t_tol, t_eps, t_hts, t_ts, vel, acc, phi);
 					
 		}
 		
 		transform in(char nch, double vel, double acc, double phi) 
-				  out(float ea, float ev,float ephi, int siz)
+				  out(float ea, float ev,float ephi)
 		{
 			#define proc_v(v) (v*v)
 			#define proc_a(a) (a*a)
 			ephi=ev=ea=0;
 			int idx = 0;
-			for(int k=0; k < t_siz; k++){
+			for(int k=0; k < BATCH; k++){
 				for(int d = 0; d < 3; d++){
 					ev +=  proc_v(vel[idx]);
 					ea += proc_a(acc[idx]);
@@ -114,12 +110,10 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 				}
 				ephi += phi[k];
 			}
-			siz = r_siz;
 		}
 		combine {
 			body_t * body_ptr;
-			int ri;
-			for(ri =0; ri < r_siz; ri++){
+			for(int ri =0; ri < BATCH; ri++){
 				body_ptr = bodyset_get(&n->bodies, bodyptr(i+ri));
 				vecLoad(&body_ptr->vel, &vel[ri*NDIM]);
 				vecLoad(&body_ptr->acc, &acc[ri*NDIM]);

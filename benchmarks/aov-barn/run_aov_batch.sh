@@ -15,9 +15,13 @@ for SEED in $(seq $STARTSEED $NSEEDS);
 do
 	FLAGS=d
 	echo "seed $SEED"
+	#./run_aov.sh batching batch1 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	#./run_aov.sh batching batch2 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
+	
+	FLAGS=t
+	echo "seed $SEED"
 	./run_aov.sh batching batch1 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
 	./run_aov.sh batching batch2 $INPUT $SEED reexec:t=scar,b=2,p=0.00 iact-$TYP $FLAGS || exit 1
-	
 	
 
 
