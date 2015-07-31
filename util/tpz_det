@@ -15,9 +15,21 @@ def string_to_array(str):
 	k = json.loads(str);
 	return k
 
+
+def compute_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	return terr
+
+def compute_rel_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c)/abs(x) if abs(x) > 0 else abs(x-c), zip(err,corr));
+	errs_sc = math.sqrt(np.sum(map(lambda x : x*x, errs)))
+	terr = errs_sc;
+	return terr
+	
 def check_corr(err,corr):
 	EPS = 1e-3
-	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	errs = compute_rel_err(err,corr);
 	terr = np.sum(errs);
 	if(terr < EPS):
 		return True;
