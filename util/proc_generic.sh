@@ -36,8 +36,6 @@ do
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "data"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
-		rm det.txt
-		rm stat.txt
 		if [ ! -f "det.txt" ];
 		then 
 			echo "detected no detector file... working...."
@@ -76,6 +74,7 @@ do
 	RATES2=""
 	TOPRATES=""
 	KIND="ltime"
+
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "timers"`
 	do
 		cd $OUTPUT/$folder/$ldfolder
@@ -89,7 +88,7 @@ do
 		RATES=$RATES","$RATE
 		RATE=$(cat energy.txt | grep "^PAPER/NODET+NOTPZ" | grep -o -E "[0-9\.\-]+")
 		RATES2=$RATES2","$RATE
-		RATE=$(cat energy.txt | grep "^PAPER/DET+NOTPZ" | grep -o -E "[0-9\.\-]+")
+		RATE=$(cat energy.txt | grep "^PAPER/DET+TPZ" | grep -o -E "[0-9\.\-]+")
 		TOPRATES=$TOPRATES","$RATE
 		cd $cdir
 	done
