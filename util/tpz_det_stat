@@ -40,10 +40,9 @@ def compute_err(err,corr):
 	return terr
 
 def compute_rel_err(err,corr):
-	errs = map(lambda (x,c) : (x-c)*(x-c) , zip(err,corr));
-	mag_sc =np.sum(map(lambda x : x*x, corr));
-	mag_sc = 1 if mag_sc == 0 else mag_sc;
-	terr = math.sqrt(np.sum(errs))/math.sqrt(mag_sc);
+	errs = map(lambda (x,c) : abs(x-c)/abs(x) if abs(x) > 0 else abs(x-c), zip(err,corr));
+	errs_sc = math.sqrt(np.sum(map(lambda x : x*x, errs)))
+	terr = errs_sc;
 	return terr
 
 abs_err = 0.0;
