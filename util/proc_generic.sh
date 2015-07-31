@@ -71,6 +71,7 @@ do
   if [ "$KIND" = "ltime" ];
   then 
 	RATES=""
+	RATES2=""
 	TOPRATES=""
 	KIND="ltime"
 	for ldfolder in  `ls $OUTPUT/$folder/ | grep "timers"`
@@ -84,11 +85,14 @@ do
 		fi
 		RATE=$(cat energy.txt | grep "^PAPER/DET+NOTPZ" | grep -o -E "[0-9\.\-]+")
 		RATES=$RATES","$RATE
-		RATE=$(cat energy.txt | grep "^PAPER/DET+TPZ" | grep -o -E "[0-9\.\-]+")
+		RATE=$(cat energy.txt | grep "^PAPER/NODET+NOTPZ" | grep -o -E "[0-9\.\-]+")
+		RATES2=$RATES2","$RATE
+		RATE=$(cat energy.txt | grep "^PAPER/DET+NOTPZ" | grep -o -E "[0-9\.\-]+")
 		TOPRATES=$TOPRATES","$RATE
 		cd $cdir
 	done
 	
+	echo "$MACH,$PROB,$BS,ltime-nodet$RATES2" >> $SUMMARY
 	echo "$MACH,$PROB,$BS,ltime$RATES" >> $SUMMARY
 	echo "$MACH,$PROB,$BS,ltime-tpz$TOPRATES" >> $SUMMARY
 	
