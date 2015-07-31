@@ -54,7 +54,7 @@ n_fn = 0.0;
 
 n = 0;
 
-EPS=1e-6
+EPS=1e-5
 is_corr = lambda x : True if x < EPS else False;
 is_kind = lambda x,a,y,b : 1 if x == a and y == b  else 0;
 
@@ -86,6 +86,8 @@ for line in flog:
 		n_fp += is_kind(isabs_c, True, isact_c, False);
 		n_tn += is_kind(isabs_c, False, isact_c, False);
 		
+		if is_kind(isabs_c, False, isact_c, True):
+			print ac_e,ab_e
 		
 		n+=1
 		
@@ -100,3 +102,5 @@ print "both-corr,frac,"+str(n_tp/n*100)
 print "aov-corr-act-err,frac,"+str(n_fp/n*100)
 print "both-err,frac,"+str(n_tn/n*100)
 print "aov-err-act-corr,frac,"+str(n_fn/n*100)
+print "aov-err-acc,frac,"+str(n_tn/(n_tn+n_fp)*100)
+print "aov-corr-acc,frac,"+str(n_tp/(n_tp+n_fn)*100)
