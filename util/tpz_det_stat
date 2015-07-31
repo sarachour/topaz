@@ -56,7 +56,7 @@ n_fn = 0.0;
 
 n = 0;
 
-EPS=0.01
+EPS=0.1
 is_corr = lambda x : True if x < EPS else False;
 is_kind = lambda x,a,y,b : 1 if x == a and y == b  else 0;
 
