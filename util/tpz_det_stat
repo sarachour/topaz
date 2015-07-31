@@ -46,7 +46,18 @@ def compute_rel_err(err,corr):
 
 abs_err = 0.0;
 act_err = 0.0;
+
+n_tp = 0.0;
+n_fp = 0.0;
+n_tn = 0.0;
+n_fn = 0.0;
+
 n = 0;
+
+EPS=1e-6
+is_corr = lambda x : True if x < EPS else False;
+is_kind = lambda x,a,y,b : 1 if x == a and y == b  else 0;
+
 for line in flog:
 	try:
 		fields = line.split('\n')[0].split('\t');
@@ -62,8 +73,20 @@ for line in flog:
 		oabs = string_to_array(fields[header.index("OABS")])
 		cabs = string_to_array(fields[header.index("CABS")])
 		
-		act_err += compute_err(output,key);
-		abs_err += compute_err(oabs,cabs);
+		ac_e = compute_err(output,key);
+		ab_e = compute_err(oabs,cabs);
+		
+		act_err += ac_e 
+		abs_err += ab_e
+		
+		isact_c = is_corr(ac_e);
+		isabs_c = is_corr(ab_e);
+		n_tp += is_kind(isabs_c, True, isact_c, True);
+		n_fn += is_kind(isabs_c, False, isact_c, True);
+		n_fp += is_kind(isabs_c, True, isact_c, False);
+		n_tn += is_kind(isabs_c, False, isact_c, False);
+		
+		
 		n+=1
 		
 	except ValueError: 
@@ -72,3 +95,8 @@ for line in flog:
 
 print "abs,err,"+str(abs_err/n*100)
 print "act,err,"+str(act_err/n*100)
+print
+print "both-corr,frac,"+str(n_tp/n*100)
+print "aov-corr-act-err,frac,"+str(n_fp/n*100)
+print "both-err,frac,"+str(n_tn/n*100)
+print "aov-err-act-corr,frac,"+str(n_fn/n*100)

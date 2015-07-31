@@ -109,8 +109,8 @@ void nbody_Simulate_Tpz(nbody_t * n, double tol, double hts, double eps, double 
 				ev3 += proc_v(vel[idx+2]);
 				
 				ea1 += proc_a(acc[idx]);
-				ea1 += proc_a(acc[idx+1]);
-				ea1 += proc_a(acc[idx+2]);
+				ea2 += proc_a(acc[idx+1]);
+				ea2 += proc_a(acc[idx+2]);
 				
 				ephi += phi[k];
 				idx+=3;
