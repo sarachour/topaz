@@ -40,8 +40,10 @@ def compute_err(err,corr):
 	return terr
 
 def compute_rel_err(err,corr):
-	errs = map(lambda (x,c) : abs(x-c)/abs(c) if c != 0 else 0, zip(err,corr));
-	terr = np.sum(errs);
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	mag_sc =np.sum(map(lambda x : x*x, corr));
+	mag_sc = 1 if mag_sc == 0 else mag_sc;
+	terr = math.sqrt(np.sum(errs))/math.sqrt(mag_sc);
 	return terr
 
 abs_err = 0.0;
@@ -54,7 +56,7 @@ n_fn = 0.0;
 
 n = 0;
 
-EPS=1e-5
+EPS=0.01
 is_corr = lambda x : True if x < EPS else False;
 is_kind = lambda x,a,y,b : 1 if x == a and y == b  else 0;
 
@@ -75,19 +77,22 @@ for line in flog:
 		
 		ac_e = compute_err(output,key);
 		ab_e = compute_err(oabs,cabs);
-		
+		ac_re = compute_rel_err(output,key);
+		ab_re = compute_rel_err(oabs,cabs);
 		act_err += ac_e 
 		abs_err += ab_e
 		
-		isact_c = is_corr(ac_e);
-		isabs_c = is_corr(ab_e);
+		isact_c = is_corr(ac_re);
+		isabs_c = is_corr(ab_re);
 		n_tp += is_kind(isabs_c, True, isact_c, True);
 		n_fn += is_kind(isabs_c, False, isact_c, True);
 		n_fp += is_kind(isabs_c, True, isact_c, False);
 		n_tn += is_kind(isabs_c, False, isact_c, False);
 		
 		if is_kind(isabs_c, False, isact_c, True):
-			print ac_e,ab_e
+			print "aov is err when act is corr: act=",ac_re,"aov=",ab_re
+			print output,key
+			print oabs, cabs
 		
 		n+=1
 		
