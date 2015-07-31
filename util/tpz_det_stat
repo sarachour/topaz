@@ -93,6 +93,7 @@ for line in flog:
 			print "aov is err when act is corr:"
 			print "    rel: act=",ac_re,"aov=",ab_re
 			print "    abs: act=",ac_e,"aov=",ab_e
+			print oabs,cabs
 		
 		n+=1
 		
