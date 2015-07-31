@@ -90,7 +90,9 @@ for line in flog:
 		n_tn += is_kind(isabs_c, False, isact_c, False);
 		
 		if is_kind(isabs_c, False, isact_c, True):
-			print "aov is err when act is corr: act=",ac_re,"aov=",ab_re
+			print "aov is err when act is corr:"
+			print "    rel: act=",ac_re,"aov=",ab_re
+			print "    abs: act=",ac_e,"aov=",ab_e
 		
 		n+=1
 		
