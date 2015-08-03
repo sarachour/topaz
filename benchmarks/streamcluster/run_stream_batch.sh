@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INP=med
+INP=4K
 TYP=static
 PROB=0.01
 BLOCKSIZE=2

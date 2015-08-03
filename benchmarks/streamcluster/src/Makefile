@@ -3,7 +3,7 @@
 PREFIX=${PARSECDIR}/pkgs/kernels/streamcluster/inst/${PARSECPLAT}
 
 TARGET=streamcluster
-OBJS=streamcluster.topaz.o util.o
+OBJS=streamcluster.topaz.o
 
 TOPAZ_INCLUDE=$(TOPAZ_ROOT)/include
 TOPAZ_LIB=$(TOPAZ_ROOT)/lib
@@ -11,7 +11,7 @@ CXXFLAGS := $(CXXFLAGS) -I$(TOPAZ_INCLUDE) -g
 LIBS := $(LIBS) -ltopaz
 LDFLAGS := $(LDFLAGS) -L$(TOPAZ_LIB)
 
-all: $(OBJS)
+all: $(OBJS) streamcluster.topaz.c
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LIBS) -o $(TARGET)
 
 %.topaz.c: %.tpz
