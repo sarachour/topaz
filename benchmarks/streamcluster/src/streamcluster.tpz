@@ -94,22 +94,17 @@ double pgain(long x, Points *points, bool * is_center, double z, long int *numce
 			//update the center table
             center_table[i] = count++;
         }
+        else {
+			center_table[i] = 0;
+		}
     }
-     //work_mem[0] = count;
+    work_mem[0] = count;
     
-    
-    //int accum = 0;
-    //int tmp = (int)work_mem[0];
-    //work_mem[0] = accum;
-    //accum += tmp;
-    
-    /*
     for( int i = 0; i < size; i++ ) {
         if( is_center[i] ) {
             center_table[i] += (int)work_mem[0];
         }
     }
-    */
     
     
     //now we finish building the table. clear the working memory.
@@ -130,16 +125,15 @@ double pgain(long x, Points *points, bool * is_center, double z, long int *numce
     for ( i = 0; i < size; i++ ) {
         float x_cost = dist(points->p[i], points->p[x], points->dim) * points->p[i].weight;
         float current_cost = points->p[i].cost;
-        
+        if(i< 5) printf("%d %f\n",i,current_cost);
         if ( x_cost < current_cost ) {
             
-            // point i would save cost just by switching to x
-            // (note that i cannot be a median,
-            // or else dist(p[i], p[x]) would be 0)
-            
-            switch_membership[i] = 1;
-            cost_of_opening_x += x_cost - current_cost;
-            
+				// point i would save cost just by switching to x
+				// (note that i cannot be a median,
+				// or else dist(p[i], p[x]) would be 0)
+				
+				switch_membership[i] = 1;
+				cost_of_opening_x += x_cost - current_cost;
             } else {
             
             // cost of assigning i to x is at least current assignment cost of i
@@ -182,18 +176,15 @@ double pgain(long x, Points *points, bool * is_center, double z, long int *numce
         }
     }
     
-    //use the rest of working memory to store the following
-    work_mem[K] = number_of_centers_to_close;
-    work_mem[K+1] = cost_of_opening_x;
-    
     
     //  printf("thread %d cost complete\n",pid);
     
-    gl_cost_of_opening_x = z;
-    gl_number_of_centers_to_close += (int)work_mem[K];
-    gl_cost_of_opening_x += work_mem[K+1];
+    gl_cost_of_opening_x = z + cost_of_opening_x;
+    gl_number_of_centers_to_close += number_of_centers_to_close;
     // Now, check whether opening x would save cost; if so, do it, and
     // otherwise do nothing
+    
+    
     int MAX_SWITCHES = MAX_PTS;
     
     
@@ -246,6 +237,8 @@ double pgain(long x, Points *points, bool * is_center, double z, long int *numce
         gl_cost_of_opening_x = 0;  // the value we'll return
     }
     *nsw = n_switches;
+    printf("     -> closing %d centers / x costs %f :: %d centers\n", gl_number_of_centers_to_close, gl_cost_of_opening_x, *numcenters);
+    
     //delete switch_membership;
     return -gl_cost_of_opening_x;
 }
