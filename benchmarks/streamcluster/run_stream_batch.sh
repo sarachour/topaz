@@ -19,7 +19,9 @@ echo "input: $INP" >> tmp.txt
 #mutt -s "Streamcluster Started" sarachour@gmail.com  < tmp.txt
 
 
-sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
+sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect 
+#sutil_run_script.sh $SCRIPT.sh $INP 1 reexec:t=scar,b=$BLOCKSIZE,p=0.00 perfect d
+
 
 for i in $(seq $STARTSEED $NSEEDS);
 do
@@ -30,8 +32,8 @@ do
 
 
 #SEED=7
-FLAGS=d
-sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
+#FLAGS=d
+#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
 
 
 #tried 6,7,8,4
@@ -57,8 +59,8 @@ sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-me
 done
 
 
-echo "streamcluster is finished executing." > tmp.txt
-echo "flags used: $FLAGS" >> tmp.txt
-echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
-echo "input: $INP" >> tmp.txt
-mutt -s "Streamcluster Finished" sarachour@gmail.com  < tmp.txt
+#echo "streamcluster is finished executing." > tmp.txt
+#echo "flags used: $FLAGS" >> tmp.txt
+#echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
+#echo "input: $INP" >> tmp.txt
+#mutt -s "Streamcluster Finished" sarachour@gmail.com  < tmp.txt

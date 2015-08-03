@@ -51,15 +51,14 @@ points */
 /*
 *  we should also compute the error between the points and the centers.
 */
-double pgain(long x, Points *points, double z, long int *numcenters)
+double pgain(long x, Points *points, bool * is_center, double z, long int *numcenters, int * switch_idx, float * switch_cost_delta, int * nsw)
 {
     //my block
     long size = points->num;
     int dim = points->dim;
+    int center_table[size];
     int i;
     int number_of_centers_to_close = 0;
-    
-    double *work_mem;
     double gl_cost_of_opening_x;
     int gl_number_of_centers_to_close;
     
@@ -76,7 +75,7 @@ double pgain(long x, Points *points, double z, long int *numcenters)
     //my own cost of opening x
     double cost_of_opening_x = 0;
     
-    work_mem = new double[stride*2];
+    double work_mem[stride*2];
     int work_mem_size = stride*2;
     gl_cost_of_opening_x = 0;
     gl_number_of_centers_to_close = 0;
@@ -87,31 +86,36 @@ double pgain(long x, Points *points, double z, long int *numcenters)
     Each thread has its own copy of the *lower* fields as an array.
     We first build a table to index the positions of the *lower* fields.
     */
+    memset(center_table, 0, size*sizeof(int));
+    
     int count = 0;
     for( int i = 0; i < size; i++ ) {
         if( is_center[i] ) {
+			//update the center table
             center_table[i] = count++;
         }
     }
-    work_mem[0] = count;
+     //work_mem[0] = count;
     
     
-    int accum = 0;
-    int tmp = (int)work_mem[0];
-    work_mem[0] = accum;
-    accum += tmp;
+    //int accum = 0;
+    //int tmp = (int)work_mem[0];
+    //work_mem[0] = accum;
+    //accum += tmp;
     
-    
+    /*
     for( int i = 0; i < size; i++ ) {
         if( is_center[i] ) {
             center_table[i] += (int)work_mem[0];
         }
     }
+    */
     
     
     //now we finish building the table. clear the working memory.
-    bool* switch_membership = new bool[size];
+    bool switch_membership[size];
     memset(switch_membership + 0, 0, (size-0)*sizeof(bool));
+    
     memset(work_mem, 0, stride*sizeof(double));
     memset(work_mem+stride,0,stride*sizeof(double));
     
@@ -124,8 +128,7 @@ double pgain(long x, Points *points, double z, long int *numcenters)
     
     chkbnd(x,size);
     for ( i = 0; i < size; i++ ) {
-        float x_cost = dist(points->p[i], points->p[x], points->dim)
-        * points->p[i].weight;
+        float x_cost = dist(points->p[i], points->p[x], points->dim) * points->p[i].weight;
         float current_cost = points->p[i].cost;
         
         if ( x_cost < current_cost ) {
@@ -191,8 +194,17 @@ double pgain(long x, Points *points, double z, long int *numcenters)
     gl_cost_of_opening_x += work_mem[K+1];
     // Now, check whether opening x would save cost; if so, do it, and
     // otherwise do nothing
+    int MAX_SWITCHES = MAX_PTS;
     
-    n_switches=0;
+    
+    if(switch_idx != NULL) 
+		memset(switch_idx, 0, sizeof(int)*MAX_PTS);
+    
+    if(switch_cost_delta != NULL) 
+		memset(switch_cost_delta, 0, sizeof(float)*MAX_PTS);
+		
+    int n_switches=0;
+    
     if ( gl_cost_of_opening_x < 0 ) {
         //  we'd save money by opening x; we'll do it
         for ( int i = 0; i < size; i++ ) {
@@ -210,7 +222,7 @@ double pgain(long x, Points *points, double z, long int *numcenters)
                 float ocost = points->p[i].cost;
                 points->p[i].cost = points->p[i].weight * dist(points->p[i], points->p[x], points->dim);
                 points->p[i].assign = x;
-                if(switch_idx != NULL){
+                if(switch_idx != NULL && n_switches < MAX_SWITCHES){
 					switch_idx[n_switches] = i;
 					switch_cost_delta[n_switches] = points->p[i].cost-ocost;
 					n_switches++;
@@ -219,6 +231,7 @@ double pgain(long x, Points *points, double z, long int *numcenters)
         }
         
         for( int i = 0; i < size; i++ ) {
+			//remove center
             if( is_center[i] && gl_lower[center_table[i]] > 0 ) {
                 is_center[i] = false;
             }
@@ -232,77 +245,27 @@ double pgain(long x, Points *points, double z, long int *numcenters)
     else {
         gl_cost_of_opening_x = 0;  // the value we'll return
     }
-    delete (work_mem);
-    delete switch_membership;
-    
+    *nsw = n_switches;
     //delete switch_membership;
     return -gl_cost_of_opening_x;
 }
 
 
 
-/* facility location on the points using local search */
-/* z is the facility cost, returns the total cost and # of centers */
-/* assumes we are seeded with a reasonable solution */
-/* cost should represent this solution's cost */
-/* halt if there is < e improvement after iter calls to gain */
-/* feasible is an array of numfeasible points which may be centers */
 
 
-
-float pFL_main(Points *points, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e){
-	double change;
-    long numberOfPoints;
-    //sizeof(k) = 1 long
-    numberOfPoints = points->num;
-    change = cost;
-    //allocate
-    //is_center = new bool[numberOfPoints];
-	//center_table = new int[numberOfPoints];
-	switch_cost_delta = new float[numberOfPoints];
-	switch_idx = new int[numberOfPoints];
-	
-	 while (change/cost > 1.0*e) {
-        change = 0.0;
-        numberOfPoints = points->num;
-        //MAKE SURE TO ENABLE RANDOMIZE
-        intshuffle(feasible, numfeasible);
-        int x;
-        //printf("		- starting iters\n");
-        for (int i=0;i<iter;i++) {
-            x = i%numfeasible;
-            float gain = pgain(feasible[x], points, z, k);
-            change += gain;
-        }
-        cost -= change;
-        
-    }
-    //delete is_center;
-    //delete center_table;
-    delete switch_cost_delta;
-    delete switch_idx;
-    return(cost);
-}
-
-float pFL_helper(Points zpts, bool * iscent, int * centtbl, float * swcost, int *swidx, long int k, int nz, int x,
-	int * nsw, float * gain, int * ok, bool * o_iscent, int * o_centtbl) // output
+float pFL_helper(Points zpts, bool * iscent, float * swcost, int *swidx, long int k, int nz, int x, int * nsw, float * gain, int * ok, bool * o_iscent) // output
 {
-	is_center = iscent;
-	center_table = centtbl;
-	switch_cost_delta = swcost;
-	switch_idx = swidx;
-	*gain = pgain(x, &zpts, nz, &k); // calculate gain
-	*nsw = n_switches;
+	//update points, passing in number centers, ptr to k, etc
+	*gain = pgain(x, &zpts,iscent, nz, &k,swidx, swcost, nsw); // calculate gain
 	for(int q =0; q < MAX_PTS; q++){
-		o_iscent[q] = is_center[q];
-		o_centtbl[q] = center_table[q];
+		o_iscent[q] = iscent[q];
 	}
 	*ok = k;
 
-	free_points(zpts);
 }
 Points * gpoints;
-float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e)
+float pFL(Points *points, bool * is_center, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e)
 {
     double change;
     long numberOfPoints;
@@ -323,38 +286,34 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
         //taskset
         taskset pfl(i=0; i < iter; i+=1){
 			before{
-				//printf("task\n");
+				
 			}
             compute in(
 				int tx = feasible[i%numfeasible],
 				int tk = k[0], 
 				char t_iscent[MAX_PTS]= (char *) is_center,
-				int t_centtbl[MAX_PTS] = center_table,
-				const float tz = z,
-				const float tflt_pts[SIZ_FLT] = prim_pts_flt,
-				const int tint_pts[SIZ_INT] = prim_pts_int
+				float tflt_pts[SIZ_FLT] = (float *) prim_pts_flt,
+				int tint_pts[SIZ_INT] = (int *) prim_pts_int,
+				const float tz = z
             )
             out(
 				int ok,
 				float ogain,
 				char o_iscent[MAX_PTS],
-				int o_centtbl[MAX_PTS],
 				int swidx[MAX_PTS],
 				float swcostdelta[MAX_PTS],
 				int nsw
             )
             {
                 Points zpts;
-                long int lk;
                 bool lok;
                 from_primitives(zpts, tflt_pts, tint_pts, lok);
                 if(lok){
-					pFL_helper(zpts,(bool *) t_iscent, t_centtbl, swcostdelta, swidx, tk, tz, tx,
-					&nsw, &ogain, &ok, (bool*)o_iscent, o_centtbl);
+					pFL_helper(zpts,(bool *) t_iscent, swcostdelta, swidx, tk, tz, tx,
+					&nsw, &ogain, &ok, (bool*)o_iscent);
 				}
-				else
-					free_points(zpts);
-					
+				free_points(zpts);
+				
             }
             transform in(int foo) 
 				out(float t_gain)
@@ -362,15 +321,17 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
 				t_gain = ogain;
 			}
             combine {
+				//ADD GAIN TO CHANGE
                 change += ogain;
                 int x = feasible[i%numfeasible];
-                bool * biscent = (bool *) o_iscent;
+                //ADD CENTERS HERE
+                bool * b_iscent = (bool *) o_iscent;
+                //ADD CENTER TABLE
                 for(int q=0; q < points->num; q++){
-					is_center[q] = biscent[q]; //copy over center table
-					center_table[q] = o_centtbl[q];
+					is_center[q] = b_iscent[q]; //copy over center table
 				}
 				
-				//modify points.
+				//modify points
 				for(int q=0; q < nsw; q++){ //for each switch
 					int idx = swidx[q];
 					points->p[idx].cost += swcostdelta[q];
@@ -379,16 +340,13 @@ float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, doub
 				to_flt_primitive(*points, prim_pts_flt);
 				to_int_primitive(*points, prim_pts_int);
                 *k = ok;
-                //printf("iteration %d\n",i);
             }
             
         }
         cost -= change;
         
-        printf("%f > %f\n",change/cost);
         
     }
-    printf("---\n");
     return (cost);
 }
 

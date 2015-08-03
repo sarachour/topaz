@@ -25,14 +25,8 @@
 #define SIZ_FLT (MAX_PTS*4)
 #define SIZ_INT (MAX_PTS+2)
 
-extern int * prim_pts_int;
-extern float * prim_pts_flt;
-
-extern int * center_table;
-extern bool * is_center;
-extern float * switch_cost_delta;
-extern int * switch_idx;
-extern int n_switches;
+extern int prim_pts_int[SIZ_INT];
+extern float prim_pts_flt[SIZ_FLT];
 
 
 /* this structure represents a point */
@@ -150,11 +144,8 @@ void free_points(Points& p);
 float dist(Point p1, Point p2, int dim);
 
 
-float pFL(Points *points, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e);
-float pFL_helper(Points zpts, bool * iscent, int * centtbl, float * swcost, int *swidx, long int k, int nz, int x,
-	int * nsw, float * gain, int * ok, bool * o_iscent, int * o_centtbl);
-float pFL_main(Points *points, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e);
-
+float pFL(Points *points, bool * is_center, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e);
+float pFL_main(Points *points, bool * is_center, int *feasible, int numfeasible,  float z, long *k, double cost, long iter, float e);
 int isIdentical(float *i, float *j, int D);
 /* comparator for floating point numbers */
 static int floatcomp(const void *i, const void *j);

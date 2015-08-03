@@ -19,12 +19,15 @@ all: $(OBJS)
 	
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) -c $<
+
+%.topaz.o : %.topaz.c
+	$(CXX) $(CXXFLAGS) -c $<
 	
 %.o : %.c
 	$(CXX) $(CXXFLAGS) -c $<
 
 clean:
-	rm -f *.o $(TARGET) streamcluster.cpp
+	rm -f *.o *.topaz.c $(TARGET) 
 
 install:
 	mkdir -p $(PREFIX)/bin

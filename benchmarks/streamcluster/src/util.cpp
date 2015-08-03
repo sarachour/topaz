@@ -24,14 +24,9 @@
 using namespace std;
 
 
-int * prim_pts_int = new int[SIZ_INT];
-float * prim_pts_flt = new float[SIZ_FLT];
+int prim_pts_int[SIZ_INT];
+float prim_pts_flt[SIZ_FLT];
 
-int * center_table=NULL;
-bool * is_center=NULL;
-float * switch_cost_delta=NULL;
-int * switch_idx=NULL;
-int n_switches;
 
 
 int size_flt_primitive_pt(int dim){
@@ -122,7 +117,7 @@ float* from_primitives(Points& p, float * f, int * l, bool& okay){
 		okay = false; return f;
 	}
 	//printf("r\n");
-	chkbnd(p.num,2000);
+	chkbnd(p.num,MAX_PTS);
     p.p = new Point[p.num];
     //printf("mm\n");
 	int fmax = size_flt_primitive_pts(p);
@@ -289,6 +284,8 @@ float pkmedian_main(Points *points, long kmin, long kmax, long* kfinal )
     double cost;
     double lastcost;
     double hiz, loz, z;
+    int npts = points->num;
+    bool is_center[npts];
     
     long k;
     int *feasible;
@@ -302,7 +299,7 @@ float pkmedian_main(Points *points, long kmin, long kmax, long* kfinal )
     //my block
     long size = points->num;
     
-    
+    for(int j = 0; j < npts; j++) is_center[j] = false;
     
     double myhiz = 0;
     for (long kk=0;kk < size; kk++ ) {
@@ -342,6 +339,7 @@ float pkmedian_main(Points *points, long kmin, long kmax, long* kfinal )
         cost = pspeedy(points, z, &k);
         i++;
     }
+    printf("> mins finished. selecting feasible\n");
     
     /* now we begin the binary search for real */
     /* must designate some points as feasible centers */
@@ -352,19 +350,18 @@ float pkmedian_main(Points *points, long kmin, long kmax, long* kfinal )
     for( int i = 0; i< points->num; i++ ) {
         is_center[points->p[i].assign]= true;
     }
+    printf("> starting pfl (k=%d) > [%d,%d]\n", k, kmin, kmax);
     
     while(1) {
         /* first get a rough estimate on the FL solution */
         lastcost = cost;
-        cost = pFL_main(points, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.1);
+        cost = pFL(points, is_center, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.1);
         /* if number of centers seems good, try a more accurate FL */
-        if (((k <= (1.1)*kmax)&&(k >= (0.9)*kmin))||
-        ((k <= kmax+2)&&(k >= kmin-2))) {
+        if (((k <= (1.1)*kmax)&&(k >= (0.9)*kmin))||((k <= kmax+2)&&(k >= kmin-2))) {
             
             /* may need to run a little longer here before halting without
             improvement */
-            cost = pFL_main(points, feasible, numfeasible,
-            z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.001);
+            cost = pFL(points, is_center, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.001);
         }
         
         if (k > kmax) {
@@ -386,7 +383,6 @@ float pkmedian_main(Points *points, long kmin, long kmax, long* kfinal )
         {
             break;
         }
-        printf("	>iter\n");
         
     }
     printf("	> finished running feasible\n");
@@ -405,6 +401,8 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     double cost;
     double lastcost;
     double hiz, loz, z;
+    int npts = points->num;
+    bool is_center[npts];
     
     long k;
     int *feasible;
@@ -414,6 +412,8 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     hiz = loz = 0.0;
     long numberOfPoints = points->num;
     long ptDimension = points->dim;
+    
+    for(int j = 0; j < npts; j++) is_center[j] = false;
     
     //my block
     long size = points->num;
@@ -469,21 +469,20 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
     }
     
     
+    printf("start: pfl %d : [%d,%d]\n",k,kmin,kmax);
     while(1) {
         /* first get a rough estimate on the FL solution */
+        printf("pfl %d ? [%d,%d] / cost: %f\n",k,kmin,kmax,cost);
         lastcost = cost;
-        printf("pfl\n");
-        cost = pFL(points, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.1);
-        
+        cost = pFL(points, is_center, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.1);
         /* if number of centers seems good, try a more accurate FL */
-        if (((k <= (1.1)*kmax)&&(k >= (0.9)*kmin))||
-        ((k <= kmax+2)&&(k >= kmin-2))) {
+        if (((k <= (1.1)*kmax)&&(k >= (0.9)*kmin))|| ((k <= kmax+2)&&(k >= kmin-2))) {
             
             /* may need to run a little longer here before halting without
             improvement */
-            cost = pFL(points, feasible, numfeasible,
-            z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.001);
+            cost = pFL(points, is_center, feasible, numfeasible, z, &k, cost, (long)(ITER*kmax*log((double)kmax)), 0.001);
         }
+        printf("pfl %d -> [%d,%d]\n",k,kmin,kmax);
         
         if (k > kmax) {
             /* facilities too cheap */
@@ -500,9 +499,11 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal )
         
         /* if k is good, return the result */
         /* if we're stuck, just give up and return what we have */
-        printf("%d max=%d min=%d, (%f,%f)\n", kmax, kmin, hiz,loz);
+        //printf("%d max=%d min=%d, (%f,%f)\n", kmax, kmin, hiz,loz);
         if (((k <= kmax)&&(k >= kmin))||((loz >= (0.999)*hiz)) )
         {
+			if(k <= kmax && k >= kmin) printf("+ within bounds\n");
+			else printf("+ hit tolerance ceiling\n");
             break;
         }
         
@@ -644,14 +645,239 @@ void copycenters(Points *points, Points* centers, long* centerIDs, long offset)
 
 
 
-void localSearch( Points* points, long kmin, long kmax, long* kfinal ) {
+void localSearchTopaz( Points* points, long kmin, long kmax, long* kfinal ) {
     pkmedian(points,kmin,kmax,kfinal);
     
     
 }
+
+double pgain_main(long x, Points *points,bool * is_center, double z, long int *numcenters, int * switch_idx, float * switch_cost_delta)
+{
+    //my block
+    long size = points->num;
+    int dim = points->dim;
+    int center_table[size];
+    int i;
+    int number_of_centers_to_close = 0;
+    double gl_cost_of_opening_x;
+    int gl_number_of_centers_to_close;
+    
+    
+    //each thread takes a block of working_mem.
+    int stride = *numcenters+2;
+    //make stride a multiple of CACHE_LINE
+    int cl = CACHE_LINE/sizeof(double);
+    if( stride % cl != 0 ) {
+        stride = cl * ( stride / cl + 1);
+    }
+    int K = stride -2 ; // K==*numcenters
+    
+    //my own cost of opening x
+    double cost_of_opening_x = 0;
+    
+    double work_mem[stride*2];
+    int work_mem_size = stride*2;
+    gl_cost_of_opening_x = 0;
+    gl_number_of_centers_to_close = 0;
+    
+    
+    /*For each center, we have a *lower* field that indicates
+    how much we will save by closing the center.
+    Each thread has its own copy of the *lower* fields as an array.
+    We first build a table to index the positions of the *lower* fields.
+    */
+    //printf("allocating table\n");
+    memset(center_table, 0, size*sizeof(int));
+    
+    int count = 0;
+    for( int i = 0; i < size; i++ ) {
+        if( is_center[i] ) {
+			//update the center table
+            center_table[i] = count++;
+        }
+    }
+    //printf("number of centers: %d\n",count);
+    
+    
+    //now we finish building the table. clear the working memory.
+    bool switch_membership[MAX_PTS];
+    memset(work_mem, 0, stride*sizeof(double));
+    memset(work_mem+stride,0,stride*sizeof(double));
+    
+    //my *lower* fields
+    double* lower = &work_mem[0];
+    int lower_size=stride*2;
+    double* gl_lower = &work_mem[stride];
+    int gl_lower_size = stride;
+    
+    chkbnd(x,size);
+    for ( i = 0; i < size; i++ ) {
+        float x_cost = dist(points->p[i], points->p[x], points->dim) * points->p[i].weight;
+        float current_cost = points->p[i].cost;
+        
+        if ( x_cost < current_cost ) {
+            
+            // point i would save cost just by switching to x
+            // (note that i cannot be a median,
+            // or else dist(p[i], p[x]) would be 0)
+            
+            switch_membership[i] = 1;
+            cost_of_opening_x += x_cost - current_cost;
+            
+            } else {
+            
+            // cost of assigning i to x is at least current assignment cost of i
+            
+            // consider the savings that i's **current** median would realize
+            // if we reassigned that median and all its members to x;
+            // note we've already accounted for the fact that the median
+            // would save z by closing; now we have to subtract from the savings
+            // the extra cost of reassigning that median and its members
+            int assign = points->p[i].assign;
+            int idx = center_table[assign];
+            chkbnd(idx,lower_size);
+            lower[idx] += current_cost - x_cost;
+        }
+        
+    }
+    
+    // at this time, we can calculate the cost of opening a center
+    // at x; if it is negative, we'll go through with opening it
+    
+    for ( int i = 0; i < size; i++ ) {
+        if( is_center[i] ) {
+            double low = z;
+            int idx;
+            //aggregate from all threads
+            low += work_mem[center_table[i]];
+		
+			idx = center_table[i];
+			
+            chkbnd(idx,gl_lower_size);
+            gl_lower[idx] = low;
+            if ( low > 0 ) {
+                // i is a median, and
+                // if we were to open x (which we still may not) we'd close i
+                
+                // note, we'll ignore the following quantity unless we do open x
+                ++number_of_centers_to_close;
+                cost_of_opening_x -= low;
+            }
+        }
+    }
+    
+    //use the rest of working memory to store the following
+    work_mem[K] = number_of_centers_to_close;
+    work_mem[K+1] = cost_of_opening_x;
+    
+    
+    //  printf("thread %d cost complete\n",pid);
+    
+    gl_cost_of_opening_x = z;
+    gl_number_of_centers_to_close += (int)work_mem[K];
+    gl_cost_of_opening_x += work_mem[K+1];
+    // Now, check whether opening x would save cost; if so, do it, and
+    // otherwise do nothing
+    int MAX_SWITCHES = MAX_PTS;
+    if(switch_idx != NULL) 
+		memset(switch_idx, 0, sizeof(int)*size);
+    if(switch_cost_delta != NULL) 
+		memset(switch_cost_delta, 0, sizeof(float)*size);
+    int n_switches=0;
+    if ( gl_cost_of_opening_x < 0 ) {
+        //  we'd save money by opening x; we'll do it
+        for ( int i = 0; i < size; i++ ) {
+			int idx;
+			int iidx;
+			
+			idx=points->p[i].assign;
+			iidx=center_table[idx];
+            chkbnd(iidx, gl_lower_size);
+            
+            bool close_center = gl_lower[iidx] > 0 ;
+            if ( switch_membership[i] || close_center ) {
+                // Either i's median (which may be i itself) is closing,
+                // or i is closer to x than to its current median
+                float ocost = points->p[i].cost;
+                points->p[i].cost = points->p[i].weight * dist(points->p[i], points->p[x], points->dim);
+                points->p[i].assign = x;
+                if(switch_idx != NULL && n_switches < MAX_SWITCHES){
+					switch_idx[n_switches] = i;
+					switch_cost_delta[n_switches] = points->p[i].cost-ocost;
+					n_switches++;
+				}
+            }
+        }
+        
+        for( int i = 0; i < size; i++ ) {
+			//remove center
+            if( is_center[i] && gl_lower[center_table[i]] > 0 ) {
+                is_center[i] = false;
+            }
+        }
+        
+        if( x >= 0 && x < size ) {
+            is_center[x] = true;
+        }
+        //printf("closing %d centers\n", gl_number_of_centers_to_close);
+        *numcenters = *numcenters + 1 - gl_number_of_centers_to_close;
+    }
+    else {
+        gl_cost_of_opening_x = 0;  // the value we'll return
+    }
+    //printf("returning\n");
+    
+    //delete switch_membership;
+    return -gl_cost_of_opening_x;
+}
+
+/* facility location on the points using local search */
+/* z is the facility cost, returns the total cost and # of centers */
+/* assumes we are seeded with a reasonable solution */
+/* cost should represent this solution's cost */
+/* halt if there is < e improvement after iter calls to gain */
+/* feasible is an array of numfeasible points which may be centers */
+
+
+float pFL_main(Points *points, bool * is_center, int *feasible, int numfeasible, float z, long *k, double cost, long iter, float e){
+	double change;
+    long numberOfPoints;
+    //sizeof(k) = 1 long
+    numberOfPoints = points->num;
+    change = cost;
+    //allocate
+    //is_center = new bool[numberOfPoints];
+	//center_table = new int[numberOfPoints];
+	float switch_cost_delta[numberOfPoints];
+	int switch_idx[numberOfPoints];
+	//printf("allocated\n");
+	 while (change/cost > 1.0*e) {
+		 //printf("looping\n");
+        change = 0.0;
+        numberOfPoints = points->num;
+        //MAKE SURE TO ENABLE RANDOMIZE
+        intshuffle(feasible, numfeasible);
+        int x;
+        //printf("		- starting iters\n");
+        for (int i=0;i<iter;i++) {
+            x = i%numfeasible;
+            //printf("gain %d %d\n", z, *k);
+            float gain = pgain_main(feasible[x], points,is_center, z, k, switch_idx, switch_cost_delta);
+            //printf("+ gain done\n");
+            change += gain;
+        }
+        cost -= change;
+        
+    }
+    //delete is_center;
+    //delete center_table;
+    //printf("done.");
+    return(cost);
+}
+
 void localSearchMain( Points* points, long kmin, long kmax, long* kfinal ) {
     pkmedian_main(points,kmin,kmax,kfinal);
-    
+    //pkmedian(points,kmin,kmax,kfinal);
     
 }
 
@@ -677,6 +903,10 @@ void outcenterIDs( Points* centers, long* centerIDs, char* outfile ) {
         }
     }
     fclose(fp);
+}
+
+void localSearch( Points* points, long kmin, long kmax, long* kfinal ) {
+	localSearchTopaz(points,kmin, kmax,kfinal);
 }
 
 void streamCluster( PStream* stream,
@@ -724,15 +954,11 @@ long chunksize, long centersize, char* outfile )
             fprintf(stderr, "error reading data!\n");
             exit(1);
         }
-        printf("main:copy\n");
         points.num = numRead;
         for( int i = 0; i < points.num; i++ ) {
             points.p[i].weight = 1.0;
         }
         
-        int siz = centers.num > MAX_PTS ? centers.num : MAX_PTS;
-		is_center = (bool*)calloc(siz,sizeof(bool));
-		center_table = (int*)malloc(siz*sizeof(int));
         
         //fprintf(stderr,"center_table = 0x%08x\n",(int)center_table);
         //fprintf(stderr,"is_center = 0x%08x\n",(int)is_center);
@@ -741,7 +967,6 @@ long chunksize, long centersize, char* outfile )
         localSearch(&points,kmin, kmax,&kfinal); // parallel
         //fprintf(stderr,"finish local search\n");
         
-        printf("main:copy\n");
         contcenters(&points); /* sequential */
         if( kfinal + centers.num > centersize ) {
             //here we don't handle the situation where # of centers gets too large.
@@ -764,11 +989,12 @@ long chunksize, long centersize, char* outfile )
     }
     printf("# LOCAL SEARCHES DONE\n");
     //Global Streamcluster Alignment
-    is_center = (bool*)calloc(centers.num,sizeof(bool));
-    center_table = (int*)malloc(centers.num*sizeof(int));
-    
-    localSearchMain( &centers, kmin, kmax ,&kfinal ); // parallel
+    printf("allocated.. conducting local search\n");
+    localSearch( &centers, kmin, kmax ,&kfinal ); // parallel
+    printf("final center count: %d\n", kfinal);
     contcenters(&centers);
+    printf("cont center complete.. outcenter\n");
     outcenterIDs( &centers, centerIDs, outfile);
+    printf("done..\n");
 }
 
