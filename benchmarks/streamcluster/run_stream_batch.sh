@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INP=4K
+INP=500
 TYP=static
 PROB=0.01
 BLOCKSIZE=2
@@ -19,7 +19,7 @@ echo "input: $INP" >> tmp.txt
 #mutt -s "Streamcluster Started" sarachour@gmail.com  < tmp.txt
 
 
-sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect 
+#sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect 
 #sutil_run_script.sh $SCRIPT.sh $INP 1 reexec:t=scar,b=$BLOCKSIZE,p=0.00 perfect d
 
 
@@ -27,8 +27,8 @@ for i in $(seq $STARTSEED $NSEEDS);
 do
 
 #SEED=6
-#FLAGS=t
-#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
+FLAGS=t
+sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
 
 
 #SEED=7

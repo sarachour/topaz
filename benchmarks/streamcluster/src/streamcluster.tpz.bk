@@ -263,25 +263,64 @@ typedef struct {
 float prim_static[STATIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS)];
 float prim_dynamic[DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS)];
 
-void deserialize_points(Points& data, float * static_data, float * dynamic_data){
-	
+
+void deallocate_points(Points* data){
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
+		free(p->coord);
+	}
+	free(data->p);
 }
-void update_serialization(Points& data, float * dynamic_data){
-	float * ptr = dynamic_data;
-	for(int i=0; i < data.num; i++){
-		Point * p = &data.p[i];
-		*dynamic_data = p->cost; dynamic_data++;
-		*dynamic_data = (float) p->assign; dynamic_data++;
+void allocate_points(Points * data){
+	data->p = new Point[data->num];
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
+		p->coord = new float[data->dim];
 	}
 }
-void serialize_points(Points& data, float * static_data, float * dynamic_data){
+
+void update_deserialization(Points * data, float * dynamic_data){
+	float * ptr = dynamic_data;
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
+		p->cost = *ptr; ptr++;
+		p->assign = (int) *ptr; ptr++;
+	}
+}
+void deserialize_points(Points* data, float * static_data, float * dynamic_data, bool allocate){
+	float * sd = static_data;
+	float * dd = dynamic_data;
+	data->num = (int) *sd; sd++;
+	data->dim = (int) *sd; sd++;
+	
+	if(allocate){
+		allocate_points(data);
+	}
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
+		p->weight = *sd; sd++;
+		for(int j=0; j < data->dim; j++){
+			p->coord[j] = *sd; sd++;
+		}
+	}
+	update_deserialization(data,dynamic_data);
+}
+void update_serialization(Points* data, float * dynamic_data){
+	float * ptr = dynamic_data;
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
+		*ptr = p->cost; ptr++;
+		*ptr = (float) p->assign; ptr++;
+	}
+}
+void serialize_points(Points* data, float * static_data, float * dynamic_data){
 	float * ptr = static_data;
-	*ptr = (float) data.num; ptr++;
-	*ptr = (float) data.dim; ptr++;
-	for(int i=0; i < data.num; i++){
-		Point * p = &data.p[i];
+	*ptr = (float) data->num; ptr++;
+	*ptr = (float) data->dim; ptr++;
+	for(int i=0; i < data->num; i++){
+		Point * p = &data->p[i];
 		*ptr = p->weight; ptr++;
-		for(int j=0; j < data.dim; j++){
+		for(int j=0; j < data->dim; j++){
 			*ptr = p->coord[j]; ptr++;
 		}
 	}
@@ -290,10 +329,16 @@ void serialize_points(Points& data, float * static_data, float * dynamic_data){
 double _pgain(long x, Points *points, bool * is_center, double z, long int *numcenters);
 
 double pgain(long x, Points *points, bool * is_center, double z, long int * numcenters){
-  serialize_points(*points, prim_static,prim_dynamic);
+  Points pts;
+  //to structs
+  serialize_points(points, prim_static,prim_dynamic);
+  //to object
+  deserialize_points(&pts, prim_static, prim_dynamic,true);
   _pgain(x,points,is_center,z,numcenters);
-  update_serialization(*points, prim_dynamic);
-
+  //to structures
+  update_serialization(&pts, prim_dynamic);
+  update_deserialization(points, prim_dynamic);
+  deallocate_points(&pts);
 }
 
 double _pgain(long x, Points *points, bool * is_center, double z, long int *numcenters)

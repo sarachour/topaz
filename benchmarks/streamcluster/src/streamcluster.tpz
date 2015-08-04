@@ -260,8 +260,11 @@ typedef struct {
 
 #define MAX_SIZE 1000
 #define MAX_DIMS 2
-float prim_static[STATIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS)];
-float prim_dynamic[DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS)];
+#define MAX_DYNAMIC_SIZE (DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
+#define MAX_STATIC_SIZE (STATIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
+
+float prim_static[MAX_STATIC_SIZE];
+float prim_dynamic[MAX_DYNAMIC_SIZE];
 
 
 void deallocate_points(Points* data){
@@ -326,22 +329,12 @@ void serialize_points(Points* data, float * static_data, float * dynamic_data){
 	}
 	update_serialization(data,dynamic_data);
 }
-double _pgain(long x, Points *points, bool * is_center, double z, long int *numcenters);
 
-double pgain(long x, Points *points, bool * is_center, double z, long int * numcenters){
-  serialize_points(points, prim_static,prim_dynamic);
-  deserialize_points(points, prim_static, prim_dynamic,false);
-  _pgain(x,points,is_center,z,numcenters);
-  update_serialization(points, prim_dynamic);
-
-}
-
-double _pgain(long x, Points *points, bool * is_center, double z, long int *numcenters)
+double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters)
 {
   //  printf("pgain pthread %d begin\n",0);
 
   //my block
-  
   long bsize = points->num;
   long k1 = bsize * 0;
   long k2 = points->num;
@@ -374,7 +367,6 @@ double _pgain(long x, Points *points, bool * is_center, double z, long int *numc
     Each thread has its own copy of the *lower* fields as an array.
     We first build a table to index the positions of the *lower* fields. 
   */
-
   int count = 0;
   for( int i = k1; i < k2; i++ ) {
     if( is_center[i] ) {
@@ -418,7 +410,6 @@ double _pgain(long x, Points *points, bool * is_center, double z, long int *numc
     float x_cost = dist(points->p[i], points->p[x], points->dim) 
       * points->p[i].weight;
     float current_cost = points->p[i].cost;
-        printf("%f / %f -> %f\n", current_cost, x_cost, points->p[i].weight);
     if ( x_cost < current_cost ) {
 
       // point i would save cost just by switching to x
@@ -524,7 +515,24 @@ double _pgain(long x, Points *points, bool * is_center, double z, long int *numc
 /* cost should represent this solution's cost */
 /* halt if there is < e improvement after iter calls to gain */
 /* feasible is an array of numfeasible points which may be centers */
-
+/*
+double pgain(long x, Points *points, bool * is_center, double z, long int * numcenters){
+  Points pts;
+  //to structs
+  serialize_points(points, prim_static,prim_dynamic);
+  //to object
+  deserialize_points(&pts, prim_static, prim_dynamic,true);
+  float g = _pgain(x,points,is_center,z,numcenters);
+  //to structures
+  update_serialization(&pts, prim_dynamic);
+  update_deserialization(points, prim_dynamic);
+  deallocate_points(&pts);
+  
+  return g;
+}
+*/
+Points wpts;
+Points * wpts_ptr = NULL;
 
  float pFL(Points *points, bool* is_center, int *feasible, int numfeasible,
       float z, long *k, double cost, long iter, float e)
@@ -538,6 +546,9 @@ double _pgain(long x, Points *points, bool * is_center, double z, long int *numc
   change = cost;
   /* continue until we run iter iterations without improvement */
   /* stop instead if improvement is less than e */
+  
+  serialize_points(points, prim_static,prim_dynamic);
+  
   while (change/cost > 1.0*e) {
     change = 0.0;
     numberOfPoints = points->num;
@@ -546,11 +557,66 @@ double _pgain(long x, Points *points, bool * is_center, double z, long int *numc
     if( 0 == 0 ) {
       intshuffle(feasible, numfeasible);
     }
-
+    taskset pgain(i=0; i < iter; i+= 1){
+		before {
+		}
+		compute in(
+		   int in_x = i%numfeasible,
+		   int in_k = (int) k[0],
+		   float in_pts_dynamic[MAX_DYNAMIC_SIZE] = prim_dynamic,
+		   char in_is_center[MAX_SIZE] = is_center,
+		   const float in_z = z,
+		   const float in_pts_static[MAX_STATIC_SIZE] = prim_static
+		)
+		out(
+		   float out_pts_dynamic[MAX_DYNAMIC_SIZE],
+		   char out_is_center[MAX_SIZE],
+		   int out_k,
+		   float out_gain
+		)
+		{
+			//update data structure
+			if(Topaz::topaz->isConstDataRefresh() || wpts_ptr == NULL){
+				bool allocate = (wpts_ptr == NULL); //allocate if never has been allocated before
+				wpts_ptr = &wpts; //set pointer
+				deserialize_points(wpts_ptr, in_pts_static, in_pts_dynamic,allocate);
+				if(allocate){
+					//initializae
+					memset(out_pts_dynamic, 0, sizeof(float)*MAX_DYNAMIC_SIZE);
+					memset(out_is_center, 0, MAX_SIZE*sizeof(char));
+				}
+			}
+			else {
+				update_deserialization(wpts_ptr, in_pts_dynamic);
+			}
+			//copy over input data
+			memcpy(out_is_center, in_is_center, sizeof(char)*MAX_SIZE);
+			out_k = in_k;
+			//run pgain
+			out_gain = _pgain(in_x,wpts_ptr,(bool *) out_is_center,in_z, &out_k);
+			//update output information (weights and assignments)
+			update_serialization(wpts_ptr, out_pts_dynamic);
+			
+		}
+		transform in(int x) out(float trans_gain){
+			trans_gain = out_gain;
+		}
+		combine {
+			bool * out_is_center_bool = (bool*) out_is_center;
+			for(int i=0; i < numberOfPoints; i++){
+				is_center[i] = out_is_center_bool[i];
+			}
+			update_deserialization(points, out_pts_dynamic);
+			*k = out_k;
+			change += out_gain;
+		}
+	}
+	/*
     for (i=0;i<iter;i++) {
       x = i%numfeasible;
       change += pgain(feasible[x], points, is_center, z, k);
     }
+    */
     cost -= change;
 
   }
@@ -1054,7 +1120,7 @@ void streamCluster( PStream* stream,
   outcenterIDs( &centers, centerIDs, outfile);
 }
 
-int main(int argc, char **argv)
+int topaz_main(int argc, char **argv)
 {
   char *outfilename = new char[MAXNAMESIZE];
   char *infilename = new char[MAXNAMESIZE];
