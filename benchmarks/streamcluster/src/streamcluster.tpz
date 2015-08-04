@@ -332,7 +332,7 @@ void serialize_points(Points* data, float * static_data, float * dynamic_data){
 	update_serialization(data,dynamic_data);
 }
 
-double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters, float * cost_sum)
+double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters)
 {
   //  printf("pgain pthread %d begin\n",0);
 
@@ -476,7 +476,6 @@ double _pgain(long x, Points *points, bool * is_center, double z, int *numcenter
 
   // Now, check whether opening x would save cost; if so, do it, and
   // otherwise do nothing
-  *cost_sum = 0;
   if ( gl_cost_of_opening_x < 0 ) {
     //  we'd save money by opening x; we'll do it
     for ( int i = k1; i < k2; i++ ) {
@@ -485,7 +484,6 @@ double _pgain(long x, Points *points, bool * is_center, double z, int *numcenter
     // Either i's median (which may be i itself) is closing,
     // or i is closer to x than to its current median
 		points->p[i].cost = points->p[i].weight * dist(points->p[i], points->p[x], points->dim);
-		*cost_sum += points->p[i].cost;
 		points->p[i].assign = x;
       }
     }
@@ -574,7 +572,8 @@ Points * wpts_ptr = NULL;
 		   float out_pts_dynamic[MAX_DYNAMIC_SIZE],
 		   char out_is_center[MAX_SIZE],
 		   int out_k,
-		   float out_gain
+		   float out_gain,
+		   float out_sum
 		)
 		{
 			//update data structure
@@ -593,14 +592,22 @@ Points * wpts_ptr = NULL;
 			memcpy(out_is_center, in_is_center, sizeof(char)*wpts_ptr->num);
 			out_k = in_k;
 			//run pgain
-			float cost_sum;
-			out_gain = _pgain(in_x,wpts_ptr,(bool *) out_is_center,in_z, &out_k, &cost_sum);
+			out_gain = _pgain(in_x,wpts_ptr,(bool *) out_is_center,in_z, &out_k);
 			//update output information (weights and assignments)
 			update_serialization(wpts_ptr, out_pts_dynamic);
+			int siz = DYNAMIC_POINTS_SIZE(wpts_ptr->num,wpts_ptr->dim)/sizeof(float);
+			out_sum = 0;
+			for(int i=0; i < siz; i++){
+				out_sum += out_pts_dynamic[i];
+			}
+			for(int i=0; i < wpts_ptr->num; i++){
+				out_sum += out_is_center[i];
+			}
 			
 		}
-		transform in(int x) out(float trans_gain){
+		transform in(int x) out(float trans_gain, float trans_cost){
 			trans_gain = out_gain;
+			trans_cost = out_sum;
 		}
 		combine {
 			bool * out_is_center_bool = (bool*) out_is_center;
