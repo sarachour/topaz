@@ -582,17 +582,15 @@ Points * wpts_ptr = NULL;
 				bool allocate = (wpts_ptr == NULL); //allocate if never has been allocated before
 				wpts_ptr = &wpts; //set pointer
 				deserialize_points(wpts_ptr, in_pts_static, in_pts_dynamic,allocate);
-				if(allocate){
-					//initializae
-					memset(out_pts_dynamic, 0, sizeof(float)*MAX_DYNAMIC_SIZE);
-					memset(out_is_center, 0, MAX_SIZE*sizeof(char));
-				}
 			}
 			else {
 				update_deserialization(wpts_ptr, in_pts_dynamic);
 			}
+			
+			memset(out_pts_dynamic, 0, sizeof(float)*MAX_DYNAMIC_SIZE);
+			memset(out_is_center, 0, sizeof(char)*MAX_SIZE);
 			//copy over input data
-			memcpy(out_is_center, in_is_center, sizeof(char)*MAX_SIZE);
+			memcpy(out_is_center, in_is_center, sizeof(char)*wpts_ptr->num);
 			out_k = in_k;
 			//run pgain
 			float cost_sum;

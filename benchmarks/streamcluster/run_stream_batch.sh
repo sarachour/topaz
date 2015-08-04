@@ -27,8 +27,8 @@ for i in $(seq $STARTSEED $NSEEDS);
 do
 
 #SEED=6
-FLAGS=t
-sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
+#FLAGS=t
+#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP $FLAGS
 
 
 #SEED=7
