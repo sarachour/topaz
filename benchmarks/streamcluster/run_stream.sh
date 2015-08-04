@@ -8,7 +8,7 @@ SEED=$5
 
 MINCLUST=4; # 2 for tiny, 3 for small, 5 for med, 7 for large
 MAXCLUST=7; # 5 for all but med:10, large 12
-CHUNKSIZE=400;
+CHUNKSIZE=500;
 CLUSTERSIZE=500;
 
 

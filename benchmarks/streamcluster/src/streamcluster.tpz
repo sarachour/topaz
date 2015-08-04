@@ -1122,7 +1122,7 @@ void streamCluster( PStream* stream,
   is_center = (bool*)calloc(centers.num,sizeof(bool));
   //center_table = (int*)malloc(centers.num*sizeof(int));
 
-
+  printf("top-level search: %d points\n", centers.num); 
   localSearch( &centers, kmin, kmax ,&kfinal ); // parallel
   contcenters(&centers);
   outcenterIDs( &centers, centerIDs, outfile);
