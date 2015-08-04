@@ -258,7 +258,7 @@ typedef struct {
 #define STATIC_POINTS_SIZE(n,d) (n*STATIC_POINT_SIZE(d)+sizeof(int)*2)
 #define DYNAMIC_POINTS_SIZE(n,d) (n*DYNAMIC_POINT_SIZE(d))
 
-#define MAX_SIZE 1000
+#define MAX_SIZE 500
 #define MAX_DIMS 2
 #define MAX_DYNAMIC_SIZE (DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
 #define MAX_STATIC_SIZE (STATIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
@@ -276,9 +276,11 @@ void deallocate_points(Points* data){
 }
 void allocate_points(Points * data){
 	data->p = new Point[data->num];
+	pin_mark_urel(data->p, sizeof(Point)*data->num);
 	for(int i=0; i < data->num; i++){
 		Point * p = &data->p[i];
 		p->coord = new float[data->dim];
+		pin_mark_urel(p->coord, sizeof(float)*data->dim);
 	}
 }
 
@@ -330,7 +332,7 @@ void serialize_points(Points* data, float * static_data, float * dynamic_data){
 	update_serialization(data,dynamic_data);
 }
 
-double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters)
+double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters, float * cost_sum)
 {
   //  printf("pgain pthread %d begin\n",0);
 
@@ -474,7 +476,7 @@ double _pgain(long x, Points *points, bool * is_center, double z, int *numcenter
 
   // Now, check whether opening x would save cost; if so, do it, and
   // otherwise do nothing
-
+  *cost_sum = 0;
   if ( gl_cost_of_opening_x < 0 ) {
     //  we'd save money by opening x; we'll do it
     for ( int i = k1; i < k2; i++ ) {
@@ -482,18 +484,18 @@ double _pgain(long x, Points *points, bool * is_center, double z, int *numcenter
       if ( switch_membership[i] || close_center ) {
     // Either i's median (which may be i itself) is closing,
     // or i is closer to x than to its current median
-    points->p[i].cost = points->p[i].weight *
-      dist(points->p[i], points->p[x], points->dim);
-    points->p[i].assign = x;
+		points->p[i].cost = points->p[i].weight * dist(points->p[i], points->p[x], points->dim);
+		*cost_sum += points->p[i].cost;
+		points->p[i].assign = x;
       }
     }
     for( int i = k1; i < k2; i++ ) {
       if( is_center[i] && gl_lower[center_table[i]] > 0 ) {
-    is_center[i] = false;
+		is_center[i] = false;
       }
     }
     if( x >= k1 && x < k2 ) {
-      is_center[x] = true;
+		is_center[x] = true;
     }
 
     if( 0==0 ) {
@@ -593,7 +595,8 @@ Points * wpts_ptr = NULL;
 			memcpy(out_is_center, in_is_center, sizeof(char)*MAX_SIZE);
 			out_k = in_k;
 			//run pgain
-			out_gain = _pgain(in_x,wpts_ptr,(bool *) out_is_center,in_z, &out_k);
+			float cost_sum;
+			out_gain = _pgain(in_x,wpts_ptr,(bool *) out_is_center,in_z, &out_k, &cost_sum);
 			//update output information (weights and assignments)
 			update_serialization(wpts_ptr, out_pts_dynamic);
 			
