@@ -332,6 +332,7 @@ void serialize_points(Points* data, float * static_data, float * dynamic_data){
 	update_serialization(data,dynamic_data);
 }
 
+#define dbg(s) (if(is_debug) printf(s);)
 double _pgain(long x, Points *points, bool * is_center, double z, int *numcenters)
 {
   //  printf("pgain pthread %d begin\n",0);
@@ -533,7 +534,6 @@ double pgain(long x, Points *points, bool * is_center, double z, long int * numc
 */
 Points wpts;
 Points * wpts_ptr = NULL;
-
  float pFL(Points *points, bool* is_center, int *feasible, int numfeasible,
       float z, long *k, double cost, long iter, float e)
 {
@@ -559,6 +559,7 @@ Points * wpts_ptr = NULL;
     }
     taskset pgain(i=0; i < iter; i+= 1){
 		before {
+			
 		}
 		compute in(
 		   int in_x = i%numfeasible,
@@ -1124,7 +1125,9 @@ void streamCluster( PStream* stream,
 
   printf("top-level search: %d points\n", centers.num); 
   localSearch( &centers, kmin, kmax ,&kfinal ); // parallel
+  printf("combine centers\n");
   contcenters(&centers);
+  printf("output centers\n");
   outcenterIDs( &centers, centerIDs, outfile);
 }
 
@@ -1188,10 +1191,12 @@ int topaz_main(int argc, char **argv)
 
 
   streamCluster(stream, kmin, kmax, dim, chunksize, clustersize, outfilename );
-
+  
+  printf("deleting stream\n");
 
   delete stream;
-
+  
+  printf("finished\n");
 
   
   return 0;
