@@ -6,11 +6,10 @@ TAGS=$3
 INPUT=$4
 SEED=$5
 
-MINCLUST=5; # 2 for tiny, 3 for small, 5 for med, 7 for large
-MAXCLUST=10; # 5 for all but med:10, large 12
-CHUNKSIZE=200;
-CLUSTERSIZE=200;
-
+MINCLUST=3; # 2 for tiny, 3 for small, 5 for med, 7 for large
+MAXCLUST=7; # 5 for all but med:10, large 12
+CHUNKSIZE=400
+CLUSTERSIZE=500;
 
 
 source sutil_make_dirs.sh
