@@ -240,6 +240,7 @@ def analyze(hwstats, timerstats):
 	print "-----------"
 	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
 	print "OA=",OA,"	TA=",TA
+	print "N=",ntasks
 	print "-----------"
 	print "IDEAL TASK LENGTH,",(TE+TA)/ntasks*1000000
 	print "REEXECUTION OVERHEAD,",TE/TA

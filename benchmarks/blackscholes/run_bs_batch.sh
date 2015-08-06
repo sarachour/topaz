@@ -4,7 +4,7 @@ INP=16K
 #TYP=med-static2
 #TYP=med-static
 TYP=med-dynamic
-PROB=0.01
+PROB=0.08
 BLOCKSIZE=2
 
 
