@@ -12,7 +12,6 @@ CHUNKSIZE=400
 CLUSTERSIZE=500;
 
 
-
 source sutil_make_dirs.sh
 
 function createDirectories {

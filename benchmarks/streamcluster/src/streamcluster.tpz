@@ -258,6 +258,7 @@ typedef struct {
 #define STATIC_POINTS_SIZE(n,d) (n*STATIC_POINT_SIZE(d)+sizeof(int)*2)
 #define DYNAMIC_POINTS_SIZE(n,d) (n*DYNAMIC_POINT_SIZE(d))
 
+
 #define MAX_SIZE 400 
 #define MAX_DIMS 2
 #define MAX_DYNAMIC_SIZE (DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
@@ -446,7 +447,7 @@ double pgain(long x, Points *points, bool * is_center, double z, int *numcenters
       double low = z;
       //aggregate from all threads
       for( int p = 0; p < 1; p++ ) {
-    low += work_mem[center_table[i]+p*stride];
+        low += work_mem[center_table[i]+p*stride];
       }
       gl_lower[center_table[i]] = low;
       if ( low > 0 ) {
