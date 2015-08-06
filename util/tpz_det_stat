@@ -39,8 +39,17 @@ def compute_err(err,corr):
 	terr = np.sum(errs);
 	return terr
 
+def print_error(i,e,err,corr):
+	if e > EPS:
+		print i,err,corr
+		return True
+	else:
+		return False
+
 def compute_rel_err(err,corr):
+	EPS=0.1
 	errs = map(lambda (x,c) : abs(x-c)/abs(x) if abs(x) > 0 else abs(x-c), zip(err,corr));
+	act_errs = filter(lambda (i,x,e,c) : print_error(i,x,e,c), zip(range(0,len(errs)), errs,err,corr) );
 	errs_sc = math.sqrt(np.sum(map(lambda x : x*x, errs)))
 	terr = errs_sc;
 	return terr

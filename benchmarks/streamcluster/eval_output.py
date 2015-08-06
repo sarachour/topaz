@@ -2,6 +2,8 @@
 
 import sys
 import math
+import numpy as np
+
 name1 = sys.argv[1]
 name2 = sys.argv[2]
 
@@ -64,7 +66,7 @@ for pt in pts:
 	j+=1;
 
 print "Cluster\tx\ty\tSilhouette"
-stats = {'max':-1, 'min':-1,'avg':0};
+stats = {'max':-1, 'min':-1,'avg':[]};
 for i in range(0, len(clusts)):
 	cerr=calc_clust_dist(pts,assigns,i,i)
 	intererr = -1;
@@ -81,10 +83,11 @@ for i in range(0, len(clusts)):
 	
 	stats['max'] = max(stats['max'], silhouette);
 	stats['min'] = min(stats['min'], silhouette);
-	stats['avg'] += silhouette*len(assigns[i])/len(pts);
+	stats['avg'].append(silhouette);
 	print i," \t",clusts[i][0],"\t",clusts[i][1],"\t",silhouette
 
 print "-----------------------"
 print "Best CLuster:", stats['max'];
 print "Worst Cluster:", stats['min'];
-print "Average Score:", stats['avg'];
+print "Average Score:", np.mean(stats['avg']);
+print "Median Score:", np.median(stats['avg']);
