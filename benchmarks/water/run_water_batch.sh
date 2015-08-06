@@ -19,8 +19,13 @@ echo "input: $INP" >> tmp.txt
 for i in $(seq $STARTSEED $NSEEDS);
 do
 #
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-$TYP t
-sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-$TYP d
+TYP=med-static
+sutil_run_script.sh run_water.sh $INP $i none iact-$TYP t
+TYP=med-dynamic
+sutil_run_script.sh run_water.sh $INP $i none iact-$TYP t
+
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-$TYP t
+#sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.00 iact-$TYP d
 
 FLAGS=t
 #sutil_run_script.sh run_water.sh $INP $i reexec:t=scar,b=$BS,p=0.01 iact-$TYP $FLAGS

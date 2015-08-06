@@ -20,12 +20,16 @@ echo "input: $INP" >> tmp.txt
 #mutt -s "Barnes Started" sarachour@gmail.com  < tmp.txt
 
 
-sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
+#sutil_run_script.sh $SCRIPT.sh $INP 1 none perfect
 for i in $(seq $STARTSEED $NSEEDS);
 do
+TYP=static
+sutil_run_script.sh $SCRIPT.sh $INP $i none iact-med-$TYP t
+TYP=dynamic
+sutil_run_script.sh $SCRIPT.sh $INP $i none iact-med-$TYP t
 
-sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP t
-sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP d
+#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP t
+#sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-med-$TYP d
 
 FLAGS=t
 #sutil_run_script.sh $SCRIPT.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-med-$TYP $FLAGS
