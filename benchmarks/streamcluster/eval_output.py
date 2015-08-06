@@ -75,8 +75,11 @@ for i in range(0, len(clusts)):
 			ierr = calc_clust_dist(pts,assigns,i,j);
 			if intererr < 0 or ierr < intererr:
 				intererr = ierr; 
-	
-	silhouette = (intererr - cerr)/max(intererr,cerr);
+				
+	if len(clusts) == 1:
+		silhouette = cerr
+	else:
+		silhouette = (intererr - cerr)/max(intererr,cerr);
 	if(stats['max'] < 0):
 		stats['max'] = silhouette;
 		stats['min'] = silhouette;
