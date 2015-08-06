@@ -258,7 +258,7 @@ typedef struct {
 #define STATIC_POINTS_SIZE(n,d) (n*STATIC_POINT_SIZE(d)+sizeof(int)*2)
 #define DYNAMIC_POINTS_SIZE(n,d) (n*DYNAMIC_POINT_SIZE(d))
 
-#define MAX_SIZE 500
+#define MAX_SIZE 400 
 #define MAX_DIMS 2
 #define MAX_DYNAMIC_SIZE (DYNAMIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
 #define MAX_STATIC_SIZE (STATIC_POINTS_SIZE(MAX_SIZE,MAX_DIMS))
@@ -551,7 +551,7 @@ Points * wpts_ptr = NULL;
 		   int in_k = (int) k[0],
 		   float in_pts_dynamic[MAX_DYNAMIC_SIZE] = prim_dynamic,
 		   char in_is_center[MAX_SIZE] = is_center,
-		   const float in_z = z,
+		   float in_z = z,
 		   const float in_pts_static[MAX_STATIC_SIZE] = prim_static
 		)
 		out(
