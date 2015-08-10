@@ -36,59 +36,68 @@ def check_corr(err,corr):
 	else:
 		return False;
 
-def draw_plot(corr, err, regions, filename):
-	bound_color="#2980b9"
-	bound_thickness=2;
+def draw_plot(corr, err, key, regions, perr, filename):
+	bound_color="#bdc3c7"
+	line_thickness=2;
+	bound_thickness=5;
 	mean_color="black"
 	mean_thickness=4;
 	error_color="#c0392b"
 	error_size=20;
-	dist_color="#bdc3c7"
+	dist_color="#2980b9"
+	
 	dist_size=40;
 	
-	px = corr['x']
-	py = corr['y']
-	ex = err['x']
-	ey = err['y']
-	
-	miny = min(py);
-	maxy = max(py);
-	minx = min(px);
-	maxx = max(px);
-	dy=(maxy-miny)
-	maxy += dy/2;
-	miny -= dy/2;
-	ey = map(lambda x : max(miny+dy*0.05,min(maxy-dy*0.05,x)), ey);
+	k = key['v']
+	p = corr['v']
+	e = err['v']
+	minv = min(k);
+	maxv = max(k);
+	dv=(maxv-minv)
+	maxv += dv/2;
+	minv -= dv/2;
+	e = map(lambda x : max(minv+dv*0.05,min(maxv-dv*0.05,x)), e);
 	
 	matplot.clf();
 	plt = matplot.subplot(111)
 	
 	plt.set_title("Region Evolution over Time")
-	plt.set_xlim((minx,maxx))
-	plt.set_ylim((miny,maxy))
-	plt.set_xlabel("time elapsed");
-	plt.set_ylabel("AOV Index Value");
+	plt.set_xlim((minv,maxv))
+	plt.set_xlabel("Value");
+	plt.set_ylabel("Probability");
 	plt.spines['right'].set_visible(False)
 	plt.spines['top'].set_visible(False)
 	plt.yaxis.set_ticks_position('left')
 	plt.xaxis.set_ticks_position('bottom')
 	
-	plt.scatter(px,py,marker="o", c=dist_color, s=dist_size, edgecolors="none", alpha=0.33);
-	plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
-		
+	nbins=1000
+	#yk,xk = np.histogram(k,nbins)
+	#print len(xk)
+	#print len(yk)
+	calc_bins = lambda x : max(10,min(nbins,len(x)/10))
+	
+	
 
+	
 	for j in range(0,len(regions)):
-		minx = regions["min"][j]["x"];
-		miny = regions["min"][j]["y"];
-		maxx = regions["max"][j]["x"];
-		maxy = regions["max"][j]["y"];
-		meanx = regions["mean"][j]["x"];
-		meany = regions["mean"][j]["y"];
-		plt.fill_between(minx, miny, maxy, facecolor=bound_color, alpha=0.15)
-
-		plt.plot(minx,miny,maxx,maxy,linestyle="-",c=bound_color,linewidth=bound_thickness);
-		plt.plot(meanx,meany,linestyle=":",c=mean_color,linewidth=mean_thickness);
+		minx = regions["min"][j]["v"];
+		maxx = regions["max"][j]["v"];
+		meanx = regions["mean"][j]["v"];
 		
+		if (len(minx) == 0):
+			continue;
+			
+		minv =np.percentile(minx, 50);
+		maxv = np.percentile(maxx, 50);
+			
+		plt.axvline(minv, c=bound_color, linestyle="--", linewidth=bound_thickness);
+		plt.axvline(maxv, c=bound_color, linestyle="--", linewidth=bound_thickness);
+		plt.axvspan(minv, maxv, alpha=0.5, color=bound_color)
+		
+	y,x_,_ = plt.hist(e, color=error_color, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=perr);
+	y,x,_ = plt.hist(p, color=dist_color, bins=calc_bins(p),histtype="stepfilled", alpha=0.5, normed=1);
+	
+	
 	matplot.savefig(filename);
 	matplot.clf();
 			
@@ -170,41 +179,39 @@ for line in flog:
 		is_corr_abs = check_corr(oabs,cabs);
 		nabs = max(nabs,len(oabs));
 		
-		mkseries(data,["t_dist","t_err"],len(output),{"x":[],"y":[]});
-		mkseries(data,["abs_dist","abs_err"],nabs,{"x":[],"y":[]});
+		mkseries(data,["t_key","t_err","t_corr"],len(output),{"v":[]});
+		mkseries(data,["a_key","a_corr","a_err"],nabs,{"v":[]});
 		
 		el = {};
-		mkseries(el,["min","max","mean"],10,{"x":[],"y":[]})
+		mkseries(el,["min","max","mean"],10,{"v":[]})
 		mkseries(data,["regions"],nabs, el);
 		
 		for i in range(0, len(output)):
-			data["t_dist"][i]["x"].append(t);
-			data["t_dist"][i]["y"].append(key[i]);
+			data["t_key"][i]["v"].append(key[i]);
 			
 			if not is_corr:
-				data["t_err"][i]["x"].append(t);
-				data["t_err"][i]["y"].append(output[i]);
+				data["t_err"][i]["v"].append(output[i]);
+			else:
+				data["t_corr"][i]["v"].append(output[i]);
+				
+				
+				
 		
 		for i in range(0, len(oabs)):
-			data["abs_dist"][i]["x"].append(t);
-			data["abs_dist"][i]["y"].append(cabs[i]);
+			data["a_key"][i]["v"].append(cabs[i]);
 			
 			if not is_corr:
-				data["abs_err"][i]["x"].append(t);
-				data["abs_err"][i]["y"].append(oabs[i]);
-		
+				data["a_err"][i]["v"].append(oabs[i]);
+			else:
+				data["a_corr"][i]["v"].append(oabs[i]);
+				
 		#traverse over outputs
 		for i in range(0, len(means)):
 			# traverse over regions
 			for j in range(0, len(means[i])):
-				data["regions"][i]["mean"][j]["x"].append(t);
-				data["regions"][i]["mean"][j]["y"].append(means[i][j]);
-					
-				data["regions"][i]["min"][j]["x"].append(t);
-				data["regions"][i]["min"][j]["y"].append(mins[i][j]);
-					
-				data["regions"][i]["max"][j]["x"].append(t);
-				data["regions"][i]["max"][j]["y"].append(maxs[i][j]);
+				data["regions"][i]["mean"][j]["v"].append(means[i][j]);
+				data["regions"][i]["min"][j]["v"].append(mins[i][j]);
+				data["regions"][i]["max"][j]["v"].append(maxs[i][j]);
 					
 			
 		if is_corr and is_accept:
@@ -237,9 +244,11 @@ print_det_stats("actual",stats["act"]);
 print_det_stats("abs",stats["abs"]);
 
 for i in range(0,nabs):
-	pts = data["abs_dist"][i];
-	errs = data["abs_err"][i];
+	key = data["a_key"][i];
+	errs = data["a_err"][i];
+	corr = data["a_corr"][i];
+	perr = float(stats["abs"]["fa"] + stats["abs"]["tr"])/stats["abs"]["n"];
 	regions = data["regions"][i];
-	filename = graph+"-"+str(i)+"-evol"-".png"
-	draw_plot(pts,errs,regions,filename)
+	filename = graph+"-"+str(i)+"-absdist"+".png"
+	draw_plot(key,errs,corr,regions,perr,filename)
 	
