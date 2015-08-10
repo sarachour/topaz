@@ -70,11 +70,8 @@ def draw_plot(corr, err, key, regions, perr, filename):
 	plt.yaxis.set_ticks_position('left')
 	plt.xaxis.set_ticks_position('bottom')
 	
-	nbins=1000
-	#yk,xk = np.histogram(k,nbins)
-	#print len(xk)
-	#print len(yk)
-	calc_bins = lambda x : max(10,min(nbins,len(x)/10))
+
+	calc_bins = lambda x : max(10,len(x)/1000)
 	
 	
 
@@ -93,9 +90,11 @@ def draw_plot(corr, err, key, regions, perr, filename):
 		plt.axvline(minv, c=bound_color, linestyle="--", linewidth=bound_thickness);
 		plt.axvline(maxv, c=bound_color, linestyle="--", linewidth=bound_thickness);
 		plt.axvspan(minv, maxv, alpha=0.5, color=bound_color)
-		
-	y,x_,_ = plt.hist(e, color=error_color, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=perr);
-	y,x,_ = plt.hist(p, color=dist_color, bins=calc_bins(p),histtype="stepfilled", alpha=0.5, normed=1);
+	
+	
+	y,x_,_ = plt.hist(e, color=error_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=True);
+	y,x,_ = plt.hist(p, color=dist_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5, normed=True);
+	
 	
 	
 	matplot.savefig(filename);
@@ -155,6 +154,7 @@ def mkseries(d,flds,l,vl):
 			
 t=0;
 nabs = 0;
+nout = 0;
 for line in flog:
 	try:
 		fields = line.split('\n')[0].split('\t');
@@ -178,6 +178,7 @@ for line in flog:
 		is_corr = check_corr(output,key);
 		is_corr_abs = check_corr(oabs,cabs);
 		nabs = max(nabs,len(oabs));
+		nout = max(nout, len(output));
 		
 		mkseries(data,["t_key","t_err","t_corr"],len(output),{"v":[]});
 		mkseries(data,["a_key","a_corr","a_err"],nabs,{"v":[]});
@@ -249,6 +250,16 @@ for i in range(0,nabs):
 	corr = data["a_corr"][i];
 	perr = float(stats["abs"]["fa"] + stats["abs"]["tr"])/stats["abs"]["n"];
 	regions = data["regions"][i];
-	filename = graph+"-"+str(i)+"-absdist"+".png"
+	filename = "distabs-"+graph+"-"+str(i)+".png"
+	draw_plot(key,errs,corr,regions,perr,filename)
+	
+
+for i in range(0,nout):
+	key = data["t_key"][i];
+	errs = data["t_err"][i];
+	corr = data["t_corr"][i];
+	perr = float(stats["abs"]["fa"] + stats["abs"]["tr"])/stats["abs"]["n"];
+	regions = [];
+	filename = "distval-"+graph+"-"+str(i)+".png"
 	draw_plot(key,errs,corr,regions,perr,filename)
 	

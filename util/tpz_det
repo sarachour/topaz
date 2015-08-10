@@ -240,6 +240,6 @@ for i in range(0,nabs):
 	pts = data["abs_dist"][i];
 	errs = data["abs_err"][i];
 	regions = data["regions"][i];
-	filename = graph+"-"+str(i)+"-evol"-".png"
+	filename = "evol-"+graph+"-"+str(i)-".png"
 	draw_plot(pts,errs,regions,filename)
 	
