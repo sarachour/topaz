@@ -17,8 +17,8 @@ class RegionStats {
 		void update_accept_rate(bool iselem, bool is_acc);
 		void update_accuracy_rate(bool iselem, bool is_true);
 		void merge(RegionStats * o);
+		float getNTestPoints(){return p_test_n;}
 		void print();
-		int log(DetectorLogInfo * d, int r, int i);
 };
 
 class GlobalStats {
@@ -33,7 +33,6 @@ class GlobalStats {
 		void update_accept_rate(bool is_corr_label);
 		void update_accuracy_rate(bool isacc);
 		void print();
-		int log(DetectorLogInfo * d, int i);
 		float get_reexec();
 		float get_frac_rej_tp();
 };

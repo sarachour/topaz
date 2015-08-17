@@ -10,5 +10,6 @@ cd TrackingBenchmark;
 tpzcc main.tpz &&
 mv main.topaz.c main.cpp &&
 cd .. &&
+./gen_configure.sh &&
 ./configure VPATH=$(pwd) &&
 make 

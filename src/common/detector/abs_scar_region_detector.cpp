@@ -6,35 +6,6 @@
 #include "ctrl_system.h"
 //FIXME: Must leave index 0 open for err-value
 
-void AbsScarRegionDetector::log(){
-	DetectorLogInfo * l = Topaz::topaz->getDLog();
-	bool isaccepted = DetectorLogInfo::getAccepted();
-	bool iscorr = this->compare();
-	int tid = DetectorLogInfo::getTaskId();
-	int rank = DetectorLogInfo::getRank();
-	int iid = DetectorLogInfo::getIID();
-	for(int v=0; v < this->dim; v++){
-		int i=1;
-		l->start_entry(tid, iid, rank, v, isaccepted, iscorr, this->data[v], this->data_key[v]); 
-		i=this->stats->log(l, i);
-		l->set(i,"n-regions", this->n_regions); i++;
-		for(int r=0; r < this->n_regions; r++){
-			char name[128];
-			region_t * q = this->regions[r];
-			
-			sprintf(name, "%d.min", r); 
-			l->set(i,name, q->min[v]); i++;
-			sprintf(name, "%d.max", r); 
-			l->set(i,name,q->max[v]); i++;
-			sprintf(name, "%d.center", r); 
-			l->set(i,name,q->center[v]); i++;
-			i=q->stats.log(l,r,i);
-		}
-		l->end_entry();
-	}
-
-	
-}
 AbsScarRegionDetector::AbsScarRegionDetector(int n) : AbsDetector(n){
 	this->dim = n;
 	this->n_regions = 0;
@@ -154,6 +125,9 @@ int AbsScarRegionDetector::find_region(float * d){
 void AbsScarRegionDetector::merge_regions(int id1, int id2){
 	region_t * r1 =	this->regions[id1];
 	region_t * r2 = this->regions[id2];
+	float n1 = r1->stats.getNTestPoints();
+	float n2 = r2->stats.getNTestPoints();
+	
 	for(int i=0; i < this->dim; i++){
 		if(r2->min[i] < r1->min[i]){
 			r1->min[i] = r2->min[i];
@@ -161,7 +135,7 @@ void AbsScarRegionDetector::merge_regions(int id1, int id2){
 		if(r2->max[i] > r1->max[i]){
 			r1->max[i] = r2->max[i];
 		}
-		r1->center[i] = (r1->center[i] + r1->center[i])/2;
+		r1->center[i] = (r1->center[i]*(n1+1)+ r2->center[i]*(1+n2))/(n1+n2+2);
 	}
 	r1->stats.merge(&r2->stats);
 	

@@ -1,0 +1,265 @@
+#!/usr/bin/python
+
+import matplotlib.pyplot as matplot
+
+import sys
+import math
+import numpy as np
+import json
+import copy
+
+def string_to_array(str):
+	str = str.replace("inf","Infinity");
+	str = str.replace("-nan","nan");
+	str = str.replace("nan","NaN");
+	k = json.loads(str);
+	return k
+
+
+def compute_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	return terr
+
+def compute_rel_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c)/abs(x) if abs(x) > 0 else abs(x-c), zip(err,corr));
+	errs_sc = math.sqrt(np.sum(map(lambda x : x*x, errs)))
+	terr = errs_sc;
+	return terr
+	
+def check_corr(err,corr):
+	EPS = 1e-3
+	errs = compute_rel_err(err,corr);
+	terr = np.sum(errs);
+	if(terr < EPS):
+		return True;
+	else:
+		return False;
+
+def draw_plot(corr, err, key, regions, perr, filename):
+	bound_color="#bdc3c7"
+	line_thickness=2;
+	bound_thickness=5;
+	mean_color="black"
+	mean_thickness=4;
+	error_color="#c0392b"
+	error_size=20;
+	dist_color="#2980b9"
+	
+	dist_size=40;
+	
+	k = key['v']
+	p = corr['v']
+	e = err['v']
+	minv = min(k);
+	maxv = max(k);
+	dv=(maxv-minv)
+	maxv += dv/2;
+	minv -= dv/2;
+	e = map(lambda x : max(minv+dv*0.05,min(maxv-dv*0.05,x)), e);
+	
+	matplot.clf();
+	plt = matplot.subplot(111)
+	
+	plt.set_title("Region Evolution over Time")
+	plt.set_xlim((minv,maxv))
+	plt.set_xlabel("Value");
+	plt.set_ylabel("Probability");
+	plt.spines['right'].set_visible(False)
+	plt.spines['top'].set_visible(False)
+	plt.yaxis.set_ticks_position('left')
+	plt.xaxis.set_ticks_position('bottom')
+	
+
+	calc_bins = lambda x : max(10,len(x)/1000)
+	
+	
+
+	
+	for j in range(0,len(regions)):
+		minx = regions["min"][j]["v"];
+		maxx = regions["max"][j]["v"];
+		meanx = regions["mean"][j]["v"];
+		
+		if (len(minx) == 0):
+			continue;
+			
+		minv =np.percentile(minx, 50);
+		maxv = np.percentile(maxx, 50);
+			
+		plt.axvline(minv, c=bound_color, linestyle="--", linewidth=bound_thickness);
+		plt.axvline(maxv, c=bound_color, linestyle="--", linewidth=bound_thickness);
+		plt.axvspan(minv, maxv, alpha=0.5, color=bound_color)
+	
+	
+	y,x_,_ = plt.hist(e, color=error_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=True);
+	y,x,_ = plt.hist(p, color=dist_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5, normed=True);
+	
+	
+	
+	matplot.savefig(filename);
+	matplot.clf();
+			
+	
+def print_det_stats(hdr,e):
+	n = e["n"]
+	to_pct = lambda x : x/float(n)*100;
+	
+	if e["tr"] + e["fa"] > 0:
+		frac_caught = float(e["tr"])/float(e["tr"] + e["fa"])
+	else:
+		frac_caught = 1;
+	
+	if e["tr"] + e["fr"] > 0:
+		frac_rej = float(e["tr"])/float(e["tr"] + e["fr"])
+	else:
+		frac_rej = 100;
+	
+	print "%s,n,%d" % (hdr,n)
+	print "%s,true-accepts,%f" % (hdr,to_pct(e["ta"]))
+	print "%s,false-accepts,%f" % (hdr,to_pct(e["fa"]))
+	print "%s,true-rejects,%f" % (hdr,to_pct(e["tr"]))
+	print "%s,false-rejects,%f" % (hdr,to_pct(e["fr"]))
+	print "%s,errors-caught,%f" % (hdr, frac_caught*100)
+	print "%s,rejs-errors,%f" % (hdr, frac_rej*100)
+	print "%s,rej-rate,%f" % (hdr, to_pct(e["fr"] + e["tr"]))
+	
+if(len(sys.argv) < 4):
+	print "Usage: logname graph selid"
+	sys.exit(1)
+	
+log = sys.argv[1];
+graph = sys.argv[2];
+sel_id = int(sys.argv[3]);
+flog = open(log);
+ssel_id = str(sel_id);
+
+header = flog.readline().split('\n')[0].split('\t');
+
+#['ID', 'IID', 'RANK', 'IS-REFRESH', 'IS-FAILED', 'IS-ACCEPT', 'OUTPUT', 'CORR', 'OABS', 'CABS', 'MINS', 'MAXS', 'MEANS']
+stats = {};
+stats["abs"] = {"ta":0,"fa":0,"tr":0,"fr":0,"n":0};
+stats["act"] = {"ta":0,"fa":0,"tr":0,"fr":0,"n":0};
+data = {};
+
+
+def mkseries(d,flds,l,vl):
+	
+	for i in range(0,len(flds)):
+		fld = flds[i];
+		if not(fld in d):
+			d[fld] = [];
+		while(len(d[fld]) < l):
+			d[fld].append(copy.deepcopy(vl));
+			
+t=0;
+nabs = 0;
+nout = 0;
+for line in flog:
+	try:
+		fields = line.split('\n')[0].split('\t');
+		id = float(fields[header.index("ID")])
+		iid = float(fields[header.index("IID")])
+		rank = float(fields[header.index("RANK")])
+		
+		if id != sel_id:
+			continue;
+			
+		is_refresh = "refresh" in fields[header.index("IS-REFRESH")]
+		is_accept = "accept" in fields[header.index("IS-ACCEPT")]
+		is_failed = "failed" in fields[header.index("IS-FAILED")] 
+		output = string_to_array(fields[header.index("OUTPUT")])
+		key = string_to_array(fields[header.index("CORR")])
+		oabs = string_to_array(fields[header.index("OABS")])
+		cabs = string_to_array(fields[header.index("CABS")])
+		mins =  string_to_array(fields[header.index("MINS")])
+		maxs =  string_to_array(fields[header.index("MAXS")])
+		means =  string_to_array(fields[header.index("MEANS")])
+		is_corr = check_corr(output,key);
+		is_corr_abs = check_corr(oabs,cabs);
+		nabs = max(nabs,len(oabs));
+		nout = max(nout, len(output));
+		
+		mkseries(data,["t_key","t_err","t_corr"],len(output),{"v":[]});
+		mkseries(data,["a_key","a_corr","a_err"],nabs,{"v":[]});
+		
+		el = {};
+		mkseries(el,["min","max","mean"],10,{"v":[]})
+		mkseries(data,["regions"],nabs, el);
+		
+		for i in range(0, len(output)):
+			data["t_key"][i]["v"].append(key[i]);
+			
+			if not is_corr:
+				data["t_err"][i]["v"].append(output[i]);
+			else:
+				data["t_corr"][i]["v"].append(output[i]);
+				
+				
+				
+		
+		for i in range(0, len(oabs)):
+			data["a_key"][i]["v"].append(cabs[i]);
+			
+			if not is_corr:
+				data["a_err"][i]["v"].append(oabs[i]);
+			else:
+				data["a_corr"][i]["v"].append(oabs[i]);
+				
+		#traverse over outputs
+		for i in range(0, len(means)):
+			# traverse over regions
+			for j in range(0, len(means[i])):
+				data["regions"][i]["mean"][j]["v"].append(means[i][j]);
+				data["regions"][i]["min"][j]["v"].append(mins[i][j]);
+				data["regions"][i]["max"][j]["v"].append(maxs[i][j]);
+					
+			
+		if is_corr and is_accept:
+			stats["act"]["ta"]+=1;
+		elif is_corr and not is_accept:
+			stats["act"]["fr"]+=1;
+		elif not is_corr and is_accept:
+			stats["act"]["fa"]+=1;
+		elif not is_corr and  not is_accept:
+			stats["act"]["tr"]+=1;
+		
+		if is_corr_abs and is_accept:
+			stats["abs"]["ta"]+=1;
+		elif is_corr_abs and not is_accept:
+			stats["abs"]["fr"]+=1;
+		elif not is_corr_abs and is_accept:
+			stats["abs"]["fa"]+=1;
+		elif not is_corr_abs and  not is_accept:
+			stats["abs"]["tr"]+=1;
+		
+		stats["abs"]["n"]+=1;
+		stats["act"]["n"]+=1;
+		t+=1;
+		
+	except ValueError: 
+		print "skipping..."
+		continue
+
+print_det_stats("actual",stats["act"]);
+print_det_stats("abs",stats["abs"]);
+
+for i in range(0,nabs):
+	key = data["a_key"][i];
+	errs = data["a_err"][i];
+	corr = data["a_corr"][i];
+	perr = float(stats["abs"]["fa"] + stats["abs"]["tr"])/stats["abs"]["n"];
+	regions = data["regions"][i];
+	filename = "distabs-"+graph+"-"+str(i)+".png"
+	draw_plot(key,errs,corr,regions,perr,filename)
+	
+
+for i in range(0,nout):
+	key = data["t_key"][i];
+	errs = data["t_err"][i];
+	corr = data["t_corr"][i];
+	perr = float(stats["abs"]["fa"] + stats["abs"]["tr"])/stats["abs"]["n"];
+	regions = [];
+	filename = "distval-"+graph+"-"+str(i)+".png"
+	draw_plot(key,errs,corr,regions,perr,filename)
+	

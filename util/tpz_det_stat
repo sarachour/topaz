@@ -1,0 +1,120 @@
+#!/usr/bin/python
+import matplotlib.pyplot as matplot
+
+import sys
+import math
+import numpy as np
+import json
+import copy
+
+def string_to_array(str):
+	str = str.replace("inf","Infinity");
+	str = str.replace("-nan","nan");
+	str = str.replace("nan","NaN");
+	k = json.loads(str);
+	return k
+
+def check_corr(err,corr):
+	EPS = 1e-3
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	if(terr < EPS):
+		return True;
+	else:
+		return False;
+
+if(len(sys.argv) < 3):
+	print "Usage: logname graph selid"
+	sys.exit(1)
+	
+log = sys.argv[1];
+sel_id = int(sys.argv[2]);
+flog = open(log);
+ssel_id = str(sel_id);
+
+header = flog.readline().split('\n')[0].split('\t');
+
+def compute_err(err,corr):
+	errs = map(lambda (x,c) : abs(x-c) , zip(err,corr));
+	terr = np.sum(errs);
+	return terr
+
+def print_error(i,e,err,corr):
+	if e > EPS:
+		print i,err,corr
+		return True
+	else:
+		return False
+
+def compute_rel_err(err,corr):
+	EPS=0.1
+	errs = map(lambda (x,c) : abs(x-c)/abs(x) if abs(x) > 0 else abs(x-c), zip(err,corr));
+	act_errs = filter(lambda (i,x,e,c) : print_error(i,x,e,c), zip(range(0,len(errs)), errs,err,corr) );
+	errs_sc = math.sqrt(np.sum(map(lambda x : x*x, errs)))
+	terr = errs_sc;
+	return terr
+
+abs_err = 0.0;
+act_err = 0.0;
+
+n_tp = 0.0;
+n_fp = 0.0;
+n_tn = 0.0;
+n_fn = 0.0;
+
+n = 0;
+
+EPS=5e-3
+is_corr = lambda x : True if x < EPS else False;
+is_kind = lambda x,a,y,b : 1 if x == a and y == b  else 0;
+
+for line in flog:
+	try:
+		fields = line.split('\n')[0].split('\t');
+		id = float(fields[header.index("ID")])
+		is_accept = "accept" in fields[header.index("IS-ACCEPT")]
+		
+		if (not is_accept) or id != sel_id:
+			continue
+		
+			
+		output = string_to_array(fields[header.index("OUTPUT")])
+		key = string_to_array(fields[header.index("CORR")])
+		oabs = string_to_array(fields[header.index("OABS")])
+		cabs = string_to_array(fields[header.index("CABS")])
+		
+		ac_e = compute_err(output,key);
+		ab_e = compute_err(oabs,cabs);
+		ac_re = compute_rel_err(output,key);
+		ab_re = compute_rel_err(oabs,cabs);
+		act_err += ac_e 
+		abs_err += ab_e
+		
+		isact_c = is_corr(ac_re);
+		isabs_c = is_corr(ab_re);
+		n_tp += is_kind(isabs_c, True, isact_c, True);
+		n_fn += is_kind(isabs_c, False, isact_c, True);
+		n_fp += is_kind(isabs_c, True, isact_c, False);
+		n_tn += is_kind(isabs_c, False, isact_c, False);
+		
+		if is_kind(isabs_c, False, isact_c, True):
+			print "aov is err when act is corr:"
+			print "    rel: act=",ac_re,"aov=",ab_re
+			print "    abs: act=",ac_e,"aov=",ab_e
+			print oabs,cabs
+		
+		n+=1
+		
+	except ValueError: 
+		print "skipping..."
+		continue
+
+print "abs,err,"+str(abs_err/n*100)
+print "act,err,"+str(act_err/n*100)
+print
+print "both-corr,frac,"+str(n_tp/n*100)
+print "aov-corr-act-err,frac,"+str(n_fp/n*100)
+print "both-err,frac,"+str(n_tn/n*100)
+print "aov-err-act-corr,frac,"+str(n_fn/n*100)
+print "aov-err-acc,frac,"+str(n_tn/(n_tn+n_fp)*100)
+print "aov-corr-acc,frac,"+str(n_tp/(n_tp+n_fn)*100)

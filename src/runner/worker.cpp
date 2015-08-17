@@ -9,6 +9,8 @@
 #include "pin_util.h"
 
 #include <setjmp.h>
+#include <sys/types.h>
+#include <unistd.h>
 struct sigaction continue_exec;
 sigjmp_buf sig_escape;
 
@@ -30,6 +32,7 @@ void main_loop(){
 
 void segfault_sigaction(int signal, siginfo_t * si, void * arg){
 	PIN_STOP_INJECT_ERRORS();
+	Topaz::topaz->getTimers()->stop_active(1);
 	siglongjmp(sig_escape,1);
 }
 
@@ -41,7 +44,8 @@ int worker_routine(int argc, char ** argv){
 	topaz_init(argc, argv);
 	topaz_worker(argc, argv);
 	
-	
+	pid_t worker_pid = getpid();
+	printf("Worker PID: %d\n", worker_pid);
 	memset(&continue_exec, 0, sizeof(struct sigaction));
 	sigemptyset(&continue_exec.sa_mask);
 	continue_exec.sa_sigaction = segfault_sigaction;
@@ -49,6 +53,7 @@ int worker_routine(int argc, char ** argv){
 	sigaction(SIGSEGV, &continue_exec, NULL);
 	sigaction(SIGABRT, &continue_exec, NULL);
 	sigaction(SIGBUS, &continue_exec, NULL);
+	sigaction(SIGUSR1, &continue_exec, NULL);
 	Topaz::topaz->getTimers()->start(MAIN_TIMER); // start whole computation time
 	Topaz::topaz->receive();
 	Topaz::topaz->execute();

@@ -88,20 +88,20 @@ Topaz::Topaz(int argc, char ** argv){
 		char name[128];
 		sprintf(name, "timer.%d.out", rank);
 		this->timer = new RealTimerInfo(name);
-		sprintf(name, "comm.%d.out", rank);
-		this->comm = new RealCommunicationInfo(name);
+		//sprintf(name, "comm.%d.out", rank);
+		this->comm = new DummyCommunicationInfo();
 	}
 	else {
 		this->timer = new DummyTimerInfo();
 		this->comm = new DummyCommunicationInfo();
 	}
-	this->timer->stop_active();
+	this->timer->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	
 	if(this->config.DETECTOR_ENABLED){
 		this->detector = new AbsDetectorManager(MAX_TASKS);
 		if(this->config.LOG_DETECTORS_ENABLED){
-			this->logdetector = new RealDetectorLogInfo("ldet.out", 160);
+			this->logdetector = new RealDetectorLogInfo("ldet.out");
 		}
 		else{
 			this->logdetector = new DummyDetectorLogInfo();
@@ -131,7 +131,7 @@ Topaz::Topaz(int argc, char ** argv){
 	this->isLocalExecute = false;
 	
 	this->timer->stop(TOPAZ_TIMER);
-	this->timer->start_active();
+	this->timer->start_active(1);
 	
 }
 
@@ -161,8 +161,21 @@ bool Topaz::isMain(){
 	return (this->machines->isMain());
 }
 
+/*determine if the const data was refreshed*/
+bool Topaz::isConstDataRefresh(){
+	bool is_const;
+	if (this->isMain()){
+		is_const = this->output_task->isRefresh();
+	}
+	else {
+		is_const = this->input_task->isRefresh();
+	}
+	return is_const;
+}
+
+
 TASK_HANDLE Topaz::add(int id, fxnptr comp, lrnptr lrn, int nin, int nout, int ntrans,...){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	va_list arguments;
 	va_start(arguments, ntrans);
@@ -216,12 +229,12 @@ TASK_HANDLE Topaz::add(int id, fxnptr comp, lrnptr lrn, int nin, int nout, int n
 	this->input_task->update(0, 0, 0, inbufsize);
 	this->output_task->update(0, 0, 0, outbufsize);
 	this->timer->stop(TOPAZ_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 	return handle;
 }
 //FIXME: No detector code
 TASK_HANDLE Topaz::add(int id, TaskSpec tspec){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	TASK_HANDLE handle = this->tasks->add(id,tspec);
 	this->input_task->update(0, 0, 0, this->tasks->getInputBufferSize());
@@ -232,7 +245,7 @@ TASK_HANDLE Topaz::add(int id, TaskSpec tspec){
 		this->scheduler->addTask(handle);
 	}
 	this->timer->stop(TOPAZ_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 	return handle;
 	
 }
@@ -247,11 +260,11 @@ void Topaz::finalize(){
 		
 		if(this->config.DETECTOR_ENABLED){
 			this->detector->print();
-			if(this->config.LOG_DETECTORS_ENABLED && this->isMain()){
-				this->logdetector->print();
-			}
 		}
 	
+		printf("++ Writing Timer to Log\n");
+		Topaz::topaz->getTimers()->dump();
+		
 		if(this->config.GODMODE_ENABLED){
 			printf("++ Writing Statistics to Log\n");
 			this->log->print();
@@ -263,6 +276,8 @@ void Topaz::finalize(){
 		
 	}
 	else{
+		printf("++ Writing Worker Timer to Log\n");
+		Topaz::topaz->getTimers()->dump();
 		MPI_Finalize();
 		printf("++ Worker...Finalizing\n");
 		
@@ -276,7 +291,7 @@ void Topaz::finalize(){
 }
 
 bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(2);
 	TaskSpec sp = this->tasks->get(tsk);
 	if(this->output_task->hasFailed()) return true;
 	int nabs = sp.getNumAbstractedOutputs(); //abstracted
@@ -293,23 +308,30 @@ bool Topaz::check(TASK_HANDLE tsk, int rank, ...){
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER_DET);
 	bool res= this->detector->run(tsk); //run train, test, etc
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER_DET);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(2);
 	return res;
 }
+
 void Topaz::packAllTaskData(bool doit){
 	Topaz::topaz->config.PACK_FULL_TASK = doit;
+}
+void Topaz::setRefresh(bool doit){
+	Topaz::topaz->config.IS_REFRESH = doit;
 }
 void Topaz::start(TASK_HANDLE tid){
 	this->tasks->nextIID(tid);
 	Topaz::topaz->packAllTaskData(true);
+	Topaz::topaz->setRefresh(true);
 }
 
 bool Topaz::isPackAll(){
 	return Topaz::topaz->config.PACK_FULL_TASK;
 }
-
+bool Topaz::isRefresh(){
+	return Topaz::topaz->config.IS_REFRESH;
+}
 void Topaz::execute(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	Topaz::topaz->getTimers()->start(TOPAZ_TIMER); // start whole computation timer
 	TASK_HANDLE id;
 	this->input_task->startUnpack();
@@ -333,12 +355,14 @@ void Topaz::execute(){
 				break;
 		}
 	}
+	
 	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER); // start whole computation timer
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->start_active(1);
 }
 
 bool Topaz::send(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
+	Topaz::topaz->getTimers()->start(TOPAZ_TIMER); // start whole computation timer
 	
 	//set metadata for this communication
 	
@@ -354,16 +378,22 @@ bool Topaz::send(){
 		}
 		else{
 			this->packAllTaskData(false);
+			this->setRefresh(false);
+			//printf("s: main send to\n");
 			this->machines->sendTo(mach, task);
 			this->isLocalExecute = false;
 		}
 	}
 	else{
+		//printf("s: worker send\n");
 		Task * task = this->output_task;
 		this->comm->set_taskset(task->getId(), task->getRank());
+		//printf("s: worker sending..\n");
 		this->machines->sendTo(this->machines->getMain().getId(), task);
+		//printf("s: worker sent..\n");
 	}
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->stop(TOPAZ_TIMER); // start whole computation timer
+	Topaz::topaz->getTimers()->start_active(1);
 	return true;
 }
 
@@ -371,81 +401,123 @@ Task * spare = NULL;
 
 void Topaz::reexecute_failed(int id, TaskSpec * ts){
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); //backup task
+	}
 	//swap task payloads
 	this->output_task = spare; 
-	spare = incorr;
+	Task * corr = this->output_task;
 	this->tasks->execute(id, this->input_task, this->output_task);
+	
+	if(this->config.LOG_DETECTORS_ENABLED) 
+		this->getDLog()->add_entry(ts, this->detector, this->input_task, incorr, corr, false);
+		
+	this->output_task = corr;
+	spare = incorr;
 }
 void Topaz::reexecute(int id, TaskSpec * ts){
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); //backup task
+	}
 	//swap task payloads
 	this->output_task = spare; 
-	spare = incorr;
+	Task * corr = this->output_task;
+	
 	this->tasks->execute(id, this->input_task, this->output_task);
 	ts->train(this->input_task, incorr, this->output_task);
-	//input task, output task
+	
 	if(this->config.LOG_DETECTORS_ENABLED) 
-		// accepted, input, bad-output, key-output
-		ts->log(false,this->input_task, incorr, this->output_task);
+		this->getDLog()->add_entry(ts, this->detector, this->input_task, incorr, corr, false);
+	//input task, output task
+	
+	this->output_task = corr;
+	spare = incorr;
 }
 // by assumption, the detector is enabled.
 void Topaz::reexecute_log(int id, TaskSpec * ts){
+	if(!this->config.LOG_DETECTORS_ENABLED) return;
+	
 	Task * incorr = this->output_task;
-	if(spare == NULL) spare = incorr->clone(); //backup task
+	if(spare == NULL){
+		spare = incorr->clone(); 
+	}//backup task
 	this->output_task = spare;
-	spare = incorr;
+	Task * corr = this->output_task;
 	this->tasks->execute(id, this->input_task, this->output_task);
 	//change back to incorrect task
 	this->output_task = incorr;
-	ts->log(true,this->input_task, incorr, this->output_task);
+	this->getDLog()->add_entry(ts, this->detector,this->input_task, incorr, corr, true);
+	
+	this->output_task = incorr;
+	spare = corr;
 }
+int nticks = 0;
+int nfails = 0;
 bool Topaz::receive(){
-	Topaz::topaz->getTimers()->stop_active();
+	Topaz::topaz->getTimers()->stop_active(1);
 	this->timer->start(TOPAZ_TIMER);
 	int id = this->input_task->getId();
 	TaskSpec ts = this->tasks->get(id);
 	bool status = true;
 	
 	if(this->isMain()){		
+		//printf("r: main waiting for recieve..\n");
 		Task * task = this->output_task;
 		this->machines->receiveFrom(task);
+		//dump logs on client side
+		//printf("r: main recieved..\n");
 		//if(this->config.GODMODE_ENABLED) this->log->aug_clear();
 		
 		this->output_task->startUnpack();
 		
+		
 		if(this->output_task->hasFailed()){
 			this->reexecute_failed(id, &ts);
-			this->packAllTaskData(true);
+			this->setRefresh(true);
 			this->timer->stop(TOPAZ_TIMER);
-			Topaz::topaz->getTimers()->start_active();
+			Topaz::topaz->getTimers()->start_active(1);
 			return true;
 		}
 		
+		#define NFAILS_BEFORE_RESEND 3
+		//printf("r: main detect\n");
 		if(this->config.DETECTOR_ENABLED){
 			//handle the outliers
 			// outlier | is true error | inject
 			status = ts.test(this->input_task, this->output_task);
 			//outlier detector detects outlier, and we're not discarding.
-			if(status == false && !this->config.DISCARD_TASK){
+			if(status == false){
+				//printf("r: main reexecuting\n");
 				this->reexecute(id, &ts);
-				this->packAllTaskData(true);
+				nfails++;
+				//printf("r: main reexecuted\n");
+				if(nfails > NFAILS_BEFORE_RESEND){
+					this->setRefresh(true);
+					nfails = 0;
+				}
 				status = true;
 			}
 			//if we're logging, reexecute anyway.
-			else if(this->config.LOG_DETECTORS_ENABLED){
+			else{
 				this->reexecute_log(id,&ts);
+				nfails = 0;
 			}
-						
 		}
+		
+		//printf("r: main detected\n");
 	}
 	else{
+		//printf("r: worker receiving..\n");
 		Task * task = this->input_task;
 		this->machines->receiveFrom(this->machines->getMain().getId(), task);
+		//printf("r: worker recieved.\n");
 	}
+	
 	this->timer->stop(TOPAZ_TIMER);
-	Topaz::topaz->getTimers()->start_active();
+	Topaz::topaz->getTimers()->dump();
+	if(nticks%50 == 0) nticks++;
+	Topaz::topaz->getTimers()->start_active(1);
 	return status;
 }
 

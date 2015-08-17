@@ -1,0 +1,277 @@
+#!/usr/bin/python
+
+import sys
+import re
+
+
+#	0: "topaz",
+#	1: "main",
+#	2: "comm",
+#	3: "send",
+#	4: "task",
+#	5: "serialize",
+#	6: "topaz-transform",
+#	7: "topaz-detect"
+	
+def read_timer(path):
+	m = open(path+"/timer.0.out",'r');
+	w = open(path+"/timer.1.out",'r');
+	
+	main = {}
+	main["ser"] = main["topaz"] = main["comp"] = main["task"] = main["det"]= 0;
+	work = {}
+	work["ser"] = work["topaz"] = work["task"] = 0;
+	
+
+	ntasks = 0;
+	
+	for line in m:
+		try:
+			args = line.split("\t");
+			typ = int(args[0]);
+			amt = float(args[1]);
+			
+			#removed serialization that pads the percentage
+			if(typ == 2 or typ == 3):
+				continue
+			
+			if(type == 0):
+				main["topaz"] += amt
+			
+			if(typ == 5):
+				main["ser"] += amt
+				
+			if(typ == 1):
+				main["comp"] += amt
+				
+			
+			if(typ == 6 or typ == 7):
+				main["det"] += amt
+				
+			if( typ == 4):
+				main["task"] += amt
+				ntasks += 1
+		except:
+			continue
+	
+	for line in w:
+		try:
+			args = line.split("\t");
+			typ = int(args[0]);
+			amt = float(args[1]);
+			
+			
+				
+			#remove serialization that pads the percentage
+			if(typ == 2 or typ == 3):
+				continue
+			
+			if( type == 0):
+				work["topaz"] += amt
+				
+			if(typ == 5):
+				work["ser"] += amt
+			
+			if(typ == 4):
+				work["task"] += amt;
+				ntasks += 1
+				
+			
+		except:
+			continue
+	
+	data = {};
+	frac = 1/1000000.0
+	
+	for k in work:
+		work[k] *= frac;
+	
+	for k in main:
+		main[k] *= frac;
+		
+	data["w"] = work
+	data["m"] = main
+	data["n"] = ntasks
+	
+	#data["nominal"] = nominal
+	#data["outdet"] = outdet
+	
+	print data
+	return data
+
+def read_profile(path):
+	m = open(path+"/insmix.0.txt",'r');
+	w = open(path+"/insmix.1.txt",'r');
+	
+	L1_LINES = -1;
+	L2_LINES = -1;
+	
+	L1_ACCS = -1;
+	L2_ACCS = -1;
+	
+	for line in w:
+		try:
+			m = re.match('Percent Approximate Lines: ([0-9\.]*)%', line)
+			
+			frac = float(m.group(1))
+			if(L1_LINES < 0):
+				L1_LINES = frac
+			else:
+				L2_LINES = frac
+			
+				
+		except:
+			try:
+				m = re.match('Percent Approximate Accesses: ([0-9\.]*)%', line)
+				
+				frac = float(m.group(1))
+				if(L1_ACCS < 0):
+					L1_ACCS = frac
+				else:
+					L2_ACCS = frac
+			except:
+				continue
+	
+	data = {};
+	data['l1'] = {};
+	data['l2'] = {};
+	data['l1']['lines'] = L1_LINES;
+	data['l1']['accs'] = L1_ACCS
+	data['l2']['lines'] = L2_LINES;
+	data['l2']['accs'] = L2_ACCS
+	
+	print data
+	return data
+	
+	#for line in w:
+	#	print line
+			
+def analyze(hwstats, timerstats):
+	SRAM_SAV = 0.8;
+	DRAM_SAV = 0.33;
+	
+	FRAC_DRAM_NOREF = 0.40;
+	
+	DRAM_SYS_CONS = 0.7009
+	SRAM_SYS_CONS = 0.2996
+	
+	L1I_SIZE = 16
+	L1I_ASSOC = 4
+	L1I_LINE = 16
+	
+	L1D_SIZE = 16
+	L1D_ASSOC = 4
+	L1D_LINE = 16
+	
+	L2_SIZE = 64
+	L2_ASSOC = 4
+	L2_LINE = 16
+	
+	L1D_APPROX = hwstats["l1"]["lines"]/100.0;
+	L2_APPROX = hwstats["l2"]["lines"]/100.0;
+	
+	AL1D_COST = lambda x : (x*(1.0-SRAM_SAV) + (1.0-x)*(1))*L1D_SIZE
+	AL2_COST = lambda x : (x*(1.0-SRAM_SAV) + (1-x)*(1))*L2_SIZE
+	L1I_COST = L1I_SIZE*1
+	L12ID_COST = (L1D_SIZE + L2_SIZE + L1I_SIZE)*1.0
+	HIERARCHY_CONS =  (AL1D_COST(L1D_APPROX)+AL2_COST(L2_APPROX) +L1I_COST+ L12ID_COST)/(L12ID_COST + L12ID_COST);
+	MAX_HIERARCY_CONS = (AL1D_COST(1)+AL2_COST(1) + L1I_COST + L12ID_COST)/(L12ID_COST + L12ID_COST);
+	
+	DRAM_CONS = ((1-DRAM_SAV)*FRAC_DRAM_NOREF + (1-FRAC_DRAM_NOREF))/1
+	MAX_APPROX_CONS = SRAM_SYS_CONS*MAX_HIERARCY_CONS + DRAM_SYS_CONS*DRAM_CONS
+	NOM_APPROX_CONS = SRAM_SYS_CONS*HIERARCHY_CONS+  DRAM_SYS_CONS*DRAM_CONS
+	
+	
+	#OUTDET_SAV = 1.0/timerstats["outdet"]*( timerstats["nominal"]*NOMINAL_SAV - (timerstats["outdet"] - timerstats["nominal"]))
+	
+	
+	OE = timerstats["m"]["topaz"] + timerstats["m"]["ser"] 
+	OA = timerstats["w"]["topaz"] + timerstats["w"]["ser"] 
+	TE = timerstats["m"]["task"]
+	TA = timerstats["w"]["task"]
+	M = timerstats["m"]["comp"]
+	D = timerstats["m"]["det"]
+	ntasks = timerstats["n"]
+	
+	AE = NOM_APPROX_CONS
+	PE = 1.0
+	BASELINE = PE*(TA+OA) + PE*(OE+M)
+	NOTOPAZ_BASELINE = PE*(TA) + PE*(M)
+	
+	NOMINAL = AE*(TA+OA) + PE*(OE+M)
+	WITHDET = AE*(TA+OA) + PE*(OE+M+TE+D)
+	FACTOR1 = NOMINAL/BASELINE
+	FACTOR2 = WITHDET/BASELINE
+	NOTOPAZ_FACTOR1 = NOMINAL/NOTOPAZ_BASELINE
+	NOTOPAZ_FACTOR2 = WITHDET/NOTOPAZ_BASELINE
+	
+	
+	CMP1 = (AE*(TA) + PE*(M+TE+D))/NOTOPAZ_BASELINE
+	CMP2 = (AE*(TA+OA) + PE*(OE+M+TE+D))/NOTOPAZ_BASELINE
+	CMP3 = (AE*(TA) + PE*(M))/NOTOPAZ_BASELINE
+	
+	if NOMINAL < BASELINE:
+		NOM_INST_ROOM = BASELINE - NOMINAL
+		NOM_TRADEOFF = 1+NOM_INST_ROOM/D
+	else:
+		NOM_INST_ROOM = NOMINAL - BASELINE
+		NOM_TRADEOFF = 1-NOM_INST_ROOM/D
+	
+	if WITHDET < BASELINE:
+		DET_INST_ROOM = BASELINE - WITHDET
+		DET_TRADEOFF = 1+DET_INST_ROOM/D
+	else:
+		DET_INST_ROOM = WITHDET - BASELINE
+		DET_TRADEOFF = 1-DET_INST_ROOM/D
+	
+	
+	
+	
+	print "-----------"
+	
+	print "Maximum Cache+Memory Savings: "+str((1-MAX_APPROX_CONS)*100)
+	print "Nominal Cache+Memory Savings: "+str((1-NOM_APPROX_CONS)*100)
+	print "-----------"
+	print "ROOM WITH NOMINAL,",NOM_INST_ROOM
+	print "ROOM_WITH_DET,",DET_INST_ROOM
+	print "TRADEOFF POINT (Nominal),",NOM_TRADEOFF
+	print "TRADEOFF POINT (Detector),",DET_TRADEOFF
+	
+	print "-----------"
+	print "OE=",OE,"	TE=",TE,"	M=",M,"	D=",D
+	print "OA=",OA,"	TA=",TA
+	print "N=",ntasks
+	print "-----------"
+	print "IDEAL TASK LENGTH,",(TE+TA)/ntasks*1000000
+	print "REEXECUTION OVERHEAD,",TE/TA
+	print "REEXECUTION DETECT,",D/TA
+	print "-----------"
+	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
+	print "--------------"
+	print "No Outdet Savings,",(100-FACTOR1*100)
+	print "With Outdet Savings,",(100-FACTOR2*100)
+	print "No Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR1*100)
+	print "With Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR2*100)
+	
+	
+	print "PAPER/NODET+NOTPZ,",(1-CMP3)*100
+	print "PAPER/DET+NOTPZ,",(1-CMP1)*100
+	print "PAPER/DET+TPZ,",(1-CMP2)*100
+	
+	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
+	
+	
+if len(sys.argv) < 2:
+	print "USAGE: tpz_energy2 hw_stats_dir timer_dir"
+
+if len(sys.argv) >= 3:
+	hw_stats_path = sys.argv[1]
+	timer_path = sys.argv[2];
+	tim = read_timer(timer_path)
+	hw = read_profile(hw_stats_path)
+else:
+	timer_path = sys.argv[1];
+	tim = read_timer(timer_path)
+	hw = {"l1":{"lines":100.0},"l2":{"lines":100.0}}
+	
+analyze(hw,tim)

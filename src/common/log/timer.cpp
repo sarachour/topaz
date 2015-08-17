@@ -1,8 +1,17 @@
 #include "logger.h"
+#include "string.h"
+#include "topaz.h"
+#include "pin_util.h"
 
-#define MAX_SIZE (300*1000000/(sizeof(timer_info_t)))
+
+//#define DEBUG
+#define MAX_SIZE (300/(sizeof(timer_info_t)))
+
 RealTimerInfo::RealTimerInfo(const char * base){
+	pin_disable_timers();
+	strcpy(this->filename,base);
 	this->file = fopen(base, "w");
+	fprintf(this->file, "INDEX\tINSTRUCTIONS\n");
 	this->ndumps = 0;
 	this->TIMER_OFF = false;
 	this->n_stops = 0;
@@ -13,31 +22,53 @@ RealTimerInfo::RealTimerInfo(const char * base){
 		}
 	}
 	init_timers();
+	pin_enable_timers();
 }
 RealTimerInfo::~RealTimerInfo(){
 	del_timers();
 	fclose(this->file);
 }
-void  RealTimerInfo::stop_active(){
-	int j = this->n_stops;
+void  RealTimerInfo::stop_active(int cache){
+	pin_disable_timers();
+	int j = cache;
+	#ifdef DEBUG
+	printf("[%s,%d] stopping: ", Topaz::topaz == NULL ? "?" : (Topaz::topaz->isMain() ? "m" : "w"),j);
+	#endif
 	for(int i=0; i < N_TIMERS; i++){
 		this->stopped[j][i] = this->active[i]; //stop any active timers.
 		if(this->active[i]){
-			this->stop(i);
+			int ninst = this->_stop(i);
+			#ifdef DEBUG
+			printf("%d=%d ",i,ninst);
+			#endif
 		}
 	}
-	this->n_stops++;
+	#ifdef DEBUG
+	printf("\n");
+	#endif
+	pin_enable_timers();
 }
-void  RealTimerInfo::start_active(){
-	int j = this->n_stops-1;
-	if(j < 0) return;
+void  RealTimerInfo::start_active(int cache){
+	pin_disable_timers();
+	int j = cache;
+	#ifdef DEBUG
+	printf("[%s,%d] starting: ", Topaz::topaz == NULL ? "?" : (Topaz::topaz->isMain() ? "m" : "w"),j);
+	#endif
 	for(int i=0; i < N_TIMERS; i++){
 		if(this->stopped[j][i]){
 			this->stopped[j][i] = false;
-			this->start(i);
+			
+			this->_start(i);
+			
+			#ifdef DEBUG
+			printf("%d ",i);
+			#endif
 		}
 	}
-	this->n_stops--;
+	#ifdef DEBUG
+	printf("\n");
+	#endif
+	pin_enable_timers();
 }
 void RealTimerInfo::on(){
 	this->TIMER_OFF = false;
@@ -47,47 +78,67 @@ void RealTimerInfo::off(){
 }
 
 //start,stop timers
-void RealTimerInfo::start(int c){
+void RealTimerInfo::_start(int c){
 	if(this->TIMER_OFF || this->active[c])
 		return;
 	this->active[c] = true;
 	pin_start_timer(c);
 }
+void RealTimerInfo::start(int c){
+	pin_disable_timers();
+	this->_start(c);
+	pin_enable_timers();
+}
+void RealTimerInfo::dump(){
+	pin_disable_timers();
+	this->print();
+	this->del_timers();
+	this->ndumps++;
+	this->start_active(0);
+	pin_enable_timers();
+}
+void print_timer(FILE * fp, timer_info_t d){
+	fprintf(fp, "%u\t%f\n", d.idx, d.inst);
+	
+}
 
-void RealTimerInfo::stop(int c){
+int RealTimerInfo::_stop(int c){
 	if(this->TIMER_OFF || !this->active[c])
-		return;
+		return 0;
 	pin_timer_info_t p;
 	pin_stop_timer(c, &p);
 	this->active[c] = false;
 	timer_info_t pt;
 	pt.idx = c;
 	pt.inst = p.inst;
+	//print_timer(this->file,pt);
+	
 	if(this->TIMER_SIZE > MAX_SIZE){
-		this->stop_active();
-		this->print();
-		this->del_timers();
-		this->ndumps++;
-		this->start_active();
+		//this->dump();
 	}
 	this->add_timer(pt);
+	return pt.inst;
+}
+void RealTimerInfo::stop(int c){
+	pin_disable_timers();
+	this->_stop(c);
+	pin_enable_timers();
 }
 void RealTimerInfo::print(){
 	FILE * fp = this->file;
-	float total = TIMER_SIZE;
 	timer_node_t * n = this->timers;
-	if(this->ndumps == 0) fprintf(fp, "INDEX\tINSTRUCTIONS\n");
 	while(n != NULL){
 		timer_info_t d = n->data;
 		fprintf(fp, "%u\t%f\n", d.idx, d.inst);
 		n=n->NEXT;
 	}
+	fflush(fp);
 	
 }
 
 RealCommunicationInfo::RealCommunicationInfo(const char * filename){
-	file = fopen(filename, "w");
-	fprintf(file, "taskset\ttask\tsent\trecvd\n");
+	//file = fopen(filename, "w");
+	//fprintf(file, "taskset\ttask\tsent\trecvd\n");
 	taskset = -1;
 	task = -1;
 	sent = 0;
@@ -95,10 +146,14 @@ RealCommunicationInfo::RealCommunicationInfo(const char * filename){
 }
 
 void RealCommunicationInfo::write_line(){
-	fprintf(file,"%d\t%d\t%d\t%d\n", taskset, task, sent, recvd);
+	//fprintf(file,"%d\t%d\t%d\t%d\n", taskset, task, sent, recvd);
 }
 RealCommunicationInfo::~RealCommunicationInfo(){
-	fclose(file);
+	//fclose(file);
+}
+void RealCommunicationInfo::dump(){
+	
+	
 }
 void RealCommunicationInfo::set_taskset(int id, int i){
 	if(taskset >= 0) this->write_line();

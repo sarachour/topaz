@@ -1,3 +1,4 @@
+make clean; make
 
 PIN_ARGS=$1
 TOPAZ_ARGS=$2
@@ -24,13 +25,14 @@ function updateDirectories {
 
 OUTDIR=$TAGS
 SUFFIX="$INPUT.$SEED"
-#sutil_run_script.sh run_ex.sh 1.100 1 reexec:t=scar,b=5,p=0.10 heavy-dram d
-#sutil_run_script.sh run_ex.sh 1.100 1 none heavy-dram 
+#sutil_run_script.sh run_ex.sh d1.n100.k1 1 reexec:t=scar,b=5,p=0.10 iact-med-static d
+#sutil_run_script.sh run_ex.sh d1.n100.k1 1 none iact-med-static
 
-ND=$(echo "$INPUT" | grep -o "^[0-9]*")
-NPTS=$(echo "$INPUT" | grep -o "[0-9]*$")
+ND=$(echo "$INPUT" | grep -o "d[0-9]*" | grep -o "[0-9]*" )
+NPTS=$(echo "$INPUT" | grep -o "n[0-9]*"| grep -o "[0-9]*")
+NITERS=$(echo "$INPUT" | grep -o "k[0-9]*"| grep -o "[0-9]*")
 
 createDirectories $OUTDIR $SUFFIX
-tpzrun $PIN_ARGS -- ./ex1d $TOPAZ_ARGS @ $ND $NPTS out.txt  > log.txt
+tpzrun $PIN_ARGS -- ./ex1d $TOPAZ_ARGS @ $ND $NPTS out.txt $NITERS  > log.txt
 ./disp_out.py out.txt
 updateDirectories $OUTDIR $SUFFIX
