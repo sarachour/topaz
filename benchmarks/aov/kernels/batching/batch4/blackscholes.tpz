@@ -237,19 +237,12 @@ int BlkSchlsEqEuroNoDiv() {
 			}
 		}
 		transform in(float tsptprice, float tfprice) out(float r1, float r2, float r3, float r4){
-			int j=0;
-			r1 = r2 = r3 =r4 = 0;
-			for(int j=0; j < NELEMS/4; j++){
-				r1 += tfprice[j]/NELEMS;
-			}
-			for(int j=NELEMS/4; j < NELEMS/2; j++){
-				r2 += tfprice[j]/NELEMS;
-			}
-			for(int j=NELEMS/2; j < 3*NELEMS/4; j++){
-				r3 += tfprice[j]/NELEMS;
-			}
-			for(int j=3*NELEMS/4; j < NELEMS; j++){
-				r4 += tfprice[j]/NELEMS;
+			r1 = r2 = r3 = r4 =0;
+			for(int j=0; j < NELEMS; j++){
+				if(j%4 == 0) r1 += tfprice[j];
+				else if(j%4 == 1) r2 += tfprice[j];
+				else if(j%4 == 2) r3 += tfprice[j];
+				else r4 += tfprice[j];
 			}
 		}
 		combine {

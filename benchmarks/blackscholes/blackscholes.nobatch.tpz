@@ -15,7 +15,7 @@
 #include "relax_lib.h"
 
 #define ERR_CHK 
-#define AUTO_NUM_RUNS 100
+#define AUTO_NUM_RUNS 105
 #ifdef ENABLE_PARSEC_HOOKS
 #include <hooks.h>
 #endif

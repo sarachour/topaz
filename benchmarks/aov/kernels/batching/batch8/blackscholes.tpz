@@ -240,29 +240,15 @@ int BlkSchlsEqEuroNoDiv() {
 			int j=0;
 			r1 = r2 = r3 =r4 = 0;
 			r5 = r6 = r7 =r8 = 0;
-			for(int j=0; j < NELEMS/8; j++){
-				r1 += tfprice[j]/NELEMS;
-			}
-			for(int j=NELEMS/8; j < 2*NELEMS/8; j++){
-				r2 += tfprice[j]/NELEMS;
-			}
-			for(int j=2*NELEMS/8; j < 3*NELEMS/8; j++){
-				r3 += tfprice[j]/NELEMS;
-			}
-			for(int j=3*NELEMS/8; j < 4*NELEMS/8; j++){
-				r4 += tfprice[j]/NELEMS;
-			}
-			for(int j=4*NELEMS/8; j < 5*NELEMS/8; j++){
-				r5 += tfprice[j]/NELEMS;
-			}
-			for(int j=5*NELEMS/8; j < 6*NELEMS/8; j++){
-				r6 += tfprice[j]/NELEMS;
-			}
-			for(int j=6*NELEMS/8; j < 7*NELEMS/8; j++){
-				r7 += tfprice[j]/NELEMS;
-			}
-			for(int j=7*NELEMS/8; j < NELEMS; j++){
-				r8 += tfprice[j]/NELEMS;
+			for(int j=0; j < NELEMS; j++){
+				if(j%8 == 0) r1 += tfprice[j];
+				else if(j%8 == 1) r2 += tfprice[j];
+				else if(j%8 == 2) r3 += tfprice[j];
+				else if(j%8 == 3) r4 += tfprice[j];
+				else if(j%8 == 4) r5 += tfprice[j];
+				else if(j%8 == 5) r6 += tfprice[j];
+				else if(j%8 == 6) r7 += tfprice[j];
+				else r8 += tfprice[j];
 			}
 		}
 		combine {

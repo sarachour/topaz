@@ -36,13 +36,15 @@ def check_corr(err,corr):
 	else:
 		return False;
 
-def draw_plot(corr, err, regions, filename):
+def draw_plot(corr, err, regions, filename,idx):
+	LABELFONT=24
+	LABSIZE=18
 	bound_color="#2980b9"
 	bound_thickness=2;
 	mean_color="black"
 	mean_thickness=4;
 	error_color="#c0392b"
-	error_size=20;
+	error_size=80;
 	dist_color="#bdc3c7"
 	dist_size=40;
 	
@@ -63,11 +65,12 @@ def draw_plot(corr, err, regions, filename):
 	matplot.clf();
 	plt = matplot.subplot(111)
 	
-	plt.set_title("Region Evolution over Time")
-	plt.set_xlim((minx,maxx))
+	#plt.set_title("Region Evolution over Time",fontsize=18)
+	
 	plt.set_ylim((miny,maxy))
-	plt.set_xlabel("time elapsed");
-	plt.set_ylabel("AOV Index Value");
+	plt.set_xlabel("Number of Tasks Executed", fontsize=LABELFONT);
+	#plt.set_ylabel("Value of AOV["+str(idx)+"]", fontsize=LABELFONT);
+	plt.set_ylabel("AOV Value", fontsize=LABELFONT);
 	plt.spines['right'].set_visible(False)
 	plt.spines['top'].set_visible(False)
 	plt.yaxis.set_ticks_position('left')
@@ -76,6 +79,12 @@ def draw_plot(corr, err, regions, filename):
 	plt.scatter(px,py,marker="o", c=dist_color, s=dist_size, edgecolors="none", alpha=0.33);
 	plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
 		
+	
+	maxx = min(maxx,2000);
+	print "lims",maxx
+	plt.set_xlim(xmin=minx,xmax=maxx)
+	plt.tick_params(axis="y",labelsize=LABSIZE);
+	plt.tick_params(axis="x",labelsize=LABSIZE);
 
 	for j in range(0,len(regions)):
 		minx = regions["min"][j]["x"];
@@ -88,8 +97,8 @@ def draw_plot(corr, err, regions, filename):
 
 		plt.plot(minx,miny,maxx,maxy,linestyle="-",c=bound_color,linewidth=bound_thickness);
 		plt.plot(meanx,meany,linestyle=":",c=mean_color,linewidth=mean_thickness);
-		
-	matplot.savefig(filename);
+
+	matplot.savefig(filename, bbox_inches='tight', pad_inches = 0.15);
 	matplot.clf();
 			
 	
@@ -240,6 +249,6 @@ for i in range(0,nabs):
 	pts = data["abs_dist"][i];
 	errs = data["abs_err"][i];
 	regions = data["regions"][i];
-	filename = "evol-"+graph+"-"+str(i)-".png"
-	draw_plot(pts,errs,regions,filename)
+	filename = "evol-"+graph+"-"+str(i)+".png"
+	draw_plot(pts,errs,regions,filename,i)
 	

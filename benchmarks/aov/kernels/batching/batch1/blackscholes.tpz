@@ -240,7 +240,7 @@ int BlkSchlsEqEuroNoDiv() {
 			int j=0;
 			r = 0;
 			for(int j=0; j < NELEMS; j++){
-				r += tfprice[j]/NELEMS;
+				r += tfprice[j];
 			}
 		}
 		combine {
