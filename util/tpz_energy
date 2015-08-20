@@ -250,15 +250,9 @@ def analyze(hwstats, timerstats):
 	print "-----------"
 	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
 	print "--------------"
-	print "No Outdet Savings,",(100-FACTOR1*100)
-	print "With Outdet Savings,",(100-FACTOR2*100)
-	print "No Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR1*100)
-	print "With Outdet Savings (No Topaz),",(100-NOTOPAZ_FACTOR2*100)
-	
-	
-	print "PAPER/NODET+NOTPZ,",(1-CMP3)*100
-	print "PAPER/DET+NOTPZ,",(1-CMP1)*100
-	print "PAPER/DET+TPZ,",(1-CMP2)*100
+	print "NODET+NOTPZ,",(1-CMP3)*100
+	print "DET+NOTPZ,",(1-CMP1)*100
+	print "DET+TPZ,",(1-CMP2)*100
 	
 	#print "Factor for Reexecution:",(N_LEFTOVER)/(timerstats["outdet"] - timerstats["nominal"])
 	
