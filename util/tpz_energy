@@ -191,6 +191,8 @@ def analyze(hwstats, timerstats):
 	TA = timerstats["w"]["task"]
 	M = timerstats["m"]["comp"]
 	D = timerstats["m"]["det"]
+	if D == 0:
+		D = 1
 	ntasks = timerstats["n"]
 	
 	AE = NOM_APPROX_CONS

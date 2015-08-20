@@ -7,6 +7,7 @@ import math
 import numpy as np
 import json
 import copy
+from scipy.stats import norm
 
 def string_to_array(str):
 	str = str.replace("inf","Infinity");
@@ -36,6 +37,7 @@ def check_corr(err,corr):
 	else:
 		return False;
 
+
 def draw_plot(corr, err, key, regions, perr, filename):
 	bound_color="#bdc3c7"
 	line_thickness=2;
@@ -57,6 +59,8 @@ def draw_plot(corr, err, key, regions, perr, filename):
 	maxv += dv/2;
 	minv -= dv/2;
 	e = map(lambda x : max(minv+dv*0.05,min(maxv-dv*0.05,x)), e);
+	maxp=max(p);
+	minp=min(p);
 	
 	matplot.clf();
 	plt = matplot.subplot(111)
@@ -71,7 +75,7 @@ def draw_plot(corr, err, key, regions, perr, filename):
 	plt.xaxis.set_ticks_position('bottom')
 	
 
-	calc_bins = lambda x : max(10,len(x)/1000)
+	calc_bins = lambda x : max(10,len(x)/500)
 	
 	
 
@@ -92,10 +96,15 @@ def draw_plot(corr, err, key, regions, perr, filename):
 		plt.axvspan(minv, maxv, alpha=0.5, color=bound_color)
 	
 	
-	y,x_,_ = plt.hist(e, color=error_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=True);
-	y,x,_ = plt.hist(p, color=dist_color, stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5, normed=True);
+	y,x,_= plt.hist([p,e], color=[dist_color,error_color], stacked=True, bins=calc_bins(p),histtype="stepfilled", alpha=0.5,normed=True);
+
+	mu,std = norm.fit(p)
+	xpr = np.linspace(min(x), max(x), 10000)
+	ppr = norm.pdf(xpr, mu, std)
 	
-	
+	lims = plt.get_ylim();
+	plt.plot(xpr, ppr, 'k', linewidth=2)
+	#plt.set_ylim(lims);
 	
 	matplot.savefig(filename);
 	matplot.clf();
@@ -123,6 +132,27 @@ def print_det_stats(hdr,e):
 	print "%s,errors-caught,%f" % (hdr, frac_caught*100)
 	print "%s,rejs-errors,%f" % (hdr, frac_rej*100)
 	print "%s,rej-rate,%f" % (hdr, to_pct(e["fr"] + e["tr"]))
+
+def to_file(filename, headers, data):
+	fp = open(filename, "w");
+	n = len(data[0]);
+	
+	fp.write("%s" % headers[0]);
+	for i in range(1, len(headers)):
+		fp.write(",%s" %  (headers[i])) 
+	fp.write("\n");
+	
+	for i in range(0,n):
+		e = data[0][i];
+		fp.write("%f" % e); 
+		for j in range (1,len(headers)):
+			try:
+				e = data[j][i];
+				fp.write(",%f" % e); 
+			except IndexError:
+				fp.write(","); 
+				continue;	
+		fp.write("\n");
 	
 if(len(sys.argv) < 4):
 	print "Usage: logname graph selid"
@@ -241,6 +271,16 @@ for line in flog:
 		print "skipping..."
 		continue
 
+for i in range(0,nabs):
+	p = data["a_corr"][i]["v"];
+	mu,sig = norm.fit(p);
+	print "abs",i,mu,sig
+
+for i in range(0,nout):
+	p = data["t_corr"][i]["v"];
+	mu,sig = norm.fit(p);
+	print "out",i,mu,sig
+
 print_det_stats("actual",stats["act"]);
 print_det_stats("abs",stats["abs"]);
 
@@ -252,7 +292,26 @@ for i in range(0,nabs):
 	regions = data["regions"][i];
 	filename = "distabs-"+graph+"-"+str(i)+".png"
 	draw_plot(key,errs,corr,regions,perr,filename)
-	
+
+hdr = [];
+series=[];
+for i in range(0,nout):
+	hdr.append("output"+str(i));
+	hdr.append("error"+str(i));
+	series.append(data["t_corr"][i]["v"]);
+	series.append(data["t_err"][i]["v"]);
+
+to_file("data-output.csv",hdr,series);
+
+hdr = [];
+series=[];
+for i in range(0,nabs):
+	hdr.append("output"+str(i));
+	hdr.append("error"+str(i));
+	series.append(data["a_corr"][i]["v"]);
+	series.append(data["a_err"][i]["v"]);
+
+to_file("data-aov.csv",hdr,series);
 
 for i in range(0,nout):
 	key = data["t_key"][i];

@@ -1,9 +1,7 @@
 #!/bin/bash
 
 INP=16K
-#TYP=med-static2
-#TYP=med-static
-TYP=med-dynamic
+TYP=med-static
 PROB=0.08
 BLOCKSIZE=2
 
@@ -19,17 +17,15 @@ echo "input: $INP" >> tmp.txt
 
 #mutt -s "Blackscholes Started" sarachour@gmail.com < tmp.txt
 
-sutil_run_script.sh run_bs.sh $INP 1 none perfect
+sutil_run_script.sh run_bs.sh $INP 1 none perfect 
 for i in $(seq $STARTSEED $NSEEDS);
 do
-
-
-
 FLAGS=d
-sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-$TYP $FLAGS
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
 
 FLAGS=t
-sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.08 iact-$TYP $FLAGS
+sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.00 iact-$TYP $FLAGS
+
 
 FLAGS=d
 #sutil_run_script.sh run_bs.sh $INP $i reexec:t=scar,b=$BLOCKSIZE,p=0.01 iact-$TYP $FLAGS
@@ -57,4 +53,3 @@ echo "flags used: $FLAGS" >> tmp.txt
 echo "seeds: $STARTSEED -> $NSEEDS" >> tmp.txt
 echo "input: $INP" >> tmp.txt
 
-mutt -s "Blackscholes Finished" sarachour@gmail.com  < tmp.txt

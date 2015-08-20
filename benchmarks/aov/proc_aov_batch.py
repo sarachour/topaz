@@ -71,20 +71,23 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 		title = title
 		xlab = axis
 		filename = filename+".png"
+		FONTSIZE=24
+		LABSIZE=16
+		LEGSIZE=20
 		
 		fig,ax = plt.subplots()
 		axes = [ax, ax.twinx(), ax.twinx()]
 		#axes = [ax, ax.twinx()]
 
 
-		fig.subplots_adjust(right=0.75);
+		fig.subplots_adjust(right=1);
 
 		axes[-1].spines['right'].set_position(('axes',1.2))
 		axes[-1].set_frame_on(True);
 		axes[-1].patch.set_visible(False);
 
 		plt.margins(0.05, 0.05)
-		plt.title(title,fontsize=14)
+		#plt.title(title,fontsize=FONTSIZE)
 		idxs = range(0,len(xvals));
 		qual = map(lambda x : get([key,"normal",x,"median"]),xvals) 
 		en = map(lambda x : get([key,"ltime-tpz",x,"median"]),xvals) 
@@ -93,19 +96,19 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 		colors = ["#2980b9","#27ae60","#c0392b"];
 		lw=5
 		i=0;
-		axes[i].plot(idxs,qual,label="Output Quality",linewidth=lw,linestyle="-",color=colors[i],marker="^");
-		axes[i].set_ylabel("Output Quality (Percent Price Error)")
+		axes[i].plot(idxs,qual,label="Relative Price Error (%)",linewidth=lw,linestyle="-",color=colors[i],marker="^");
+		axes[i].set_ylabel("Relative Price Error (%)",fontsize=FONTSIZE)
 
 		i+=1;
-		axes[i].plot(idxs,en,label="Energy Savings", linewidth=lw,linestyle="--",color=colors[i],marker="h");
-		axes[i].set_ylabel("Energy Savings (%)")
+		axes[i].plot(idxs,en,label="Energy Savings (%)", linewidth=lw,linestyle="--",color=colors[i],marker="h");
+		axes[i].set_ylabel("Energy Savings (%)",fontsize=FONTSIZE )
 
 		i+=1;
-		axes[i].plot(idxs,det,label="% Errors Detected",linewidth=lw,linestyle=":",color=colors[i],marker="o");
+		axes[i].plot(idxs,det,label="Error Detection Rate (%)",linewidth=lw,linestyle=":",color=colors[i],marker="o");
 		axes[i].set_ylim(0,axes[i].get_ylim()[1]);
-		axes[i].set_ylabel("% Errors Detected (%)")
+		axes[i].set_ylabel("Error Detection Rate (%)",fontsize=FONTSIZE)
 
-		axes[0].set_xlabel(xlab)
+		axes[0].set_xlabel(xlab,fontsize=FONTSIZE)
 		
 		handles = [];
 		labels = [];
@@ -120,18 +123,23 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 		labels = labels+l
 		
 		print handles,labels
-		lgd = plt.legend(handles, labels,loc="upper center", bbox_to_anchor=(0.5,-0.1),ncol=3)
+		lgd = plt.legend(handles, labels,loc="upper center", bbox_to_anchor=(0.5,-0.2),ncol=3, fontsize=LEGSIZE)
 		
 		
+		axes[0].tick_params(axis="y",labelsize=LABSIZE);
+		axes[1].tick_params(axis="y",labelsize=LABSIZE);
+		axes[2].tick_params(axis="y",labelsize=LABSIZE);
 		if(is_tiny):
-			axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
+			axes[0].set_xticks(map(lambda x : x, idxs), minor=False);
 			axes[0].set_xticklabels(xticks,rotation=45);
-			axes[0].tick_params(axis="x",labelsize=8);
+			axes[0].tick_params(axis="x",labelsize=LABSIZE);
 		
 		else:
-			axes[0].set_xticks(map(lambda x : x + 0.5, idxs), minor=False);
+			axes[0].set_xticks(map(lambda x : x, idxs), minor=False);
 			axes[0].set_xticklabels(xticks,rotation=0);
+			axes[0].tick_params(axis="x",labelsize=LABSIZE);
 		
+                
 		plt.savefig(filename, bbox_extra_artists=(lgd,), bbox_inches='tight')
 		
 	except KeyError:
