@@ -248,8 +248,6 @@ def analyze(hwstats, timerstats):
 	print "REEXECUTION OVERHEAD,",TE/TA
 	print "REEXECUTION DETECT,",D/TA
 	print "-----------"
-	#print "With Outdet Savings: "+str(OUTDET_SAV*100)
-	print "--------------"
 	print "NODET+NOTPZ,",(1-CMP3)*100
 	print "DET+NOTPZ,",(1-CMP1)*100
 	print "DET+TPZ,",(1-CMP2)*100
