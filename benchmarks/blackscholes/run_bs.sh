@@ -1,10 +1,10 @@
 
-PIN_ARGS=$1
 TOPAZ_ARGS=$2
 TAGS=$3
 INPUT=$4
 INPUT_FILE="in_$INPUT.txt"
 SEED=$5
+PIN_ARGS="$1 -s $SEED"
 
 source sutil_make_dirs.sh
 

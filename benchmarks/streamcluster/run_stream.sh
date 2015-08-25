@@ -1,10 +1,11 @@
 #!/bin/bash
 
-PIN_ARGS=$1
 TOPAZ_ARGS=$2
 TAGS=$3
 INPUT=$4
 SEED=$5
+PIN_ARGS="$1 -s $SEED"
+
 
 MINCLUST=3; # 2 for tiny, 3 for small, 5 for med, 7 for large
 MAXCLUST=7; # 5 for all but med:10, large 12

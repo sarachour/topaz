@@ -71,9 +71,9 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 		title = title
 		xlab = axis
 		filename = filename+".png"
-		FONTSIZE=24
-		LABSIZE=16
-		LEGSIZE=20
+		FONTSIZE=28
+		LABSIZE=18
+		LEGSIZE=28
 		
 		fig,ax = plt.subplots()
 		axes = [ax, ax.twinx(), ax.twinx()]
@@ -123,7 +123,7 @@ def produce_tuple_plot(filename,title,key,xvals,xticks,axis,is_tiny):
 		labels = labels+l
 		
 		print handles,labels
-		lgd = plt.legend(handles, labels,loc="upper center", bbox_to_anchor=(0.5,-0.2),ncol=3, fontsize=LEGSIZE)
+		lgd = plt.legend(handles, labels,loc="upper center", bbox_to_anchor=(0.5,-0.20),ncol=1, fontsize=LEGSIZE)
 		
 		
 		axes[0].tick_params(axis="y",labelsize=LABSIZE);

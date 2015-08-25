@@ -1,10 +1,10 @@
 #!/bin/bash
 
-PIN_ARGS=$1
 TOPAZ_ARGS=$2
 TAGS=$3
 INPUT=$4
 SEED=$5
+PIN_ARGS="$1 -s $SEED"
 
 
 NMOL=$(echo "$INPUT" | grep -o "m[0-9]*" | sed "s/[a-z]//g")
