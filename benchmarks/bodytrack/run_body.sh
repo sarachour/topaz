@@ -6,11 +6,12 @@
 #!/bin/bash
 NFRAMES=1
 NPOSES=8000
-PIN_ARGS=$1
 TOPAZ_ARGS=$2
 TAGS=$3
 INPUT=$4
 SEED=$5
+PIN_ARGS="$1 -s $SEED"
+
 
 source sutil_make_dirs.sh
 
