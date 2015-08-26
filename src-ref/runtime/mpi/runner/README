@@ -1,3 +1,0 @@
-#Machine Config File
-Each host is tied to a process in the order they are listed in the machine file. For now, the first process is assumed to be the reliable main thread. The subsequent processes are worker processes. 
-We also need a way to annotate whether each processor is reliable or unreliable.
