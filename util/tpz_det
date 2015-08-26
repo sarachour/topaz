@@ -80,8 +80,6 @@ def draw_plot(corr, err, regions, filename,idx):
 	plt.scatter(ex,ey,marker="^", c=error_color, s=error_size, edgecolors="none");
 		
 	
-	maxx = min(maxx,2000);
-	print "lims",maxx
 	plt.set_xlim(xmin=minx,xmax=maxx)
 	plt.tick_params(axis="y",labelsize=LABSIZE);
 	plt.tick_params(axis="x",labelsize=LABSIZE);
