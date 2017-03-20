@@ -33,15 +33,15 @@ for (line1,line2) in zip(str1.splitlines(), str2.splitlines()):
 			
 			err = math.sqrt( pow(p1[0]-p2[0],2) + pow(p1[1]-p2[1],2) + pow(p1[2]-p2[2],2));
 
-			cvec[0] += p1[0]
-			cvec[1] += p1[1]
-			cvec[2] += p1[2]
+			cvec[0] += abs(p1[0])
+			cvec[1] += abs(p1[1])
+			cvec[2] += abs(p1[2])
 		
 			if (err > EPS):
 				nerrs += 1
-				cerr[0] = abs(p1[0] - p2[0]);
-				cerr[1] = abs(p1[1] - p2[1]);
-				cerr[2] = abs(p1[2] - p2[2]);
+				cerr[0] += abs(p1[0] - p2[0]);
+				cerr[1] += abs(p1[1] - p2[1]);
+				cerr[2] += abs(p1[2] - p2[2]);
 			
 		except ValueError:
 			print "cannot parse"
@@ -51,6 +51,7 @@ for (line1,line2) in zip(str1.splitlines(), str2.splitlines()):
 apos = [cvec[0]/total, cvec[1]/total,cvec[2]/total];
 aerr = [cerr[0]/nerrs, cerr[1]/nerrs,cerr[2]/nerrs]
 apct = [aerr[0]/apos[0]*100, aerr[1]/apos[1]*100, aerr[2]/apos[2]*100]
+print "== Positional Statistics (AbsVal Pos) =="
 print "Total: ", total
 print "Number Errors: ", nerrs
 print "Cuml Pos: ", cvec

@@ -49,9 +49,9 @@ for (line1,line2) in zip(str1.splitlines(), str2.splitlines()):
 				raise ValueError 
 
 
-			cvec[0] += h1_1[0]; cvec[1] += h1_1[1]; cvec[2] += h1_1[2]
-			cvec[0] += o_1[0]; cvec[1] += o_1[1]; cvec[2] += o_1[2]
-			cvec[0] += h2_1[0]; cvec[1] += h2_1[1]; cvec[2] += h2_1[2]
+			cvec[0] += abs(h1_1[0]); cvec[1] += abs(h1_1[1]); cvec[2] += abs(h1_1[2])
+			cvec[0] += abs(o_1[0]); cvec[1] += abs(o_1[1]); cvec[2] += abs(o_1[2])
+			cvec[0] += abs(h2_1[0]); cvec[1] += abs(h2_1[1]); cvec[2] += abs(h2_1[2])
 			
 			err = math.sqrt(pow(h1_1[0] - h1_2[0],2) + pow(h1_1[1] - h1_2[1],2) + pow(h1_1[2] - h1_2[2],2))
 			 
